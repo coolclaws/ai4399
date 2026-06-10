@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>成语方阵 · AI4399</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  background: #0a0a12;
+  color: #e8e8f0;
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 12px 40px;
+  overflow-x: hidden;
+}
+a.back {
+  position: fixed;
+  top: 10px; left: 12px;
+  color: #8888a0;
+  background: rgba(20, 20, 31, .6);
+  border: 1px solid #2a2a3d;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 13px;
+  text-decoration: none;
+  opacity: .8;
+  z-index: 50;
+  backdrop-filter: blur(4px);
+}
+a.back:hover { color: #ffcc00; opacity: 1; }
+
+header { text-align: center; margin-top: 40px; }
+h1 {
+  font-size: 28px;
+  letter-spacing: 8px;
+  margin-left: 8px;
+  background: linear-gradient(135deg, #ffcc00, #ff9a3d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.subtitle { color: #8888a0; font-size: 13px; margin-top: 6px; }
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin: 14px auto 4px;
+  justify-content: center;
+  align-items: center;
+}
+.tabs button {
+  font-family: inherit;
+  font-size: 14px;
+  padding: 7px 16px;
+  border-radius: 20px;
+  border: 1px solid #2a2a3d;
+  background: #14141f;
+  color: #8888a0;
+  cursor: pointer;
+  transition: all .2s;
+}
+.tabs button.active {
+  background: #2a2417;
+  border-color: #ffcc00;
+  color: #ffcc00;
+}
+.tabs button:hover { border-color: #ffcc00; }
+#statsBtn, #helpBtn { padding: 7px 12px; }
+
+.legend {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin: 10px 0 2px;
+  font-size: 12px;
+  color: #8888a0;
+}
+.legend i {
+  display: inline-block;
+  width: 11px; height: 11px;
+  border-radius: 3px;
+  margin-right: 4px;
+  vertical-align: -1px;
+}
+.legend .g { background: #4caf6d; }
+.legend .y { background: #d9a92f; }
+.legend .x { background: #3a3a4d; }
+
+main { width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; }
+
+#board {
+  display: grid;
+  grid-template-rows: repeat(6, auto);
+  gap: 8px;
+  margin: 16px 0 14px;
+}
+.row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.row.shake { animation: shake .45s; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-7px); }
+  40%, 80% { transform: translateX(7px); }
+}
+.tile {
+  width: min(17.5vw, 68px);
+  height: min(17.5vw, 68px);
+  perspective: 600px;
+}
+.tile-inner {
+  position: relative;
+  width: 100%; height: 100%;
+  transform-style: preserve-3d;
+  transition: transform .5s;
+}
+.tile.flip .tile-inner { transform: rotateX(180deg); }
+.face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: min(8vw, 32px);
+  font-weight: 600;
+  border-radius: 10px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.face.front {
+  background: #14141f;
+  border: 2px solid #2a2a3d;
+}
+.tile.typed .face.front {
+  border-color: #55556e;
+  animation: pop .12s;
+}
+@keyframes pop {
+  0% { transform: scale(.85); }
+  60% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+.face.back {
+  transform: rotateX(180deg);
+  color: #fff;
+}
+.back.correct { background: linear-gradient(160deg, #4caf6d, #35935a); box-shadow: 0 2px 10px rgba(76,175,109,.35); }
+.back.present { background: linear-gradient(160deg, #d9a92f, #bd8d1c); box-shadow: 0 2px 10px rgba(217,169,47,.35); }
+.back.absent  { background: #3a3a4d; color: #b8b8c8; }
+.tile.dance { animation: dance .55s ease both; }
+@keyframes dance {
+  0%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-18px); }
+  65% { transform: translateY(4px); }
+}
+
+.input-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  max-width: 330px;
+}
+#guessInput {
+  flex: 1;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 18px;
+  letter-spacing: 6px;
+  text-align: center;
+  padding: 11px 8px;
+  border-radius: 10px;
+  border: 1px solid #2a2a3d;
+  background: #14141f;
+  color: #e8e8f0;
+  outline: none;
+  transition: border-color .2s;
+}
+#guessInput:focus { border-color: #ffcc00; }
+#guessInput::placeholder { color: #55556e; letter-spacing: 2px; font-size: 14px; }
+#guessInput:disabled { opacity: .45; }
+#submitBtn {
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 0 22px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #ffcc00, #ffb300);
+  color: #1a1400;
+  cursor: pointer;
+  transition: transform .12s, filter .2s;
+}
+#submitBtn:hover { filter: brightness(1.1); }
+#submitBtn:active { transform: scale(.95); }
+#submitBtn:disabled { opacity: .4; cursor: default; }
+
+#toast {
+  position: fixed;
+  top: 64px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  background: #e8e8f0;
+  color: #14141f;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s, transform .25s;
+  z-index: 90;
+  max-width: 86vw;
+  text-align: center;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+#letters {
+  width: 100%;
+  margin-top: 20px;
+  background: #14141f;
+  border: 1px solid #2a2a3d;
+  border-radius: 14px;
+  padding: 12px 14px 14px;
+}
+#letters h3 {
+  font-size: 13px;
+  color: #8888a0;
+  font-weight: 500;
+  margin-bottom: 8px;
+  text-align: center;
+}
+.letter-group { display: flex; align-items: flex-start; gap: 8px; margin-top: 8px; }
+.letter-group .tag {
+  flex-shrink: 0;
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-top: 2px;
+}
+.tag.g { background: rgba(76,175,109,.18); color: #6fd693; }
+.tag.y { background: rgba(217,169,47,.18); color: #ecc35a; }
+.tag.x { background: rgba(90,90,115,.25); color: #8888a0; }
+.letter-group .chars { display: flex; flex-wrap: wrap; gap: 6px; }
+.char-chip {
+  width: 30px; height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.char-chip.correct { background: #4caf6d; color: #fff; }
+.char-chip.present { background: #d9a92f; color: #fff; }
+.char-chip.absent { background: #3a3a4d; color: #8888a0; }
+.letter-group .none { color: #55556e; font-size: 13px; margin-top: 6px; }
+
+/* 弹窗 */
+#overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 5, 10, .72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s;
+  padding: 16px;
+}
+#overlay.show { opacity: 1; pointer-events: auto; }
+.modal {
+  background: #14141f;
+  border: 1px solid #2a2a3d;
+  border-radius: 18px;
+  padding: 24px 22px;
+  width: 100%;
+  max-width: 360px;
+  max-height: 86vh;
+  overflow-y: auto;
+  text-align: center;
+  transform: translateY(14px) scale(.97);
+  transition: transform .25s;
+}
+#overlay.show .modal { transform: translateY(0) scale(1); }
+.modal h2 { font-size: 21px; margin-bottom: 6px; }
+.modal h2.win { color: #6fd693; }
+.modal h2.lose { color: #ff7a7a; }
+.modal .answer-box {
+  background: #0a0a12;
+  border: 1px solid #2a2a3d;
+  border-radius: 12px;
+  padding: 14px;
+  margin: 14px 0;
+}
+.modal .answer-word {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 10px;
+  margin-left: 10px;
+  color: #ffcc00;
+}
+.modal .answer-def {
+  font-size: 13px;
+  color: #8888a0;
+  margin-top: 8px;
+  line-height: 1.6;
+  text-align: left;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 14px 0;
+}
+.stat-cell { background: #0a0a12; border-radius: 10px; padding: 10px 4px; }
+.stat-cell b { display: block; font-size: 22px; color: #ffcc00; }
+.stat-cell span { font-size: 11px; color: #8888a0; }
+.modal .btns { display: flex; gap: 10px; margin-top: 14px; }
+.modal .btns button {
+  flex: 1;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 11px 0;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: filter .15s, transform .12s;
+}
+.modal .btns button:active { transform: scale(.96); }
+.btn-share { background: linear-gradient(135deg, #4caf6d, #35935a); color: #fff; }
+.btn-again { background: linear-gradient(135deg, #ffcc00, #ffb300); color: #1a1400; }
+.btn-plain { background: #2a2a3d; color: #e8e8f0; }
+.modal .btns button:hover { filter: brightness(1.12); }
+.countdown { font-size: 13px; color: #8888a0; margin-top: 12px; }
+.countdown b { color: #e8e8f0; font-variant-numeric: tabular-nums; }
+.modal .close-x {
+  position: sticky;
+  float: right;
+  top: 0;
+  background: none;
+  border: none;
+  color: #55556e;
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 6px;
+}
+.modal .close-x:hover { color: #e8e8f0; }
+.help-list { text-align: left; font-size: 14px; line-height: 1.9; color: #b8b8c8; margin-top: 10px; }
+.help-list .demo {
+  display: inline-block;
+  width: 26px; height: 26px;
+  line-height: 26px;
+  text-align: center;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 600;
+  margin-right: 4px;
+  vertical-align: -6px;
+}
+
+#confettiCanvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 80;
+}
+.daily-done-tip {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #8888a0;
+}
+.daily-done-tip button {
+  background: none;
+  border: none;
+  color: #ffcc00;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+@media (max-height: 740px) {
+  header { margin-top: 34px; }
+  h1 { font-size: 23px; }
+  #board { gap: 6px; margin: 10px 0 10px; }
+  .row { gap: 6px; }
+  .tile { width: min(15.5vw, 56px); height: min(15.5vw, 56px); }
+  .face { font-size: min(7.5vw, 27px); }
+}
+</style>
+</head>
+<body>
+<a class="back" href="../">← AI4399</a>
+<canvas id="confettiCanvas"></canvas>
+
+<header>
+  <h1>成语方阵</h1>
+  <p class="subtitle">六次机会，猜出隐藏的四字成语</p>
+  <div class="tabs">
+    <button id="tabDaily" class="active">每日一题</button>
+    <button id="tabEndless">无限模式</button>
+    <button id="statsBtn" title="统计">📊</button>
+    <button id="helpBtn" title="玩法说明">❓</button>
+  </div>
+  <div class="legend">
+    <span><i class="g"></i>位置正确</span>
+    <span><i class="y"></i>位置不对</span>
+    <span><i class="x"></i>不在成语中</span>
+  </div>
+</header>
+
+<main>
+  <div id="board"></div>
+  <div class="input-row">
+    <input id="guessInput" type="text" autocomplete="off" placeholder="输入四字成语" aria-label="输入四字成语">
+    <button id="submitBtn">提交</button>
+  </div>
+  <div class="daily-done-tip" id="dailyDoneTip" hidden>
+    今日挑战已完成，<button id="viewResultBtn">查看战绩</button> 或切换到无限模式继续玩
+  </div>
+  <section id="letters">
+    <h3>已猜过的字</h3>
+    <div class="letter-group"><span class="tag g">正确</span><div class="chars" id="charsCorrect"><span class="none">—</span></div></div>
+    <div class="letter-group"><span class="tag y">存在</span><div class="chars" id="charsPresent"><span class="none">—</span></div></div>
+    <div class="letter-group"><span class="tag x">排除</span><div class="chars" id="charsAbsent"><span class="none">—</span></div></div>
+  </section>
+</main>
+
+<div id="toast"></div>
+<div id="overlay"><div class="modal" id="modalBox"></div></div>
+
+<script>
+"use strict";
+/* ============ 题库：[成语, 释义] ============ */
+const IDIOMS = [
+["画蛇添足","比喻做了多余的事，反而弄巧成拙。"],
+["守株待兔","比喻死守狭隘经验，妄想不劳而获。"],
+["亡羊补牢","比喻出了问题以后及时设法补救，还不算晚。"],
+["井底之蛙","比喻见识狭窄、眼界短浅的人。"],
+["对牛弹琴","比喻对不懂道理的人讲道理，白费口舌。"],
+["狐假虎威","比喻倚仗别人的势力来欺压、吓唬人。"],
+["画龙点睛","比喻在关键处用上精辟的语句，使内容更加生动传神。"],
+["刻舟求剑","比喻拘泥成法、固执不知变通。"],
+["掩耳盗铃","比喻自己欺骗自己。"],
+["自相矛盾","比喻自己的言行前后互相抵触。"],
+["滥竽充数","比喻没有真才实学的人混在行家里面充数。"],
+["买椟还珠","比喻没有眼光，取舍不当。"],
+["杞人忧天","比喻不必要的或缺乏根据的忧虑。"],
+["愚公移山","比喻做事有顽强的毅力，不怕困难。"],
+["精卫填海","比喻意志坚决，不畏艰难。"],
+["叶公好龙","比喻表面上爱好某事物，实际上并非真正爱好。"],
+["塞翁失马","比喻坏事在一定条件下可以变为好事。"],
+["惊弓之鸟","比喻受过惊吓、遇到一点动静就特别害怕的人。"],
+["胸有成竹","比喻做事之前心里已有完整的打算和把握。"],
+["百发百中","形容射箭或射击非常准；也比喻做事有充分把握。"],
+["四面楚歌","形容四面受敌、孤立无援的困境。"],
+["背水一战","比喻处于绝境之中，为求出路而决一死战。"],
+["破釜沉舟","比喻下定决心，不顾一切地干到底。"],
+["卧薪尝胆","形容人刻苦自励，发愤图强。"],
+["纸上谈兵","比喻空谈理论，不能解决实际问题。"],
+["负荆请罪","表示主动向人认错赔罪。"],
+["完璧归赵","比喻把原物完好无损地归还本人。"],
+["毛遂自荐","比喻自告奋勇，自己推荐自己担任工作。"],
+["指鹿为马","比喻故意颠倒黑白，混淆是非。"],
+["三顾茅庐","比喻真心诚意、一再邀请有才能的人。"],
+["望梅止渴","比喻愿望无法实现，只能用空想来安慰自己。"],
+["乐不思蜀","比喻在新环境中玩乐而忘了返回，乐而忘本。"],
+["一鸣惊人","比喻平时没有突出表现，一下子做出惊人的成绩。"],
+["东山再起","比喻失势之后重新恢复地位。"],
+["东施效颦","比喻盲目模仿别人，结果适得其反。"],
+["邯郸学步","比喻模仿别人不到家，反而把自己原有的本领也丢了。"],
+["南辕北辙","比喻行动和目的正好相反。"],
+["缘木求鱼","比喻方向或办法不对，不可能达到目的。"],
+["盲人摸象","比喻对事物只凭片面了解就乱加猜测，以偏概全。"],
+["九牛一毛","比喻极大数量中微不足道的一点。"],
+["沧海一粟","比喻非常渺小，微不足道。"],
+["千载难逢","形容机会极其难得。"],
+["机不可失","好的时机不可放过，失掉了不会再来。"],
+["画饼充饥","比喻用空想来安慰自己，无补于实际。"],
+["雪上加霜","比喻接连遭受灾难，损害愈加严重。"],
+["火上浇油","比喻使人更加愤怒，或使事态更加严重。"],
+["过河拆桥","比喻达到目的之后，就把曾经帮助过自己的人一脚踢开。"],
+["顺水推舟","比喻顺应趋势说话办事。"],
+["雪中送炭","比喻在别人急需的时候给予帮助。"],
+["锦上添花","比喻使美好的事物更加美好。"],
+["落井下石","比喻乘人危难之时加以陷害。"],
+["趁火打劫","比喻趁人危难之际捞取好处。"],
+["声东击西","用假象迷惑对方，使其产生错觉，而攻击其不备之处。"],
+["调虎离山","比喻设法使对方离开原来的有利位置，以便乘机行事。"],
+["抛砖引玉","谦辞，比喻用自己粗浅的意见引出别人的高见。"],
+["金蝉脱壳","比喻用计脱身溜走，使对方不能及时发觉。"],
+["瞒天过海","比喻用伪装的手段作掩护，暗中行动。"],
+["笑里藏刀","比喻外表和气而内心阴险狠毒。"],
+["口蜜腹剑","形容人嘴甜心毒，阴险狡诈。"],
+["口是心非","嘴里说的与心里想的不一致。"],
+["言不由衷","说的话不是发自内心，心口不一。"],
+["表里如一","形容言行和思想完全一致。"],
+["名副其实","名声或名称与实际相符合。"],
+["实事求是","按照事物的实际情况，客观地处理问题。"],
+["脚踏实地","形容做事踏实认真，不浮夸。"],
+["好高骛远","不切实际地追求过高过远的目标。"],
+["急功近利","急于求成，贪图眼前的成效和利益。"],
+["拔苗助长","比喻违反事物的发展规律，急于求成，反而坏事。"],
+["循序渐进","按照一定的步骤、顺序逐渐深入或提高。"],
+["按部就班","按照一定的条理和程序办事。"],
+["墨守成规","形容因循守旧，不肯改进。"],
+["千变万化","形容变化极多。"],
+["瞬息万变","形容在极短的时间内变化快而多。"],
+["日新月异","形容发展变化快，不断出现新事物、新气象。"],
+["推陈出新","去掉旧事物的糟粕，吸取精华，创造出新的来。"],
+["标新立异","提出新奇的主张，表示与众不同。"],
+["独树一帜","比喻自成一家，独具风格。"],
+["别具一格","另有一种独特的风格。"],
+["独一无二","没有相同的，没有可以相比的。"],
+["举世无双","全世界找不到第二个，形容极其罕见。"],
+["空前绝后","从前没有过，今后也不会再有，形容独一无二。"],
+["史无前例","历史上从来没有过的事例。"],
+["司空见惯","形容经常看到，不足为奇。"],
+["屡见不鲜","经常见到，并不新奇。"],
+["习以为常","经常做某件事，成了习惯。"],
+["不足为奇","不值得奇怪，指事物或现象很平常。"],
+["大惊小怪","形容对不足为奇的事情过分惊讶。"],
+["大同小异","大体相同，略有差异。"],
+["千篇一律","形容文章、事物公式化，毫无变化。"],
+["如出一辙","好像出自同一个车辙，形容两件事情非常相似。"],
+["截然不同","形容两件事物毫无共同之处。"],
+["天壤之别","形容差别极大，像天和地一样悬殊。"],
+["面目全非","样子完全改变了，变得很厉害。"],
+["焕然一新","形容呈现出崭新的面貌。"],
+["耳目一新","听到的、看到的都换了样子，感到很新鲜。"],
+["栩栩如生","形容艺术形象非常逼真，如同活的一样。"],
+["惟妙惟肖","形容描写或模仿得非常逼真。"],
+["活灵活现","形容描述或模仿的人或事物生动逼真。"],
+["绘声绘色","形容叙述、描写生动逼真。"],
+["有声有色","形容说话或表演十分生动精彩。"],
+["了如指掌","形容对情况了解得非常清楚。"],
+["一目了然","一眼就能看得清清楚楚。"],
+["心照不宣","彼此心里明白，不必明说。"],
+["心领神会","不用对方明说，心里已经领会。"],
+["心有灵犀","形容彼此心意相通。"],
+["情投意合","形容双方感情融洽，心意相合。"],
+["志同道合","志向相同，意见一致。"],
+["同舟共济","比喻团结互助，同心协力，共渡难关。"],
+["风雨同舟","比喻共同经历患难，同心协力。"],
+["患难与共","共同承担危险和困难。"],
+["同甘共苦","共同享受幸福，共同承担苦难。"],
+["相依为命","互相依靠着生活，谁也离不开谁。"],
+["相濡以沫","比喻在困境中用微薄的力量互相救助。"],
+["唇亡齿寒","比喻双方利害关系十分密切。"],
+["息息相关","形容彼此关系非常密切。"],
+["形影不离","形容彼此关系亲密，经常在一起。"],
+["孤苦伶仃","形容孤独困苦，无依无靠。"],
+["无依无靠","形容孤苦而无所依靠。"],
+["举目无亲","形容人地生疏，孤单无依。"],
+["自以为是","总以为自己是对的，形容主观、不虚心。"],
+["自作聪明","自以为聪明而轻率行事。"],
+["目中无人","形容骄傲自大，看不起别人。"],
+["目空一切","形容骄傲自大，什么都看不起。"],
+["不可一世","形容狂妄自大到了极点。"],
+["狂妄自大","形容人十分骄横傲慢。"],
+["妄自菲薄","过分看轻自己，形容自卑。"],
+["自惭形秽","因不如别人而感到惭愧。"],
+["自暴自弃","自己甘心落后，不求上进。"],
+["垂头丧气","形容失望懊丧的样子。"],
+["灰心丧气","形容因失败或不顺利而失去信心，意志消沉。"],
+["心灰意冷","灰心失望，意志消沉。"],
+["万念俱灰","所有的想法都破灭了，形容极端灰心失望。"],
+["意气风发","形容精神振奋，气概豪迈。"],
+["斗志昂扬","斗争的意志旺盛高昂。"],
+["精神抖擞","形容精神振作，情绪饱满。"],
+["神采奕奕","形容精神饱满，容光焕发。"],
+["容光焕发","形容身体好，精神饱满。"],
+["生龙活虎","形容很有生气和活力。"],
+["朝气蓬勃","形容充满了生命力和向上发展的气息。"],
+["生机勃勃","形容富有朝气，充满活力。"],
+["欣欣向荣","形容草木生长茂盛，比喻事业蓬勃发展。"],
+["蒸蒸日上","形容事业一天天向上发展。"],
+["如日中天","比喻事物正发展到十分兴盛的阶段。"],
+["风起云涌","比喻新事物相继兴起，声势浩大。"],
+["一帆风顺","比喻非常顺利，没有任何阻碍。"],
+["万事如意","一切事情都符合心意（多用作祝颂语）。"],
+["心想事成","心里想到的事情都能实现（多用作祝颂语）。"],
+["梦寐以求","睡梦中都在追求，形容愿望非常迫切。"],
+["如愿以偿","像所希望的那样得到满足，愿望实现。"],
+["称心如意","完全合乎心意。"],
+["喜出望外","遇到出乎意料的喜事而特别高兴。"],
+["欣喜若狂","形容高兴到了极点。"],
+["兴高采烈","形容兴致高昂，情绪热烈。"],
+["眉开眼笑","形容十分高兴的样子。"],
+["笑逐颜开","形容满脸笑容、十分高兴的样子。"],
+["手舞足蹈","双手舞动，两脚跳动，形容高兴到了极点。"],
+["心花怒放","形容内心高兴极了。"],
+["喜气洋洋","形容非常欢乐的样子。"],
+["皆大欢喜","人人都高兴满意。"],
+["普天同庆","天下的人或全国的人共同庆祝。"],
+["张灯结彩","挂上灯笼，系上彩绸，形容节日或喜庆的热闹景象。"],
+["喜闻乐见","喜欢听，乐意看，形容很受群众欢迎。"],
+["雅俗共赏","形容某些文艺作品既优美又通俗，各种文化程度的人都能欣赏。"],
+["脍炙人口","比喻好的诗文为人们所称赞和传诵。"],
+["家喻户晓","家家户户都知道，形容人所共知。"],
+["妇孺皆知","连妇女和小孩都知道，形容人人皆知。"],
+["众所周知","大家全都知道。"],
+["举世闻名","全世界都知道，形容名声极大。"],
+["名扬四海","名声传遍天下。"],
+["闻名遐迩","远近都有名气，形容名声很大。"],
+["德高望重","品德高尚，声望很高。"],
+["平易近人","态度谦逊和蔼，使人容易接近。"],
+["和蔼可亲","态度温和，容易接近。"],
+["彬彬有礼","形容文雅而有礼貌。"],
+["温文尔雅","形容人态度温和，举止文雅。"],
+["落落大方","形容言谈举止自然大方。"],
+["谈笑风生","形容谈话谈得高兴而有风趣。"],
+["口若悬河","形容能言善辩，说起话来滔滔不绝。"],
+["滔滔不绝","形容说话连续不断。"],
+["出口成章","形容文思敏捷，口才好。"],
+["妙语连珠","巧妙风趣的话一个接一个。"],
+["能说会道","形容口齿伶俐，很会说话。"],
+["巧舌如簧","形容花言巧语，能说会道（含贬义）。"],
+["花言巧语","指虚假而动听的话。"],
+["甜言蜜语","为了讨人喜欢或哄骗人而说的好听的话。"],
+["胡言乱语","指没有根据、不符合实际的瞎说。"],
+["信口开河","随口乱说一气。"],
+["夸夸其谈","形容说话、写文章浮夸，不切实际。"],
+["言过其实","说话过分夸大，超过了实际情况。"],
+["添油加醋","形容转述事情时随意夸大渲染。"],
+["无中生有","把没有的说成有，指凭空捏造。"],
+["捕风捉影","比喻说话做事没有丝毫事实根据。"],
+["道听途说","指没有根据的传闻。"],
+["三人成虎","比喻谣言重复多次，就能使人信以为真。"],
+["人云亦云","别人怎么说，自己也跟着怎么说，形容没有主见。"],
+["随声附和","自己没有主见，别人说什么也跟着说什么。"],
+["见风使舵","比喻看势头或看别人的眼色行事。"],
+["趋炎附势","奉承依附有权有势的人。"],
+["阿谀奉承","用动听的话迎合讨好别人。"],
+["溜须拍马","比喻讨好奉承。"],
+["卑躬屈膝","形容没有骨气，谄媚讨好别人。"],
+["见利忘义","见到有利可图就不顾道义。"],
+["忘恩负义","忘记别人对自己的恩情，做出对不起别人的事。"],
+["恩将仇报","用仇恨报答恩惠，指忘恩负义。"],
+["以怨报德","用怨恨回报别人对自己的恩德。"],
+["知恩图报","得到别人的恩惠，懂得报答。"],
+["感恩戴德","感激别人给予的恩惠和好处。"],
+["饮水思源","喝水时想到水的来源，比喻不忘本。"],
+["落叶归根","比喻事物都有一定的归宿，多指客居他乡的人终要回到故乡。"],
+["衣锦还乡","穿着华丽的衣服回到故乡，指富贵以后回到家乡。"],
+["背井离乡","离开家乡到外地（多指被迫的）。"],
+["流离失所","到处流浪，没有安身的地方。"],
+["颠沛流离","形容生活艰难，四处流浪。"],
+["风餐露宿","形容旅途或野外工作的辛苦。"],
+["跋山涉水","翻山越岭，趟水过河，形容旅途艰苦。"],
+["千山万水","形容路途遥远而艰险。"],
+["不远万里","不以万里为远，形容不怕路途遥远。"],
+["千里迢迢","形容路途非常遥远。"],
+["翻山越岭","翻越很多山岭，形容野外工作或行路的辛苦。"],
+["长途跋涉","指远距离的翻山渡水，形容路途遥远，行路辛苦。"],
+["风尘仆仆","形容旅途奔波，忙碌劳累。"],
+["日夜兼程","白天黑夜不停地赶路。"],
+["马不停蹄","比喻一刻也不停留，不间歇地进行。"],
+["快马加鞭","比喻快上加快，加速前进。"],
+["一马当先","形容领先，带头走在前面。"],
+["当仁不让","遇到应该做的事，就积极主动去做，不推让。"],
+["责无旁贷","自己应尽的责任，不能推卸给别人。"],
+["义不容辞","道义上不允许推辞。"],
+["挺身而出","遇到危难时，勇敢地站出来承担。"],
+["见义勇为","看到正义的事情就奋勇地去做。"],
+["舍己为人","为了他人而牺牲自己的利益。"],
+["舍生取义","为了正义事业不惜牺牲生命。"],
+["大公无私","完全为人民群众利益着想，毫无私心。"],
+["克己奉公","严格要求自己，一心为公。"],
+["两袖清风","比喻做官廉洁，除衣袖中的清风外一无所有。"],
+["一尘不染","形容非常清洁干净；也比喻人品纯洁，不沾染坏习气。"],
+["一丝不苟","形容办事认真，连最细微的地方也不马虎。"],
+["精益求精","已经很好了，还要求更好。"],
+["千锤百炼","比喻经历多次艰苦斗争的锻炼和考验；也指对诗文反复推敲加工。"],
+["持之以恒","长久地坚持下去。"],
+["坚持不懈","坚持到底，毫不松懈。"],
+["锲而不舍","比喻做事有恒心，有毅力，坚持不懈。"],
+["滴水穿石","比喻只要坚持不懈，力量虽小也能做成难事。"],
+["闻鸡起舞","听到鸡叫就起来舞剑，比喻有志之士及时奋发努力。"],
+["半途而废","做事中途停止，不能坚持到底。"],
+["有始无终","做事有开头没有结尾，不能坚持到底。"],
+["虎头蛇尾","比喻做事开头声势很大，后来劲头很小，有始无终。"],
+["善始善终","事情从开头到结束都做得很好。"],
+["有条不紊","做事、说话有条有理，一点儿不乱。"],
+["井井有条","形容条理分明，整齐不乱。"],
+["井然有序","整整齐齐，次序分明，条理清楚。"],
+["杂乱无章","又多又乱，没有条理。"],
+["乱七八糟","形容混乱、没有条理的样子。"],
+["手忙脚乱","形容遇事慌张，不知如何是好。"],
+["惊慌失措","因害怕慌张而不知怎么办才好。"],
+["不知所措","不知道怎么办才好，形容受窘或发急。"],
+["镇定自若","遇到紧急情况不慌不乱，保持常态。"],
+["泰然自若","形容碰上意外或紧急情况能沉着镇定。"],
+["处变不惊","面对变乱能够镇定自若，不惊慌。"],
+["临危不惧","面临危险毫不畏惧。"],
+["面不改色","形容遇到危难时神态镇定自若。"],
+["从容不迫","态度镇定沉着，不慌不忙。"],
+["不慌不忙","形容态度镇定，从容不迫。"],
+["有备无患","事先有准备，就可以避免祸患。"],
+["防患未然","在事故或灾害发生之前就加以防备。"],
+["未雨绸缪","比喻事先做好准备工作。"],
+["居安思危","处在安定的环境中要想到可能出现的危难。"],
+["高枕无忧","垫高枕头安心睡觉，比喻平安无事，不用担忧。"],
+["万无一失","绝对不会出差错。"],
+["十拿九稳","形容很有把握。"],
+["稳操胜券","形容有充分的把握取得胜利。"],
+["胜券在握","比喻很有取胜的把握。"],
+["旗开得胜","比喻事情一开始就取得好成绩。"],
+["马到成功","形容事情顺利，刚开始就取得成功。"],
+["大功告成","指巨大的工程或重要的任务宣告完成。"],
+["功成名就","功业建立了，名声也有了。"],
+["名利双收","既得名声，又获利益。"],
+["一举两得","做一件事得到两方面的好处。"],
+["一箭双雕","比喻做一件事达到两个目的。"],
+["事半功倍","形容花费的气力小，收到的成效大。"],
+["事倍功半","形容做事费力大，收效小。"],
+["得不偿失","所得到的利益抵偿不了所受的损失。"],
+["因小失大","为了小的利益而失去大的利益。"],
+["贪小失大","因贪图小便宜而失掉大的利益。"],
+["舍本逐末","比喻不抓根本环节，只在枝节问题上下功夫。"],
+["本末倒置","比喻把主要的和次要的、根本的和非根本的关系弄颠倒了。"],
+["轻重缓急","指各种事情中有主要的和次要的、急办的和可以缓办的区别。"],
+["有的放矢","对准靶子射箭，比喻说话做事有针对性。"],
+["对症下药","比喻针对具体情况采取有效的措施。"],
+["因材施教","针对学习的人的能力、性格等具体情况施行不同的教育。"],
+["因地制宜","根据各地的具体情况，制定适宜的办法。"],
+["量力而行","按照自己能力的大小去做事。"],
+["自不量力","不估量自己的能力，指过高地估计自己的力量。"],
+["螳臂当车","比喻不正确估计自己的力量，去做办不到的事情。"],
+["以卵击石","比喻不估计自己的力量，自取灭亡。"],
+["飞蛾扑火","比喻自寻死路，自取灭亡。"],
+["自取灭亡","自己的所作所为导致自己的灭亡。"],
+["自食其果","自己做了坏事，自己承受坏的后果。"],
+["咎由自取","灾祸或罪过是自己招来的。"],
+["罪有应得","受到的惩罚完全应该，形容罚当其罪。"],
+["苦尽甘来","艰难的日子过完，美好的日子来到了。"],
+["否极泰来","坏运到了尽头，好运就来了。"],
+["物极必反","事物发展到极端，就会向相反的方向转化。"],
+["乐极生悲","快乐到了极点，转而发生悲哀的事情。"],
+["转危为安","从危险转为平安。"],
+["化险为夷","使危险的情况或处境变为平安。"],
+["绝处逢生","在走投无路的情况下找到了生路。"],
+["柳暗花明","比喻在困境中出现转机，看到希望。"],
+["守口如瓶","形容说话谨慎，严守秘密。"],
+["一言九鼎","形容说的话分量很重，作用很大。"],
+["一诺千金","许下的一个诺言有千金的价值，形容说话算数，讲信用。"],
+["言而有信","说话靠得住，有信用。"],
+["言出必行","说出来的话一定去做，形容说话守信用。"],
+["说一不二","形容说话算数，说怎样就怎样。"],
+["出尔反尔","形容言行前后自相矛盾，反复无常。"],
+["朝三暮四","比喻反复无常，变来变去。"],
+["朝令夕改","早晨发布的命令，晚上就改变，形容主张或办法经常改变。"],
+["三心二意","形容犹豫不决或意志不坚定。"],
+["一心一意","形容心思、意念专一。"],
+["全神贯注","全部精神高度集中。"],
+["聚精会神","形容精神高度集中。"],
+["专心致志","形容一心一意，聚精会神。"],
+["心不在焉","心思不在这里，指思想不集中。"],
+["三言两语","指很少的几句话。"],
+["只言片语","个别的词句，零星的话语。"],
+["千言万语","形容说的话很多。"],
+["一字千金","形容文辞精妙，价值极高。"],
+["字斟句酌","对每一字、每一句都仔细推敲，形容说话或写作的态度慎重。"],
+["咬文嚼字","过分地斟酌字句，多指死抠字眼而不注重精神实质。"],
+["博览群书","广泛地阅读各种书籍，形容学识渊博。"],
+["学富五车","形容读书多，学问渊博。"],
+["才高八斗","形容人文才极高。"],
+["博古通今","对古代的事知道得很多，并且通晓现代的事情，形容知识丰富。"],
+["见多识广","见过的多，知道的广，形容阅历深，经验多。"],
+["孤陋寡闻","学识浅陋，见闻不广。"],
+["一知半解","知道得不全面，理解得不深不透。"],
+["不求甚解","只求懂得个大概，不求深刻了解。"],
+["囫囵吞枣","比喻读书等不加分析地笼统接受。"],
+["生搬硬套","不顾实际情况，机械地搬用别人的方法、经验等。"],
+["举一反三","比喻从一件事情类推而知道其他许多事情。"],
+["融会贯通","参合多方面的知识或道理而得到全面透彻的领悟。"],
+["温故知新","温习旧的知识，能得到新的理解和体会。"],
+["学以致用","为了实际应用而学习。"],
+["勤能补拙","勤奋能够弥补天资上的不足。"],
+["熟能生巧","熟练了就能产生巧办法，找出窍门。"],
+["百炼成钢","比喻经过长期锻炼，变得非常坚强。"],
+["青出于蓝","比喻学生超过老师，后人胜过前人。"],
+["后来居上","后来的超过先前的。"],
+["名列前茅","指名次列在前面。"],
+["出类拔萃","形容超出同类之上，多指人的品德才能。"],
+["鹤立鸡群","比喻一个人的仪表或才能在周围一群人里显得很突出。"],
+["与众不同","跟大家不一样。"],
+["平分秋色","比喻双方各得一半，不分高低。"],
+["不相上下","分不出高低好坏，形容水平相当。"],
+["势均力敌","双方力量相等，不分高低。"],
+["旗鼓相当","比喻双方力量不相上下。"],
+["半斤八两","比喻彼此不相上下，实力相当。"],
+["各有千秋","各有各的存在价值，各有所长。"],
+["取长补短","吸取别人的长处，弥补自己的短处。"],
+["集思广益","集中众人的智慧，广泛吸收有益的意见。"],
+["群策群力","大家一起出主意、出力量。"],
+["同心协力","团结一致，共同努力。"],
+["齐心协力","思想一致，共同努力。"],
+["万众一心","千万人一条心，形容团结一致。"],
+["众志成城","大家同心协力，就像城墙一样牢固，比喻团结一致力量无比强大。"],
+["人多势众","人多力量大、声势大。"],
+["孤掌难鸣","一个巴掌拍不响，比喻力量孤单，难以成事。"],
+["单枪匹马","比喻单独行动，没有别人帮助。"],
+["孤军奋战","孤立无援的军队单独作战，也比喻一个人单独奋斗。"],
+["各自为政","各按自己的主张办事，不互相配合。"],
+["一盘散沙","比喻力量分散，没有组织起来。"],
+["四分五裂","形容分散、不完整、不团结。"],
+["支离破碎","形容事物零散破碎，不成整体。"],
+["土崩瓦解","比喻彻底崩溃，不可收拾。"],
+["不攻自破","不用攻击，自己就溃败了，多形容论点站不住脚。"],
+["水到渠成","比喻条件成熟，事情自然会成功。"],
+["瓜熟蒂落","比喻条件、时机成熟，事情自然成功。"],
+["顺理成章","形容写文章或做事情顺着条理就能做好，也比喻某种情况自然产生某种结果。"],
+["理所当然","按道理应当这样。"],
+["天经地义","指非常正确、不容置疑的道理。"],
+["毋庸置疑","事实明显或理由充分，根本不容怀疑。"],
+["千真万确","形容情况非常确实。"],
+["铁证如山","形容证据确凿，像山一样不能动摇。"],
+["有目共睹","人人都可以看到，形容极其明显。"],
+["显而易见","事情或道理很明显，极容易看清楚。"],
+["一清二楚","十分清楚、明白。"],
+["水落石出","比喻事情的真相完全显露出来。"],
+["真相大白","真实情况完全弄明白了。"],
+["原形毕露","本来面目完全暴露。"],
+["东窗事发","比喻阴谋败露，将被惩治。"],
+["自圆其说","使自己的论点或谎话没有破绽。"],
+["天衣无缝","比喻事物没有一点儿破绽。"],
+["滴水不漏","形容说话、办事非常周密，没有漏洞。"],
+["无懈可击","没有可以被攻击或挑剔的漏洞，形容十分严密。"],
+["完美无缺","完善美好，没有缺点。"],
+["十全十美","各方面都非常完美，毫无缺陷。"],
+["美中不足","大体很好，但还有不足。"],
+["白璧微瑕","洁白的玉上有小斑点，比喻很好的人或事物还有小缺点。"]
+];
+
+/* ============ 工具 ============ */
+const $ = (id) => document.getElementById(id);
+const STORE_PREFIX = "ai4399-idiom-";
+const ROWS = 6, COLS = 4;
+
+function store(key, val) {
+  try {
+    if (val === undefined) {
+      const raw = localStorage.getItem(STORE_PREFIX + key);
+      return raw ? JSON.parse(raw) : null;
+    }
+    localStorage.setItem(STORE_PREFIX + key, JSON.stringify(val));
+  } catch (e) { return null; }
+}
+
+function todayStr() {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, "0");
+  return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+}
+
+function hashStr(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function dailyIndex(dateStr) {
+  return hashStr("idiom-" + dateStr) % IDIOMS.length;
+}
+
+/* ============ 音效（WebAudio 合成） ============ */
+let audioCtx = null;
+function playTone(freq, dur, type, vol, when) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    const t = audioCtx.currentTime + (when || 0);
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type || "sine";
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(vol || 0.12, t + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(t);
+    osc.stop(t + dur + 0.05);
+  } catch (e) { /* 音效失败静默忽略 */ }
+}
+const sfx = {
+  flip: () => playTone(660, 0.08, "triangle", 0.06),
+  good: () => playTone(880, 0.12, "triangle", 0.08),
+  win: () => { [523, 659, 784, 1047].forEach((f, i) => playTone(f, 0.22, "triangle", 0.1, i * 0.12)); },
+  lose: () => { playTone(220, 0.3, "sawtooth", 0.05); playTone(165, 0.4, "sawtooth", 0.05, 0.18); }
+};
+
+/* ============ 游戏状态 ============ */
+const state = {
+  mode: "daily",            // daily | endless
+  answer: "",
+  def: "",
+  guesses: [],              // ["成语字符", ...]
+  results: [],              // [["correct",...], ...]
+  finished: false,
+  win: false,
+  revealing: false,
+  charMap: {}               // 字 -> correct|present|absent
+};
+let endlessCache = null;    // 切换模式时保留无限模式进度
+let countdownTimer = null;
+
+/* ============ 评分（Wordle 标准重复字规则） ============ */
+function scoreGuess(guess, answer) {
+  const res = new Array(COLS).fill("absent");
+  const remain = {};
+  for (let i = 0; i < COLS; i++) {
+    if (guess[i] === answer[i]) res[i] = "correct";
+    else remain[answer[i]] = (remain[answer[i]] || 0) + 1;
+  }
+  for (let i = 0; i < COLS; i++) {
+    if (res[i] !== "correct" && remain[guess[i]] > 0) {
+      res[i] = "present";
+      remain[guess[i]]--;
+    }
+  }
+  return res;
+}
+
+/* ============ 棋盘渲染 ============ */
+function buildBoard() {
+  const board = $("board");
+  board.innerHTML = "";
+  for (let r = 0; r < ROWS; r++) {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.dataset.row = r;
+    for (let c = 0; c < COLS; c++) {
+      const tile = document.createElement("div");
+      tile.className = "tile";
+      tile.innerHTML = '<div class="tile-inner"><div class="face front"></div><div class="face back"></div></div>';
+      row.appendChild(tile);
+    }
+    board.appendChild(row);
+  }
+}
+
+function tileAt(r, c) {
+  return $("board").children[r].children[c];
+}
+
+function paintRowInstant(r, guess, result) {
+  for (let c = 0; c < COLS; c++) {
+    const tile = tileAt(r, c);
+    tile.querySelector(".front").textContent = guess[c];
+    const back = tile.querySelector(".back");
+    back.textContent = guess[c];
+    back.classList.add(result[c]);
+    tile.querySelector(".tile-inner").style.transition = "none";
+    tile.classList.add("flip");
+  }
+}
+
+function revealRow(r, guess, result, onDone) {
+  state.revealing = true;
+  for (let c = 0; c < COLS; c++) {
+    const tile = tileAt(r, c);
+    const back = tile.querySelector(".back");
+    back.textContent = guess[c];
+    back.classList.add(result[c]);
+    setTimeout(() => {
+      tile.classList.add("flip");
+      sfx.flip();
+    }, c * 320);
+  }
+  setTimeout(() => {
+    state.revealing = false;
+    onDone();
+  }, (COLS - 1) * 320 + 560);
+}
+
+function mirrorInput() {
+  if (state.finished) return;
+  const r = state.guesses.length;
+  if (r >= ROWS) return;
+  const chars = Array.from($("guessInput").value.replace(/\s/g, "")).slice(0, COLS);
+  for (let c = 0; c < COLS; c++) {
+    const tile = tileAt(r, c);
+    const front = tile.querySelector(".front");
+    const ch = chars[c] || "";
+    if (front.textContent !== ch) {
+      front.textContent = ch;
+      tile.classList.toggle("typed", !!ch);
+      if (ch) {
+        tile.classList.remove("typed");
+        void tile.offsetWidth;
+        tile.classList.add("typed");
+      }
+    }
+  }
+}
+
+/* ============ 已猜字汇总 ============ */
+const RANK = { absent: 0, present: 1, correct: 2 };
+function updateCharMap(guess, result) {
+  for (let i = 0; i < COLS; i++) {
+    const ch = guess[i], st = result[i];
+    if (!(ch in state.charMap) || RANK[st] > RANK[state.charMap[ch]]) {
+      state.charMap[ch] = st;
+    }
+  }
+}
+function renderLetters() {
+  const groups = { correct: [], present: [], absent: [] };
+  Object.keys(state.charMap).forEach((ch) => groups[state.charMap[ch]].push(ch));
+  const fill = (id, list, cls) => {
+    const el = $(id);
+    el.innerHTML = list.length
+      ? list.map((ch) => '<span class="char-chip ' + cls + '">' + ch + "</span>").join("")
+      : '<span class="none">—</span>';
+  };
+  fill("charsCorrect", groups.correct, "correct");
+  fill("charsPresent", groups.present, "present");
+  fill("charsAbsent", groups.absent, "absent");
+}
+
+/* ============ 提示与统计 ============ */
+let toastTimer = null;
+function toast(msg, ms) {
+  const el = $("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), ms || 1800);
+}
+
+function getStats() {
+  return store("stats") || { played: 0, won: 0, streak: 0, maxStreak: 0 };
+}
+function recordResult(win) {
+  const s = getStats();
+  s.played++;
+  if (win) {
+    s.won++;
+    s.streak++;
+    s.maxStreak = Math.max(s.maxStreak, s.streak);
+  } else {
+    s.streak = 0;
+  }
+  store("stats", s);
+}
+
+/* ============ 撒花 ============ */
+function confetti() {
+  const canvas = $("confettiCanvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
+  const colors = ["#ffcc00", "#4caf6d", "#d9a92f", "#ff7a7a", "#7ab8ff", "#e8e8f0"];
+  const parts = [];
+  for (let i = 0; i < 130; i++) {
+    parts.push({
+      x: Math.random() * canvas.width,
+      y: -20 - Math.random() * canvas.height * 0.4,
+      w: 6 + Math.random() * 6,
+      h: 8 + Math.random() * 8,
+      vy: 2.2 + Math.random() * 3,
+      vx: -1.5 + Math.random() * 3,
+      rot: Math.random() * Math.PI,
+      vr: -0.12 + Math.random() * 0.24,
+      color: colors[i % colors.length]
+    });
+  }
+  const t0 = performance.now();
+  function frame(t) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    for (const p of parts) {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.vr;
+      if (p.y < canvas.height + 30) alive = true;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    }
+    if (alive && t - t0 < 4200) requestAnimationFrame(frame);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ============ 弹窗 ============ */
+function openModal(html) {
+  $("modalBox").innerHTML = html;
+  $("overlay").classList.add("show");
+}
+function closeModal() {
+  $("overlay").classList.remove("show");
+  if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+}
+$("overlay").addEventListener("click", (e) => {
+  if (e.target === $("overlay")) closeModal();
+});
+
+function statsCellsHtml() {
+  const s = getStats();
+  const rate = s.played ? Math.round((s.won / s.played) * 100) : 0;
+  return '<div class="stats-grid">' +
+    '<div class="stat-cell"><b>' + s.played + "</b><span>累计场次</span></div>" +
+    '<div class="stat-cell"><b>' + rate + "%</b><span>胜率</span></div>" +
+    '<div class="stat-cell"><b>' + s.streak + "</b><span>当前连胜</span></div>" +
+    '<div class="stat-cell"><b>' + s.maxStreak + "</b><span>最长连胜</span></div>" +
+    "</div>";
+}
+
+function showStatsModal() {
+  openModal(
+    '<button class="close-x" onclick="closeModal()">✕</button>' +
+    "<h2>📊 我的统计</h2>" + statsCellsHtml() +
+    '<div class="btns"><button class="btn-plain" onclick="closeModal()">关闭</button></div>'
+  );
+}
+
+function showHelpModal() {
+  openModal(
+    '<button class="close-x" onclick="closeModal()">✕</button>' +
+    "<h2>玩法说明</h2>" +
+    '<div class="help-list">' +
+    "你有 <b>6 次</b>机会猜出一个四字成语。每次提交后，方格会逐一翻转：<br>" +
+    '<span class="demo" style="background:#4caf6d">画</span>绿色：这个字位置完全正确<br>' +
+    '<span class="demo" style="background:#d9a92f">蛇</span>黄色：成语里有这个字，但位置不对<br>' +
+    '<span class="demo" style="background:#3a3a4d">足</span>灰色：成语里没有这个字<br><br>' +
+    "「每日一题」全网同题，每天一换；「无限模式」可以连续畅玩。猜测可以是任意四个汉字，不限于成语。" +
+    "</div>" +
+    '<div class="btns"><button class="btn-again" onclick="closeModal()">开始挑战</button></div>'
+  );
+}
+
+function emojiGrid() {
+  return state.results
+    .map((res) => res.map((s) => (s === "correct" ? "🟩" : s === "present" ? "🟨" : "⬛")).join(""))
+    .join("\n");
+}
+
+function shareText() {
+  const tag = state.mode === "daily" ? "每日一题 " + todayStr() : "无限模式";
+  const tries = state.win ? state.guesses.length + "/6" : "X/6";
+  return "成语方阵 " + tag + " " + tries + "\n" + emojiGrid() + "\nAI4399 · 成语方阵";
+}
+
+function doShare() {
+  const text = shareText();
+  const done = () => toast("战绩已复制到剪贴板 📋");
+  const fail = () => toast("复制失败，请手动截图分享");
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text) ? done() : fail());
+  } else {
+    fallbackCopy(text) ? done() : fail();
+  }
+}
+function fallbackCopy(text) {
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    return ok;
+  } catch (e) { return false; }
+}
+
+function showResultModal() {
+  const winTitle = ["神乎其技！", "才高八斗！", "出类拔萃！", "学富五车！", "厉害了！", "险中求胜！"][state.guesses.length - 1] || "恭喜！";
+  const title = state.win
+    ? '<h2 class="win">🎉 ' + winTitle + "</h2>"
+    : '<h2 class="lose">很遗憾，未能猜出</h2>';
+  const sub = state.win
+    ? '<p style="color:#8888a0;font-size:13px">' + state.guesses.length + " 次猜中答案</p>"
+    : "";
+  const answerBox =
+    '<div class="answer-box"><div class="answer-word">' + state.answer + "</div>" +
+    '<div class="answer-def">【释义】' + state.def + "</div></div>";
+  let btns = '<div class="btns"><button class="btn-share" onclick="doShare()">分享战绩</button>';
+  if (state.mode === "endless") {
+    btns += '<button class="btn-again" onclick="closeModal();newEndless()">再来一局</button>';
+  } else {
+    btns += '<button class="btn-plain" onclick="closeModal()">关闭</button>';
+  }
+  btns += "</div>";
+  let extra = "";
+  if (state.mode === "daily") {
+    extra = '<div class="countdown">距下一题还有 <b id="cdText">--:--:--</b></div>';
+  }
+  openModal(
+    '<button class="close-x" onclick="closeModal()">✕</button>' +
+    title + sub + answerBox + statsCellsHtml() + btns + extra
+  );
+  if (state.mode === "daily") startCountdown();
+}
+
+function startCountdown() {
+  const tick = () => {
+    const el = $("cdText");
+    if (!el) return;
+    const now = new Date();
+    const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    let ms = next - now;
+    const h = Math.floor(ms / 3600000); ms %= 3600000;
+    const m = Math.floor(ms / 60000); ms %= 60000;
+    const s = Math.floor(ms / 1000);
+    const p = (n) => String(n).padStart(2, "0");
+    el.textContent = p(h) + ":" + p(m) + ":" + p(s);
+  };
+  tick();
+  if (countdownTimer) clearInterval(countdownTimer);
+  countdownTimer = setInterval(tick, 1000);
+}
+
+/* ============ 游戏流程 ============ */
+function resetUIState() {
+  state.guesses = [];
+  state.results = [];
+  state.finished = false;
+  state.win = false;
+  state.charMap = {};
+  buildBoard();
+  renderLetters();
+  $("guessInput").value = "";
+  setInputEnabled(true);
+  $("dailyDoneTip").hidden = true;
+}
+
+function setInputEnabled(on) {
+  $("guessInput").disabled = !on;
+  $("submitBtn").disabled = !on;
+}
+
+function saveDaily() {
+  if (state.mode !== "daily") return;
+  store("daily", {
+    date: todayStr(),
+    guesses: state.guesses,
+    finished: state.finished,
+    win: state.win
+  });
+}
+
+function loadDaily() {
+  resetUIState();
+  const idx = dailyIndex(todayStr());
+  state.answer = IDIOMS[idx][0];
+  state.def = IDIOMS[idx][1];
+  const saved = store("daily");
+  if (saved && saved.date === todayStr() && Array.isArray(saved.guesses)) {
+    saved.guesses.forEach((g, r) => {
+      if (typeof g !== "string" || Array.from(g).length !== COLS) return;
+      const res = scoreGuess(Array.from(g), Array.from(state.answer));
+      state.guesses.push(g);
+      state.results.push(res);
+      paintRowInstant(r, Array.from(g), res);
+      updateCharMap(Array.from(g), res);
+    });
+    renderLetters();
+    state.finished = !!saved.finished;
+    state.win = !!saved.win;
+    if (state.finished) {
+      setInputEnabled(false);
+      $("dailyDoneTip").hidden = false;
+      showResultModal();
+    }
+  }
+}
+
+function newEndless() {
+  resetUIState();
+  const idx = Math.floor(Math.random() * IDIOMS.length);
+  state.answer = IDIOMS[idx][0];
+  state.def = IDIOMS[idx][1];
+  endlessCache = null;
+  $("guessInput").focus();
+}
+
+function switchMode(mode) {
+  if (state.revealing) return;
+  if (state.mode === mode) return;
+  // 缓存无限模式进度
+  if (state.mode === "endless") {
+    endlessCache = {
+      answer: state.answer, def: state.def,
+      guesses: state.guesses.slice(), results: state.results.map((r) => r.slice()),
+      finished: state.finished, win: state.win, charMap: Object.assign({}, state.charMap)
+    };
+  }
+  state.mode = mode;
+  $("tabDaily").classList.toggle("active", mode === "daily");
+  $("tabEndless").classList.toggle("active", mode === "endless");
+  closeModal();
+  if (mode === "daily") {
+    loadDaily();
+  } else if (endlessCache) {
+    resetUIState();
+    state.answer = endlessCache.answer;
+    state.def = endlessCache.def;
+    endlessCache.guesses.forEach((g, r) => {
+      state.guesses.push(g);
+      state.results.push(endlessCache.results[r]);
+      paintRowInstant(r, Array.from(g), endlessCache.results[r]);
+    });
+    state.charMap = endlessCache.charMap;
+    state.finished = endlessCache.finished;
+    state.win = endlessCache.win;
+    renderLetters();
+    if (state.finished) setInputEnabled(false);
+  } else {
+    newEndless();
+  }
+}
+
+function submitGuess() {
+  if (state.finished || state.revealing) return;
+  const raw = $("guessInput").value.replace(/\s/g, "");
+  const chars = Array.from(raw);
+  if (chars.length !== COLS || !/^[一-鿿]{4}$/.test(raw)) {
+    toast("请输入恰好四个汉字");
+    const row = $("board").children[state.guesses.length];
+    if (row) {
+      row.classList.remove("shake");
+      void row.offsetWidth;
+      row.classList.add("shake");
+    }
+    return;
+  }
+  const r = state.guesses.length;
+  const answerChars = Array.from(state.answer);
+  const result = scoreGuess(chars, answerChars);
+  state.guesses.push(raw);
+  state.results.push(result);
+  $("guessInput").value = "";
+  $("guessInput").focus();
+
+  revealRow(r, chars, result, () => {
+    updateCharMap(chars, result);
+    renderLetters();
+    const win = result.every((s) => s === "correct");
+    if (win || state.guesses.length >= ROWS) {
+      state.finished = true;
+      state.win = win;
+      recordResult(win);
+      saveDaily();
+      setInputEnabled(false);
+      $("guessInput").value = "";
+      // 清理结束后下一行可能残留的预览字
+      if (state.guesses.length < ROWS) {
+        for (let c = 0; c < COLS; c++) {
+          const t = tileAt(state.guesses.length, c);
+          t.querySelector(".front").textContent = "";
+          t.classList.remove("typed");
+        }
+      }
+      if (win) {
+        sfx.win();
+        for (let c = 0; c < COLS; c++) {
+          const tile = tileAt(r, c);
+          setTimeout(() => tile.classList.add("dance"), c * 110);
+        }
+        confetti();
+        setTimeout(showResultModal, 1100);
+      } else {
+        sfx.lose();
+        setTimeout(showResultModal, 500);
+      }
+      if (state.mode === "daily") $("dailyDoneTip").hidden = false;
+    } else {
+      saveDaily();
+      if (result.some((s) => s === "correct" || s === "present")) sfx.good();
+    }
+  });
+}
+
+/* ============ 事件绑定 ============ */
+$("submitBtn").addEventListener("click", submitGuess);
+$("guessInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.isComposing) submitGuess();
+});
+$("guessInput").addEventListener("input", mirrorInput);
+$("tabDaily").addEventListener("click", () => switchMode("daily"));
+$("tabEndless").addEventListener("click", () => switchMode("endless"));
+$("statsBtn").addEventListener("click", showStatsModal);
+$("helpBtn").addEventListener("click", showHelpModal);
+$("viewResultBtn").addEventListener("click", showResultModal);
+window.addEventListener("resize", () => {
+  const c = $("confettiCanvas");
+  c.width = innerWidth;
+  c.height = innerHeight;
+});
+// 弹窗按钮通过 inline onclick 调用，挂到全局
+window.closeModal = closeModal;
+window.doShare = doShare;
+window.newEndless = newEndless;
+
+/* ============ 启动 ============ */
+(function init() {
+  buildBoard();
+  loadDaily();
+  if (!store("seen-help")) {
+    showHelpModal();
+    store("seen-help", 1);
+  }
+})();
+</script>
+</body>
+</html>

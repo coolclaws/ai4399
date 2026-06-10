@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>包子铺大亨 · AI4399</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; }
+body {
+  background:#0a0a12;
+  background-image:radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,204,0,.05), transparent),
+                   radial-gradient(ellipse 40% 30% at 80% 100%, rgba(255,100,60,.04), transparent);
+  color:#e8e8f0;
+  font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  overflow-x:hidden;
+  user-select:none; -webkit-user-select:none;
+}
+a.back {
+  position:fixed; top:10px; left:12px; z-index:200;
+  color:#8888a0; text-decoration:none; font-size:13px;
+  background:rgba(20,20,31,.6); border:1px solid #2a2a3d; border-radius:20px;
+  padding:5px 12px; backdrop-filter:blur(6px); opacity:.85; transition:.2s;
+}
+a.back:hover { color:#ffcc00; border-color:#ffcc00; opacity:1; }
+
+/* ===== 顶部统计栏 ===== */
+header.stats {
+  position:sticky; top:0; z-index:100;
+  background:rgba(10,10,18,.88); backdrop-filter:blur(10px);
+  border-bottom:1px solid #2a2a3d;
+  padding:10px 16px 8px; text-align:center;
+}
+header.stats h1 { font-size:15px; color:#8888a0; font-weight:600; letter-spacing:2px; margin-bottom:2px; }
+header.stats h1 b { color:#ffcc00; }
+.bignum { font-size:30px; font-weight:800; color:#ffcc00; line-height:1.15; text-shadow:0 0 24px rgba(255,204,0,.35); font-variant-numeric:tabular-nums; }
+.bignum small { font-size:16px; font-weight:600; color:#e8e8f0; margin-left:3px; }
+.substats { display:flex; justify-content:center; gap:18px; font-size:12px; color:#8888a0; margin-top:2px; flex-wrap:wrap; }
+.substats b { color:#e8e8f0; font-weight:600; }
+#buffchips { display:flex; justify-content:center; gap:8px; margin-top:4px; min-height:0; flex-wrap:wrap; }
+.chip {
+  font-size:12px; color:#0a0a12; background:linear-gradient(135deg,#ffe066,#ffcc00);
+  border-radius:12px; padding:2px 10px; font-weight:700;
+  animation:chipIn .3s ease; box-shadow:0 0 14px rgba(255,204,0,.5);
+}
+@keyframes chipIn { from { transform:scale(.5); opacity:0; } }
+
+/* ===== 主布局 ===== */
+main { display:flex; max-width:1060px; margin:0 auto; padding:14px; gap:14px; align-items:flex-start; }
+#left { flex:1.1; position:sticky; top:96px; }
+#right { flex:1; min-width:0; }
+@media (max-width:760px) {
+  main { flex-direction:column; padding:10px; }
+  #left { position:static; width:100%; }
+  #right { width:100%; }
+  .bignum { font-size:26px; }
+}
+
+/* ===== 点击区 ===== */
+#clickwrap {
+  background:#14141f; border:1px solid #2a2a3d; border-radius:16px;
+  padding:18px 10px 22px; text-align:center; position:relative; overflow:hidden;
+}
+#shopsign {
+  display:inline-block; font-size:18px; font-weight:800; letter-spacing:6px; color:#ffcc00;
+  border:2px solid #5a4a20; border-radius:8px; padding:4px 18px 4px 24px;
+  background:linear-gradient(180deg,#2a2218,#1c1812);
+  box-shadow:0 2px 10px rgba(0,0,0,.5), inset 0 0 18px rgba(255,204,0,.08);
+  margin-bottom:6px;
+}
+#clickarea { position:relative; width:min(78vw,310px); height:min(78vw,310px); margin:0 auto; cursor:pointer; touch-action:manipulation; }
+#bigbaozi { width:100%; height:100%; transform-origin:50% 78%; filter:drop-shadow(0 14px 22px rgba(0,0,0,.55)); transition:transform .08s; }
+#clickarea.squish #bigbaozi { animation:squish .22s cubic-bezier(.36,1.6,.5,1); }
+@keyframes squish {
+  0% { transform:scale(1,1); }
+  30% { transform:scale(1.07,.88); }
+  65% { transform:scale(.96,1.05); }
+  100% { transform:scale(1,1); }
+}
+#clickarea .float {
+  position:absolute; pointer-events:none; font-weight:800; font-size:20px; color:#ffcc00;
+  text-shadow:0 1px 6px rgba(0,0,0,.8); animation:floatUp 1s ease-out forwards; z-index:5; white-space:nowrap;
+}
+@keyframes floatUp { 0%{ transform:translate(-50%,0) scale(.8); opacity:1; } 100%{ transform:translate(-50%,-80px) scale(1.15); opacity:0; } }
+.steam {
+  position:absolute; pointer-events:none; border-radius:50%;
+  background:radial-gradient(circle, rgba(240,240,255,.5), rgba(240,240,255,0) 70%);
+  animation:steamUp 2.2s ease-out forwards; z-index:4;
+}
+@keyframes steamUp {
+  0% { transform:translate(0,0) scale(.6); opacity:0; }
+  15% { opacity:.85; }
+  100% { transform:translate(var(--dx),-130px) scale(1.7); opacity:0; }
+}
+#clickhint { font-size:12px; color:#8888a0; margin-top:8px; }
+#clickhint b { color:#ffcc00; }
+
+/* ===== 金包子 ===== */
+#golden {
+  position:fixed; z-index:300; width:64px; height:64px; cursor:pointer;
+  animation:flyby linear forwards, bob 1.2s ease-in-out infinite alternate;
+  filter:drop-shadow(0 0 14px rgba(255,204,0,.9));
+}
+@keyframes flyby { from { left:-80px; } to { left:105vw; } }
+@keyframes bob { from { margin-top:-14px; } to { margin-top:14px; } }
+
+/* ===== 右侧面板 ===== */
+#panel { background:#14141f; border:1px solid #2a2a3d; border-radius:16px; overflow:hidden; }
+.tabs { display:flex; border-bottom:1px solid #2a2a3d; }
+.tabs button {
+  flex:1; background:none; border:none; color:#8888a0; font-family:inherit; font-size:14px; font-weight:600;
+  padding:12px 4px; cursor:pointer; border-bottom:2px solid transparent; transition:.15s; position:relative;
+}
+.tabs button.on { color:#ffcc00; border-bottom-color:#ffcc00; background:rgba(255,204,0,.05); }
+.tabs button .dot {
+  display:inline-block; min-width:17px; height:17px; line-height:17px; border-radius:9px;
+  background:#ffcc00; color:#0a0a12; font-size:11px; font-weight:800; padding:0 4px; margin-left:4px; vertical-align:1px;
+}
+.tabbody { padding:10px; max-height:60vh; overflow-y:auto; }
+@media (max-width:760px) { .tabbody { max-height:none; } }
+
+/* 购买数量 */
+.qtybar { display:flex; gap:6px; margin-bottom:8px; align-items:center; }
+.qtybar span { font-size:12px; color:#8888a0; margin-right:2px; }
+.qtybar button {
+  background:#1c1c2c; border:1px solid #2a2a3d; color:#8888a0; border-radius:8px;
+  font-family:inherit; font-size:12px; padding:4px 12px; cursor:pointer;
+}
+.qtybar button.on { color:#ffcc00; border-color:#ffcc00; background:rgba(255,204,0,.08); }
+
+/* 建筑行 */
+.brow {
+  display:flex; align-items:center; gap:10px; padding:9px 10px; margin-bottom:7px;
+  background:#191926; border:1px solid #2a2a3d; border-radius:12px; cursor:pointer; transition:.12s;
+}
+.brow.can { border-color:#4a4a28; }
+.brow.can:hover { border-color:#ffcc00; background:#1f1f30; transform:translateX(2px); }
+.brow.cant { opacity:.55; cursor:not-allowed; }
+.brow .bicon { font-size:27px; width:40px; text-align:center; flex-shrink:0; }
+.brow .binfo { flex:1; min-width:0; }
+.brow .bname { font-size:14px; font-weight:700; }
+.brow .bname .cnt { color:#ffcc00; font-size:13px; margin-left:5px; }
+.brow .bsub { font-size:11.5px; color:#8888a0; margin-top:1px; }
+.brow .bbuy { text-align:right; flex-shrink:0; }
+.brow .bcost { font-size:13.5px; font-weight:700; color:#e8e8f0; }
+.brow.can .bcost { color:#ffcc00; }
+.brow .bk { font-size:10.5px; color:#8888a0; }
+.brow.mystery { opacity:.5; cursor:default; }
+.brow.mystery .bicon { filter:grayscale(1) brightness(.6); }
+.brow.flash { animation:buyflash .35s ease; }
+@keyframes buyflash { 0% { background:rgba(255,204,0,.25); } }
+
+/* 升级卡 */
+.urow {
+  display:flex; align-items:center; gap:10px; padding:9px 10px; margin-bottom:7px;
+  background:linear-gradient(135deg,#1d1a2e,#191926); border:1px solid #3a3050; border-radius:12px; cursor:pointer; transition:.12s;
+}
+.urow.can { border-color:#6a5a28; }
+.urow.can:hover { border-color:#ffcc00; transform:translateX(2px); }
+.urow.cant { opacity:.55; cursor:not-allowed; }
+.urow .uicon { font-size:23px; width:36px; text-align:center; flex-shrink:0; }
+.urow .uname { font-size:13.5px; font-weight:700; }
+.urow .udesc { font-size:11.5px; color:#8888a0; margin-top:1px; }
+.urow .ucost { font-size:13px; font-weight:700; color:#ffcc00; flex-shrink:0; }
+.urow.cant .ucost { color:#8888a0; }
+.empty { text-align:center; color:#8888a0; font-size:13px; padding:26px 10px; }
+
+/* 成就 */
+.agrid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+@media (max-width:420px) { .agrid { grid-template-columns:1fr; } }
+.acard { background:#191926; border:1px solid #2a2a3d; border-radius:10px; padding:8px 10px; }
+.acard.got { border-color:#5a4a20; background:linear-gradient(135deg,#241f12,#191926); }
+.acard .aname { font-size:13px; font-weight:700; color:#8888a0; }
+.acard.got .aname { color:#ffcc00; }
+.acard .adesc { font-size:11px; color:#8888a0; margin-top:2px; opacity:.8; }
+
+/* 底部操作 */
+.foot { display:flex; gap:8px; padding:10px; border-top:1px solid #2a2a3d; flex-wrap:wrap; }
+.foot button {
+  flex:1; background:#1c1c2c; border:1px solid #2a2a3d; color:#8888a0; border-radius:8px;
+  font-family:inherit; font-size:12px; padding:7px 4px; cursor:pointer; transition:.15s; white-space:nowrap;
+}
+.foot button:hover { color:#e8e8f0; border-color:#8888a0; }
+.foot button.danger { color:#ff7766; }
+.foot button.armed { background:#3d1a14; border-color:#ff7766; color:#ff9988; font-weight:700; }
+
+/* toast */
+#toasts { position:fixed; top:14px; right:14px; z-index:400; display:flex; flex-direction:column; gap:8px; align-items:flex-end; pointer-events:none; }
+.toast {
+  background:#14141f; border:1px solid #ffcc00; border-radius:12px; padding:10px 14px; max-width:270px;
+  box-shadow:0 6px 24px rgba(0,0,0,.6), 0 0 18px rgba(255,204,0,.18);
+  animation:toastIn .35s cubic-bezier(.2,1.4,.4,1), toastOut .4s ease 3.6s forwards;
+}
+.toast .tt { font-size:13px; font-weight:800; color:#ffcc00; }
+.toast .td { font-size:12px; color:#e8e8f0; margin-top:2px; }
+.toast.plain { border-color:#2a2a3d; box-shadow:0 6px 24px rgba(0,0,0,.6); }
+.toast.plain .tt { color:#e8e8f0; }
+@keyframes toastIn { from { transform:translateX(60px); opacity:0; } }
+@keyframes toastOut { to { transform:translateY(-8px); opacity:0; } }
+
+/* 弹窗 */
+#modalbg { position:fixed; inset:0; background:rgba(5,5,10,.75); z-index:500; display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+#modalbg.show { display:flex; }
+#modal {
+  background:#14141f; border:1px solid #ffcc00; border-radius:16px; padding:24px 22px; max-width:330px; margin:16px;
+  text-align:center; box-shadow:0 0 40px rgba(255,204,0,.2); animation:chipIn .3s ease;
+}
+#modal h3 { color:#ffcc00; font-size:17px; margin-bottom:10px; }
+#modal p { font-size:13.5px; color:#e8e8f0; line-height:1.7; }
+#modal p b { color:#ffcc00; }
+#modal button {
+  margin-top:16px; background:linear-gradient(135deg,#ffe066,#ffcc00); color:#0a0a12; border:none;
+  border-radius:10px; font-family:inherit; font-size:14px; font-weight:800; padding:9px 34px; cursor:pointer;
+}
+</style>
+</head>
+<body>
+<a class="back" href="../">← AI4399</a>
+<div id="toasts"></div>
+
+<header class="stats">
+  <h1>🥟 <b>包子铺大亨</b></h1>
+  <div class="bignum"><span id="st-baozi">0</span><small>个包子</small></div>
+  <div class="substats">
+    <span>每秒 <b id="st-cps">0</b></span>
+    <span>每次点击 <b id="st-click">1</b></span>
+    <span>累计点击 <b id="st-clicks">0</b></span>
+  </div>
+  <div id="buffchips"></div>
+</header>
+
+<main>
+  <section id="left">
+    <div id="clickwrap">
+      <div id="shopsign">包 子 铺</div>
+      <div id="clickarea"></div>
+      <div id="clickhint">点包子赚包子！攒钱雇 <b>外婆</b> 帮你蒸</div>
+    </div>
+  </section>
+
+  <section id="right">
+    <div id="panel">
+      <nav class="tabs">
+        <button id="tabb-build" class="on">建筑</button>
+        <button id="tabb-up">升级<span class="dot" id="updot" style="display:none">0</span></button>
+        <button id="tabb-ach">成就 <span id="achcnt"></span></button>
+      </nav>
+      <div class="tabbody" id="tab-build">
+        <div class="qtybar"><span>购买数量</span>
+          <button data-q="1" class="on">×1</button><button data-q="10">×10</button><button data-q="max">最大</button>
+        </div>
+        <div id="blist"></div>
+      </div>
+      <div class="tabbody" id="tab-up" style="display:none"><div id="ulist"></div></div>
+      <div class="tabbody" id="tab-ach" style="display:none"><div class="agrid" id="alist"></div></div>
+      <div class="foot">
+        <button id="btn-sound">🔊 音效：开</button>
+        <button id="btn-save">💾 手动存档</button>
+        <button id="btn-reset" class="danger">🗑 重置进度</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="modalbg"><div id="modal">
+  <h3 id="modal-t"></h3><p id="modal-b"></p><button id="modal-ok">好的</button>
+</div></div>
+
+<script>
+'use strict';
+/* ================== 包子铺大亨 · AI4399 ================== */
+const SAVE_KEY = 'ai4399-baozi-save';
+
+/* ---------- 数据定义 ---------- */
+const BUILDINGS = [
+  { id:'waipo',  name:'外婆帮工',   icon:'👵', cost:15,     cps:0.1,   desc:'外婆的手艺，一褶都不能少' },
+  { id:'zlong',  name:'蒸笼',       icon:'🪵', cost:100,    cps:1,     desc:'竹香四溢，一笼接一笼' },
+  { id:'xuetu',  name:'学徒',       icon:'🧑‍🍳', cost:1100,   cps:8,     desc:'三年出师，先从揉面开始' },
+  { id:'dian',   name:'店面',       icon:'🏪', cost:12000,  cps:47,    desc:'临街旺铺，开门见客' },
+  { id:'waimai', name:'外卖小哥',   icon:'🛵', cost:130000, cps:260,   desc:'风里雨里，包子准时送达' },
+  { id:'chain',  name:'连锁分店',   icon:'🏬', cost:1.4e6,  cps:1400,  desc:'把招牌挂遍全城' },
+  { id:'central',name:'中央厨房',   icon:'🏭', cost:2e7,    cps:7800,  desc:'流水线上的包子海洋' },
+  { id:'robot',  name:'包子机器人', icon:'🤖', cost:3.3e8,  cps:44000, desc:'AI 捏褶，分毫不差' },
+];
+
+/* 升级：t=类型 click点击倍率 / b建筑倍率 / global全局倍率 / ccps点击附加CPS百分比 / bdur金包子加成时长 */
+const UPGRADES = [
+  { id:'c1', name:'老面配方',     icon:'🍞', cost:100,     t:'click', m:2,
+    desc:'点击产量 ×2', cond:s=>s.clicks>=15 },
+  { id:'c2', name:'十八褶手法',   icon:'🤏', cost:2500,    t:'click', m:2,
+    desc:'点击产量 ×2', cond:s=>s.clicks>=100 },
+  { id:'c3', name:'鎏金擀面杖',   icon:'🪄', cost:120000,  t:'click', m:3,
+    desc:'点击产量 ×3', cond:s=>s.clicks>=600 },
+  { id:'c4', name:'一指禅功',     icon:'☝️', cost:600000,  t:'ccps', m:0.05,
+    desc:'每次点击额外获得每秒产量的 5%', cond:(s,d)=>d.cps>=100 },
+  { id:'c5', name:'气功掌法',     icon:'🖐', cost:5e7,     t:'click', m:5,
+    desc:'点击产量 ×5', cond:s=>s.clicks>=2500 },
+  { id:'b_waipo1',  name:'老花镜',       icon:'👓', cost:300,    t:'b', b:'waipo', m:2,
+    desc:'外婆帮工产量 ×2', cond:s=>cnt(s,'waipo')>=3 },
+  { id:'b_waipo2',  name:'广场舞晨练',   icon:'💃', cost:24000,  t:'b', b:'waipo', m:2,
+    desc:'外婆精神百倍，产量再 ×2', cond:s=>cnt(s,'waipo')>=15 },
+  { id:'b_zlong1',  name:'不锈钢蒸笼',   icon:'✨', cost:1800,   t:'b', b:'zlong', m:2,
+    desc:'蒸笼产量 ×2', cond:s=>cnt(s,'zlong')>=5 },
+  { id:'b_zlong2',  name:'九层叠蒸',     icon:'🗼', cost:90000,  t:'b', b:'zlong', m:2,
+    desc:'蒸笼叠到天上去，产量再 ×2', cond:s=>cnt(s,'zlong')>=15 },
+  { id:'b_xuetu1',  name:'名师指点',     icon:'📜', cost:16000,  t:'b', b:'xuetu', m:2,
+    desc:'学徒产量 ×2', cond:s=>cnt(s,'xuetu')>=5 },
+  { id:'b_dian1',   name:'黄金地段',     icon:'📍', cost:180000, t:'b', b:'dian', m:2,
+    desc:'店面产量 ×2', cond:s=>cnt(s,'dian')>=5 },
+  { id:'b_waimai1', name:'超级电动车',   icon:'⚡', cost:1.9e6,  t:'b', b:'waimai', m:2,
+    desc:'外卖小哥产量 ×2', cond:s=>cnt(s,'waimai')>=5 },
+  { id:'b_chain1',  name:'统一供应链',   icon:'🚚', cost:2.1e7,  t:'b', b:'chain', m:2,
+    desc:'连锁分店产量 ×2', cond:s=>cnt(s,'chain')>=5 },
+  { id:'b_central1',name:'智能流水线',   icon:'⚙️', cost:3e8,    t:'b', b:'central', m:2,
+    desc:'中央厨房产量 ×2', cond:s=>cnt(s,'central')>=5 },
+  { id:'b_robot1',  name:'AI 调馅算法',  icon:'🧠', cost:5e9,    t:'b', b:'robot', m:2,
+    desc:'包子机器人产量 ×2', cond:s=>cnt(s,'robot')>=5 },
+  { id:'g1', name:'祖传秘方',     icon:'📕', cost:50000,   t:'global', m:1.25,
+    desc:'全部产量 +25%', cond:s=>s.total>=30000 },
+  { id:'g2', name:'口碑相传',     icon:'💬', cost:5e6,     t:'global', m:1.5,
+    desc:'全部产量 +50%', cond:s=>s.total>=3e6 },
+  { id:'g3', name:'网红打卡店',   icon:'📱', cost:5e8,     t:'global', m:2,
+    desc:'全部产量 ×2', cond:s=>s.total>=3e8 },
+  { id:'lucky1', name:'锦鲤体质', icon:'🐟', cost:7777777, t:'bdur', m:2,
+    desc:'金包子的点击加成持续时间 ×2', cond:s=>s.golden>=1 },
+];
+
+const ACHIEVEMENTS = [
+  { id:'a_click1', name:'第一笼出炉', desc:'完成第一次点击',        cond:s=>s.clicks>=1 },
+  { id:'a_click2', name:'手指发热',   desc:'累计点击 100 次',       cond:s=>s.clicks>=100 },
+  { id:'a_click3', name:'点击狂魔',   desc:'累计点击 1000 次',      cond:s=>s.clicks>=1000 },
+  { id:'a_b1',     name:'开张大吉',   desc:'拥有第一个建筑',        cond:s=>tcnt(s)>=1 },
+  { id:'a_b50',    name:'人多力量大', desc:'建筑总数达到 50',       cond:s=>tcnt(s)>=50 },
+  { id:'a_b100',   name:'百人大厂',   desc:'建筑总数达到 100',      cond:s=>tcnt(s)>=100 },
+  { id:'a_t100',   name:'小有积蓄',   desc:'累计生产 100 个包子',   cond:s=>s.total>=100 },
+  { id:'a_t1w',    name:'万包户',     desc:'累计生产 1 万个包子',   cond:s=>s.total>=1e4 },
+  { id:'a_t1y',    name:'亿万包翁',   desc:'累计生产 1 亿个包子',   cond:s=>s.total>=1e8 },
+  { id:'a_t1z',    name:'富可敌国',   desc:'累计生产 1 兆个包子',   cond:s=>s.total>=1e12 },
+  { id:'a_cps10',  name:'蒸蒸日上',   desc:'每秒产量达到 10',       cond:(s,d)=>d.cps>=10 },
+  { id:'a_cps1k',  name:'日进斗金',   desc:'每秒产量达到 1000',     cond:(s,d)=>d.cps>=1000 },
+  { id:'a_cps10w', name:'包子帝国',   desc:'每秒产量达到 10 万',    cond:(s,d)=>d.cps>=1e5 },
+  { id:'a_gold',   name:'锦鲤附体',   desc:'点中一只金包子',        cond:s=>s.golden>=1 },
+  { id:'a_up10',   name:'学有所成',   desc:'购买 10 个升级',        cond:s=>s.ups.length>=10 },
+  { id:'a_robot',  name:'全自动化',   desc:'拥有一台包子机器人',    cond:s=>cnt(s,'robot')>=1 },
+];
+
+/* ---------- 状态 ---------- */
+let S = freshState();
+function freshState() {
+  return { baozi:0, total:0, clicks:0, counts:{}, ups:[], ach:[], golden:0, muted:false, last:Date.now() };
+}
+function cnt(s,id){ return s.counts[id]||0; }
+function tcnt(s){ let n=0; for(const b of BUILDINGS) n+=cnt(s,b.id); return n; }
+
+/* 派生数值 */
+const D = { cps:0, clickMult:1, ccps:0, bMult:{}, gMult:1, bdur:1 };
+function recalc() {
+  D.clickMult=1; D.ccps=0; D.gMult=1; D.bdur=1; D.bMult={};
+  for(const b of BUILDINGS) D.bMult[b.id]=1;
+  for(const uid of S.ups) {
+    const u=UPGRADES.find(x=>x.id===uid); if(!u) continue;
+    if(u.t==='click') D.clickMult*=u.m;
+    else if(u.t==='b') D.bMult[u.b]*=u.m;
+    else if(u.t==='global') D.gMult*=u.m;
+    else if(u.t==='ccps') D.ccps+=u.m;
+    else if(u.t==='bdur') D.bdur*=u.m;
+  }
+  let c=0;
+  for(const b of BUILDINGS) c+=b.cps*cnt(S,b.id)*D.bMult[b.id];
+  D.cps=c*D.gMult;
+}
+let buff = { mult:1, until:0 };  // 金包子点击加成
+function clickValue(){
+  const base = 1*D.clickMult + D.cps*D.ccps;
+  return base * (Date.now()<buff.until ? buff.mult : 1);
+}
+
+/* ---------- 中文大数格式化 ---------- */
+const UNITS=[[1e32,'沟'],[1e28,'穰'],[1e24,'秭'],[1e20,'垓'],[1e16,'京'],[1e12,'兆'],[1e8,'亿'],[1e4,'万']];
+function fmt(n){
+  if(!isFinite(n)) return '∞';
+  if(n<0) return '-'+fmt(-n);
+  for(const [v,u] of UNITS){
+    if(n>=v){ const x=n/v; return (x>=100?x.toFixed(0):x>=10?x.toFixed(1):x.toFixed(2))+u; }
+  }
+  return String(Math.floor(n));
+}
+function fmtCps(n){
+  if(n===0) return '0';
+  if(n<1e4) return n<10 ? (Math.round(n*10)/10).toFixed(1) : String(Math.floor(n));
+  return fmt(n);
+}
+function fmtTime(ms){
+  const m=Math.floor(ms/60000), h=Math.floor(m/60);
+  return h>0 ? h+' 小时 '+(m%60)+' 分钟' : Math.max(1,m)+' 分钟';
+}
+
+/* ---------- 音效（WebAudio 合成） ---------- */
+let AC=null;
+function ac(){ if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(AC&&AC.state==='suspended') AC.resume(); return AC; }
+function tone(freq,dur,type,vol,delay,slide){
+  if(S.muted) return; const ctx=ac(); if(!ctx) return;
+  const t0=ctx.currentTime+(delay||0);
+  const o=ctx.createOscillator(), g=ctx.createGain();
+  o.type=type||'sine'; o.frequency.setValueAtTime(freq,t0);
+  if(slide) o.frequency.exponentialRampToValueAtTime(Math.max(40,freq+slide),t0+dur);
+  g.gain.setValueAtTime(0,t0);
+  g.gain.linearRampToValueAtTime(vol||0.12,t0+0.008);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  o.connect(g); g.connect(ctx.destination); o.start(t0); o.stop(t0+dur+0.05);
+}
+const SFX={
+  click(){ tone(520+Math.random()*180,0.09,'sine',0.1,0,140); },
+  buy(){ tone(392,0.1,'triangle',0.12); tone(587,0.14,'triangle',0.12,0.07); },
+  upgrade(){ tone(523,0.1,'triangle',0.12); tone(659,0.1,'triangle',0.12,0.08); tone(880,0.18,'triangle',0.12,0.16); },
+  ach(){ tone(523,0.12,'sine',0.13); tone(659,0.12,'sine',0.13,0.09); tone(784,0.12,'sine',0.13,0.18); tone(1047,0.25,'sine',0.13,0.27); },
+  gold(){ tone(880,0.12,'sine',0.14); tone(1175,0.12,'sine',0.14,0.08); tone(1568,0.3,'sine',0.14,0.16); tone(2093,0.35,'sine',0.1,0.24); },
+  err(){ tone(160,0.12,'square',0.05,0,-40); },
+};
+
+/* ---------- 包子 SVG ---------- */
+function baoziSVG(gold){
+  const c = gold
+    ? { hi:'#fff3b0', mid:'#ffd75e', lo:'#e0a020', line:'#b07a10', blush:'#ff9d3c', tray:'#8a6a30', tray2:'#6a5020' }
+    : { hi:'#fff8ee', mid:'#f7e8cf', lo:'#dfc9a3', line:'#c9a878', blush:'#ffb6a0', tray:'#9a7040', tray2:'#75512c' };
+  return `<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg${gold?'g':'n'}" cx="42%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="${c.hi}"/><stop offset="55%" stop-color="${c.mid}"/><stop offset="100%" stop-color="${c.lo}"/>
+    </radialGradient>
+  </defs>
+  <!-- 蒸笼 -->
+  <g>
+    <ellipse cx="110" cy="183" rx="92" ry="20" fill="${c.tray2}"/>
+    <ellipse cx="110" cy="177" rx="92" ry="20" fill="${c.tray}"/>
+    <ellipse cx="110" cy="175" rx="80" ry="15" fill="#e8d9b8" opacity="0.55"/>
+    <path d="M40 172 Q110 188 180 172" stroke="${c.tray2}" stroke-width="2.5" fill="none" opacity="0.6"/>
+  </g>
+  <!-- 包子身体 -->
+  <path d="M30 160 Q30 86 78 66 Q95 50 110 50 Q125 50 142 66 Q190 86 190 160 Q190 174 110 176 Q30 174 30 160 Z" fill="url(#bg${gold?'g':'n'})"/>
+  <!-- 褶子 -->
+  <g stroke="${c.line}" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.85">
+    <path d="M110 56 Q108 78 96 96"/>
+    <path d="M110 56 Q112 78 124 96"/>
+    <path d="M104 57 Q88 76 70 92"/>
+    <path d="M116 57 Q132 76 150 92"/>
+    <path d="M97 60 Q70 76 50 100"/>
+    <path d="M123 60 Q150 76 170 100"/>
+  </g>
+  <!-- 顶部收口 -->
+  <ellipse cx="110" cy="55" rx="13" ry="8" fill="${c.mid}" stroke="${c.line}" stroke-width="2.5"/>
+  <!-- 高光 -->
+  <ellipse cx="74" cy="86" rx="17" ry="9" fill="#ffffff" opacity="0.4" transform="rotate(-24 74 86)"/>
+  <!-- 表情 -->
+  <g stroke="#7a5a3a" stroke-width="4" stroke-linecap="round" fill="none">
+    <path d="M82 124 Q88 117 94 124"/>
+    <path d="M126 124 Q132 117 138 124"/>
+    <path d="M102 136 Q110 144 118 136"/>
+  </g>
+  <ellipse cx="72" cy="134" rx="9" ry="5.5" fill="${c.blush}" opacity="0.65"/>
+  <ellipse cx="148" cy="134" rx="9" ry="5.5" fill="${c.blush}" opacity="0.65"/>
+  ${gold?'<text x="110" y="30" font-size="22" text-anchor="middle">✨</text>':''}
+  </svg>`;
+}
+
+/* ---------- DOM 引用 ---------- */
+const $=id=>document.getElementById(id);
+const elBaozi=$('st-baozi'), elCps=$('st-cps'), elClick=$('st-click'), elClicks=$('st-clicks');
+const clickarea=$('clickarea'), blist=$('blist'), ulist=$('ulist'), alist=$('alist');
+
+/* ---------- 点击区 ---------- */
+clickarea.innerHTML='<div id="bigbaozi">'+baoziSVG(false)+'</div>';
+let squishT=null;
+clickarea.addEventListener('pointerdown', e=>{
+  e.preventDefault();
+  const v=clickValue();
+  S.baozi+=v; S.total+=v; S.clicks++;
+  clickarea.classList.remove('squish'); void clickarea.offsetWidth; clickarea.classList.add('squish');
+  clearTimeout(squishT); squishT=setTimeout(()=>clickarea.classList.remove('squish'),260);
+  const r=clickarea.getBoundingClientRect();
+  const x=e.clientX-r.left, y=e.clientY-r.top;
+  spawnFloat(x,y,'+'+fmt(v));
+  spawnSteam(x, Math.min(y,r.height*0.35), 2);
+  SFX.click();
+  renderStats();
+});
+function spawnFloat(x,y,txt){
+  const d=document.createElement('div'); d.className='float'; d.textContent=txt;
+  d.style.left=x+'px'; d.style.top=(y-12)+'px';
+  clickarea.appendChild(d); setTimeout(()=>d.remove(),1000);
+}
+function spawnSteam(x,y,n){
+  for(let i=0;i<n;i++){
+    const s=document.createElement('div'); s.className='steam';
+    const sz=16+Math.random()*22;
+    s.style.width=s.style.height=sz+'px';
+    s.style.left=(x-sz/2+(Math.random()*36-18))+'px';
+    s.style.top=(y-sz/2)+'px';
+    s.style.setProperty('--dx',(Math.random()*50-25)+'px');
+    clickarea.appendChild(s); setTimeout(()=>s.remove(),2300);
+  }
+}
+/* 环境蒸汽：CPS 越高蒸汽越旺 */
+setInterval(()=>{
+  if(document.hidden) return;
+  const r=clickarea.getBoundingClientRect();
+  const n=D.cps>0 ? Math.min(3,1+Math.floor(Math.log10(D.cps+1)/2)) : (S.clicks>0?1:0);
+  if(n>0) spawnSteam(r.width/2+(Math.random()*60-30), r.height*0.22, n);
+},900);
+
+/* ---------- 建筑商店 ---------- */
+let qty='1';
+document.querySelectorAll('.qtybar button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    qty=b.dataset.q;
+    document.querySelectorAll('.qtybar button').forEach(x=>x.classList.toggle('on',x===b));
+    updateStore();
+  });
+});
+function costOf(b,from,k){ return b.cost*Math.pow(1.15,from)*(Math.pow(1.15,k)-1)/0.15; }
+function maxAfford(b){
+  let k=0, n=cnt(S,b.id), money=S.baozi;
+  let c=b.cost*Math.pow(1.15,n);
+  while(money>=c && k<500){ money-=c; c*=1.15; k++; }
+  return k;
+}
+const brows={};
+(function buildStore(){
+  for(const b of BUILDINGS){
+    const d=document.createElement('div');
+    d.className='brow'; d.id='brow-'+b.id; d.style.display='none';
+    d.innerHTML=`<div class="bicon">${b.icon}</div>
+      <div class="binfo"><div class="bname"><span class="nm"></span><span class="cnt"></span></div><div class="bsub"></div></div>
+      <div class="bbuy"><div class="bcost"></div><div class="bk"></div></div>`;
+    d.addEventListener('click',()=>buyBuilding(b,d));
+    blist.appendChild(d); brows[b.id]=d;
+  }
+})();
+function buyBuilding(b,row){
+  if(row.classList.contains('mystery')) return;
+  const n=cnt(S,b.id);
+  let k = qty==='max' ? maxAfford(b) : parseInt(qty);
+  if(qty!=='max'){ if(S.baozi<costOf(b,n,k)) k=0; }
+  if(k<1){ SFX.err(); return; }
+  const price=costOf(b,n,k);
+  S.baozi-=price; S.counts[b.id]=n+k;
+  recalc(); SFX.buy();
+  row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash');
+  updateStore(); updateUpgrades(); renderStats();
+}
+function updateStore(){
+  let mysteryShown=false;
+  for(const b of BUILDINGS){
+    const row=brows[b.id], n=cnt(S,b.id);
+    const unlocked = n>0 || S.total>=b.cost*0.35;
+    if(!unlocked){
+      if(!mysteryShown){
+        mysteryShown=true; row.style.display='flex';
+        row.className='brow mystery';
+        row.querySelector('.nm').textContent='？？？';
+        row.querySelector('.cnt').textContent='';
+        row.querySelector('.bsub').textContent='继续攒包子来解锁…';
+        row.querySelector('.bcost').textContent=fmt(b.cost);
+        row.querySelector('.bk').textContent='';
+      } else row.style.display='none';
+      continue;
+    }
+    row.style.display='flex';
+    let k = qty==='max' ? Math.max(1,maxAfford(b)) : parseInt(qty);
+    const price=costOf(b,n,k);
+    const can=S.baozi>=price && (qty!=='max' || maxAfford(b)>=1);
+    row.className='brow '+(can?'can':'cant');
+    row.querySelector('.nm').textContent=b.name;
+    row.querySelector('.cnt').textContent=n>0?'×'+n:'';
+    const each=b.cps*D.bMult[b.id]*D.gMult;
+    row.querySelector('.bsub').textContent = n>0
+      ? `单体 ${fmtCps(each)}/秒 · 合计 ${fmtCps(each*n)}/秒`
+      : `${b.desc} · 单体 ${fmtCps(each)}/秒`;
+    row.querySelector('.bcost').textContent='🥟 '+fmt(Math.ceil(price));
+    row.querySelector('.bk').textContent = k>1 ? '×'+k : '';
+  }
+}
+
+/* ---------- 升级 ---------- */
+let upKey='';
+function visibleUps(){ return UPGRADES.filter(u=>!S.ups.includes(u.id)&&u.cond(S,D)); }
+function updateUpgrades(){
+  const vis=visibleUps();
+  const key=vis.map(u=>u.id+(S.baozi>=u.cost?'+':'-')).join(',');
+  const dot=$('updot');
+  const aff=vis.filter(u=>S.baozi>=u.cost).length;
+  dot.style.display=aff>0?'':'none'; dot.textContent=aff;
+  if(key===upKey) return; upKey=key;
+  ulist.innerHTML='';
+  if(vis.length===0){ ulist.innerHTML='<div class="empty">暂无可购升级<br>多点点包子、多买建筑就会出现～</div>'; return; }
+  for(const u of vis){
+    const can=S.baozi>=u.cost;
+    const d=document.createElement('div');
+    d.className='urow '+(can?'can':'cant');
+    d.innerHTML=`<div class="uicon">${u.icon}</div>
+      <div style="flex:1;min-width:0"><div class="uname">${u.name}</div><div class="udesc">${u.desc}</div></div>
+      <div class="ucost">🥟 ${fmt(u.cost)}</div>`;
+    d.addEventListener('click',()=>{
+      if(S.baozi<u.cost){ SFX.err(); return; }
+      S.baozi-=u.cost; S.ups.push(u.id);
+      recalc(); SFX.upgrade();
+      toast('🛠 '+u.name,u.desc,true);
+      upKey=''; updateUpgrades(); updateStore(); renderStats();
+    });
+    ulist.appendChild(d);
+  }
+}
+
+/* ---------- 成就 ---------- */
+const acards={};
+(function buildAch(){
+  for(const a of ACHIEVEMENTS){
+    const d=document.createElement('div'); d.className='acard';
+    d.innerHTML=`<div class="aname">🔒 ${a.name}</div><div class="adesc">${a.desc}</div>`;
+    alist.appendChild(d); acards[a.id]=d;
+  }
+})();
+function checkAch(){
+  for(const a of ACHIEVEMENTS){
+    if(S.ach.includes(a.id)) continue;
+    if(a.cond(S,D)){
+      S.ach.push(a.id);
+      markAch(a.id);
+      toast('🏆 成就达成：'+a.name,a.desc);
+      SFX.ach();
+    }
+  }
+  $('achcnt').textContent=S.ach.length+'/'+ACHIEVEMENTS.length;
+}
+function markAch(id){
+  const a=ACHIEVEMENTS.find(x=>x.id===id), d=acards[id];
+  d.className='acard got';
+  d.querySelector('.aname').textContent='🏆 '+a.name;
+}
+
+/* ---------- 金包子 ---------- */
+let goldenEl=null, goldenTimer=null;
+function scheduleGolden(){
+  clearTimeout(goldenTimer);
+  goldenTimer=setTimeout(spawnGolden,(60+Math.random()*120)*1000);
+}
+function spawnGolden(){
+  if(goldenEl) goldenEl.remove();
+  const d=document.createElement('div');
+  d.id='golden'; d.innerHTML=baoziSVG(true);
+  d.style.top=(15+Math.random()*55)+'vh';
+  d.style.animationDuration=(9+Math.random()*4)+'s, 1.2s';
+  d.addEventListener('pointerdown',e=>{
+    e.preventDefault(); e.stopPropagation();
+    S.golden++;
+    SFX.gold();
+    if(Math.random()<0.5){
+      const gain=Math.max(D.cps*60, clickValue()*30, 66);
+      S.baozi+=gain; S.total+=gain;
+      toast('🥇 金包子！','立得 '+fmt(gain)+' 个包子（每秒产量×60）');
+    } else {
+      const dur=30000*D.bdur;
+      buff={ mult:7, until:Date.now()+dur };
+      toast('🥇 金包子！','点击产量 ×7，持续 '+Math.round(dur/1000)+' 秒！');
+    }
+    d.remove(); goldenEl=null;
+    renderStats();
+  });
+  d.addEventListener('animationend',ev=>{ if(ev.animationName==='flyby'){ d.remove(); if(goldenEl===d) goldenEl=null; } });
+  document.body.appendChild(d); goldenEl=d;
+  scheduleGolden();
+}
+
+/* ---------- toast / 弹窗 ---------- */
+function toast(t,d,plain){
+  const el=document.createElement('div');
+  el.className='toast'+(plain?' plain':'');
+  el.innerHTML=`<div class="tt"></div><div class="td"></div>`;
+  el.querySelector('.tt').textContent=t;
+  el.querySelector('.td').textContent=d;
+  $('toasts').appendChild(el);
+  while($('toasts').children.length>4) $('toasts').firstChild.remove();
+  setTimeout(()=>el.remove(),4100);
+}
+function modal(t,b){
+  $('modal-t').textContent=t;
+  $('modal-b').innerHTML=b;
+  $('modalbg').classList.add('show');
+}
+$('modal-ok').addEventListener('click',()=>$('modalbg').classList.remove('show'));
+
+/* ---------- 渲染 ---------- */
+function renderStats(){
+  elBaozi.textContent=fmt(S.baozi);
+  elCps.textContent=fmtCps(D.cps)+'/秒';
+  elClick.textContent=fmt(clickValue());
+  elClicks.textContent=fmt(S.clicks);
+  const chips=$('buffchips');
+  if(Date.now()<buff.until){
+    const left=Math.ceil((buff.until-Date.now())/1000);
+    let chip=chips.firstChild;
+    if(!chip){ chip=document.createElement('span'); chip.className='chip'; chips.appendChild(chip); }
+    const txt='🥇 点击×'+buff.mult+'　剩 '+left+' 秒';
+    if(chip.textContent!==txt) chip.textContent=txt;
+  } else if(chips.firstChild) chips.innerHTML='';
+}
+
+/* ---------- 标签页 ---------- */
+const tabs=[['tabb-build','tab-build'],['tabb-up','tab-up'],['tabb-ach','tab-ach']];
+for(const [btn,body] of tabs){
+  $(btn).addEventListener('click',()=>{
+    for(const [b2,p2] of tabs){
+      $(b2).classList.toggle('on',b2===btn);
+      $(p2).style.display=p2===body?'':'none';
+    }
+  });
+}
+
+/* ---------- 存档 ---------- */
+function save(){
+  S.last=Date.now();
+  try{ localStorage.setItem(SAVE_KEY,JSON.stringify(S)); }catch(e){}
+}
+function load(){
+  let raw=null;
+  try{ raw=localStorage.getItem(SAVE_KEY); }catch(e){}
+  if(!raw) return;
+  try{
+    const o=JSON.parse(raw);
+    S=Object.assign(freshState(),o);
+    S.counts=o.counts||{}; S.ups=o.ups||[]; S.ach=o.ach||[];
+    recalc();
+    /* 离线收益 */
+    const dt=Math.min(Date.now()-(S.last||Date.now()), 8*3600*1000);
+    if(dt>60000 && D.cps>0){
+      const gain=dt/1000*D.cps*0.5;
+      S.baozi+=gain; S.total+=gain;
+      modal('🌙 欢迎回来！',
+        '你离开了 <b>'+fmtTime(dt)+'</b>，<br>外婆们替你看着蒸笼，'+
+        '补发离线收益<br><b>'+fmt(gain)+'</b> 个包子<br>'+
+        '<span style="color:#8888a0;font-size:12px">（按离线时长 × 每秒产量的 50%，上限 8 小时）</span>');
+    }
+    for(const id of S.ach) if(acards[id]) markAch(id);
+  }catch(e){ console.warn('存档损坏',e); }
+}
+
+/* 手动存档 / 音效 / 重置 */
+$('btn-save').addEventListener('click',()=>{ save(); toast('💾 已保存','进度已写入本地存档',true); });
+function renderSound(){ $('btn-sound').textContent=S.muted?'🔇 音效：关':'🔊 音效：开'; }
+$('btn-sound').addEventListener('click',()=>{ S.muted=!S.muted; renderSound(); if(!S.muted) SFX.click(); });
+let resetArmed=false, resetT=null;
+$('btn-reset').addEventListener('click',()=>{
+  const b=$('btn-reset');
+  if(!resetArmed){
+    resetArmed=true; b.classList.add('armed'); b.textContent='⚠️ 再点一次确认重置';
+    clearTimeout(resetT);
+    resetT=setTimeout(()=>{ resetArmed=false; b.classList.remove('armed'); b.textContent='🗑 重置进度'; },5000);
+    return;
+  }
+  clearTimeout(resetT); resetArmed=false;
+  b.classList.remove('armed'); b.textContent='🗑 重置进度';
+  if(!confirm('真的要清空所有进度吗？此操作不可恢复！')) return;
+  try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+  S=freshState(); buff={mult:1,until:0};
+  recalc();
+  for(const a of ACHIEVEMENTS){
+    const d=acards[a.id]; d.className='acard';
+    d.querySelector('.aname').textContent='🔒 '+a.name;
+  }
+  upKey='\0'; updateUpgrades(); updateStore(); renderStats(); checkAch(); renderSound();
+  toast('🗑 已重置','包子铺重新开张！',true);
+});
+
+/* ---------- 主循环 ---------- */
+let lastTick=Date.now();
+setInterval(()=>{
+  const now=Date.now(), dt=Math.min((now-lastTick)/1000,2);
+  lastTick=now;
+  if(D.cps>0){ const g=D.cps*dt; S.baozi+=g; S.total+=g; }
+  renderStats();
+},100);
+setInterval(()=>{ updateStore(); updateUpgrades(); checkAch(); },250);
+setInterval(save,10000);
+window.addEventListener('beforeunload',save);
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){ save(); return; }
+  /* 页面挂后台时定时器被节流：回到前台按全速补足这段时间（上限 8 小时） */
+  const now=Date.now(), gap=Math.min(now-lastTick, 8*3600*1000);
+  if(gap>3000 && D.cps>0){ const g=D.cps*gap/1000; S.baozi+=g; S.total+=g; }
+  lastTick=now;
+});
+
+/* ---------- 启动 ---------- */
+load();
+recalc(); renderSound();
+updateStore(); updateUpgrades(); checkAch(); renderStats();
+scheduleGolden();
+</script>
+</body>
+</html>

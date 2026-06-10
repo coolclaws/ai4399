@@ -11,6 +11,16 @@
 | 深渊五层 Depths of Five | 回合制 Roguelike | [`/roguelike/`](roguelike/) |
 | 血色深渊 Crimson Abyss | 第一人称射击 | [`/fps/`](fps/) |
 | 疾风卡丁 GP | 3D 卡丁车竞速 | [`/kart/`](kart/) |
+| 2048 | 数字合成益智 | [`/2048/`](2048/) |
+| 霓虹贪吃蛇 | 经典街机 | [`/snake/`](snake/) |
+| 方块消行 | 落块消行益智 | [`/blocks/`](blocks/) |
+| 扫雷 | 推理益智 | [`/mines/`](mines/) |
+| 笨鸟先飞 | 一键休闲 | [`/flappy/`](flappy/) |
+| 大球吃小球 | 休闲街机 | [`/balls/`](balls/) |
+| 都市狂奔 | 三车道跑酷 | [`/runner/`](runner/) |
+| 荡绳侠 | 物理摆荡街机 | [`/swing/`](swing/) |
+| 包子铺大亨 | 放置经营 | [`/baozi/`](baozi/) |
+| 成语方阵 | 成语版 Wordle | [`/idiom/`](idiom/) |
 
 ## 添加新游戏
 

@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>扫雷 · AI4399</title>
+<style>
+  :root{
+    --bg:#0a0a12;
+    --panel:#14141f;
+    --border:#2a2a3d;
+    --text:#e8e8f0;
+    --muted:#8888a0;
+    --accent:#ffcc00;
+    --cs:34px;
+    --cell:#232336;
+    --cell-alt:#26263a;
+    --cell-hover:#30304a;
+    --cell-open:#101019;
+    --cell-open-alt:#12121c;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:16px 12px 40px;
+    user-select:none;
+    -webkit-user-select:none;
+    -webkit-touch-callout:none;
+    overscroll-behavior:none;
+  }
+  a.back{
+    position:fixed;top:12px;left:14px;z-index:50;
+    color:var(--text);opacity:.45;text-decoration:none;font-size:14px;
+    padding:6px 10px;border-radius:8px;background:rgba(20,20,31,.6);
+    border:1px solid rgba(42,42,61,.6);backdrop-filter:blur(4px);
+    transition:opacity .2s;
+  }
+  a.back:hover{opacity:1;}
+  header{text-align:center;margin:30px 0 14px;}
+  header h1{
+    margin:0;font-size:30px;letter-spacing:10px;text-indent:10px;font-weight:700;
+  }
+  header h1 .mine-ico{letter-spacing:0;text-indent:0;font-size:24px;vertical-align:2px;}
+  header .sub{color:var(--muted);font-size:13px;margin-top:6px;letter-spacing:2px;}
+
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:14px;
+    box-shadow:0 10px 40px rgba(0,0,0,.5);
+    max-width:calc(100vw - 16px);
+  }
+  .panel.shake{animation:shake .5s;}
+  @keyframes shake{
+    0%,100%{transform:translate(0,0);}
+    15%{transform:translate(-6px,2px);}
+    30%{transform:translate(5px,-3px);}
+    45%{transform:translate(-4px,-2px);}
+    60%{transform:translate(4px,3px);}
+    75%{transform:translate(-3px,1px);}
+    90%{transform:translate(2px,-1px);}
+  }
+
+  .diffbar{
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    margin-bottom:12px;
+  }
+  .diffbar .spacer{flex:1;}
+  .diff-btn{
+    font-family:inherit;font-size:13px;
+    background:#1b1b2a;color:var(--muted);
+    border:1px solid var(--border);border-radius:8px;
+    padding:7px 14px;cursor:pointer;transition:all .15s;
+  }
+  .diff-btn:hover{color:var(--text);border-color:#3d3d58;}
+  .diff-btn.active{
+    background:rgba(255,204,0,.12);color:var(--accent);
+    border-color:rgba(255,204,0,.5);font-weight:600;
+  }
+  .best{
+    font-size:12px;color:var(--muted);white-space:nowrap;
+  }
+  .best b{color:var(--accent);font-weight:600;}
+  .icon-btn{
+    font-family:inherit;font-size:15px;line-height:1;
+    background:#1b1b2a;border:1px solid var(--border);border-radius:8px;
+    padding:6px 9px;cursor:pointer;color:var(--text);transition:all .15s;
+  }
+  .icon-btn:hover{border-color:#3d3d58;}
+
+  .statusbar{
+    display:flex;align-items:center;justify-content:space-between;
+    background:#0d0d16;border:1px solid var(--border);border-radius:10px;
+    padding:8px 12px;margin-bottom:12px;gap:10px;
+  }
+  .counter{
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    font-size:24px;font-weight:700;color:var(--accent);
+    background:#08080f;border:1px solid #1f1f30;border-radius:8px;
+    padding:3px 12px;min-width:84px;text-align:center;
+    text-shadow:0 0 12px rgba(255,204,0,.35);
+    letter-spacing:2px;
+  }
+  .counter .ico{font-size:15px;text-shadow:none;letter-spacing:0;margin-right:4px;vertical-align:2px;}
+  #faceBtn{
+    font-size:28px;line-height:1;
+    background:#1b1b2a;border:1px solid var(--border);border-radius:10px;
+    width:52px;height:52px;cursor:pointer;
+    transition:transform .1s,border-color .15s;
+    display:flex;align-items:center;justify-content:center;
+  }
+  #faceBtn:hover{border-color:rgba(255,204,0,.5);}
+  #faceBtn:active{transform:scale(.92);}
+
+  .viewport{
+    position:relative;overflow:hidden;margin:0 auto;
+    border-radius:10px;touch-action:none;
+  }
+  .board{
+    display:grid;gap:2px;
+    background:transparent;
+    width:max-content;
+    transform-origin:0 0;
+    will-change:transform;
+  }
+  .cell{
+    width:var(--cs);height:var(--cs);
+    background:var(--cell);
+    border-radius:5px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:17px;font-weight:700;
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    cursor:pointer;position:relative;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+    transition:background .1s;
+  }
+  .cell.alt{background:var(--cell-alt);}
+  @media(hover:hover){
+    .cell:not(.revealed):hover{background:var(--cell-hover);}
+  }
+  .cell.revealed{
+    background:var(--cell-open);
+    box-shadow:inset 0 1px 3px rgba(0,0,0,.5);
+    cursor:default;
+    animation:popIn .18s ease-out;
+  }
+  .cell.revealed.alt{background:var(--cell-open-alt);}
+  @keyframes popIn{
+    0%{transform:scale(.55);opacity:.3;}
+    70%{transform:scale(1.08);}
+    100%{transform:scale(1);opacity:1;}
+  }
+  .cell.flagged,.cell.quest{font-size:16px;}
+  .cell.quest{color:var(--accent);font-size:17px;}
+  /* 数字经典色系（深色底适配） */
+  .cell.n1{color:#5aa9ff;}
+  .cell.n2{color:#5fce6f;}
+  .cell.n3{color:#ff6259;}
+  .cell.n4{color:#9087ff;}
+  .cell.n5{color:#d49a6a;}
+  .cell.n6{color:#4fd6d6;}
+  .cell.n7{color:#e8e8f0;}
+  .cell.n8{color:#9a9ab0;}
+  .cell.mine-show{
+    animation:boomIn .45s ease-out both;
+    font-size:17px;
+  }
+  @keyframes boomIn{
+    0%{transform:scale(.2);background:#ff5040;box-shadow:0 0 18px rgba(255,80,64,.9);}
+    45%{transform:scale(1.35);background:#ff5040;box-shadow:0 0 22px rgba(255,80,64,.8);}
+    100%{transform:scale(1);background:#3a1620;box-shadow:inset 0 1px 3px rgba(0,0,0,.5);}
+  }
+  .cell.hit{background:#5c1420 !important;box-shadow:0 0 14px rgba(255,80,64,.55) !important;}
+  .cell.wrong::after{
+    content:"✕";position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    color:#ff5040;font-size:26px;font-weight:900;
+    text-shadow:0 0 6px rgba(0,0,0,.8);
+  }
+  .cell.win-flag{animation:flagPop .3s ease-out both;}
+  @keyframes flagPop{
+    0%{transform:scale(.3);}
+    60%{transform:scale(1.25);}
+    100%{transform:scale(1);}
+  }
+
+  .msg{
+    text-align:center;min-height:24px;margin-top:12px;
+    font-size:14px;color:var(--muted);
+  }
+  .msg .win{color:var(--accent);font-weight:600;}
+  .msg .lose{color:#ff6259;font-weight:600;}
+  .msg .record{
+    display:inline-block;color:#0a0a12;background:var(--accent);
+    border-radius:6px;padding:1px 8px;margin-left:8px;font-weight:700;
+    animation:recordPulse 1s ease-in-out infinite;
+  }
+  @keyframes recordPulse{
+    0%,100%{transform:scale(1);box-shadow:0 0 4px rgba(255,204,0,.4);}
+    50%{transform:scale(1.08);box-shadow:0 0 16px rgba(255,204,0,.8);}
+  }
+
+  footer.hint{
+    margin-top:18px;color:var(--muted);font-size:12px;text-align:center;
+    line-height:1.9;max-width:560px;
+  }
+  footer.hint .key{
+    background:#1b1b2a;border:1px solid var(--border);border-radius:4px;
+    padding:1px 6px;font-size:11px;
+  }
+  canvas.confetti{
+    position:fixed;inset:0;width:100vw;height:100vh;
+    pointer-events:none;z-index:100;
+  }
+  @media(max-width:600px){
+    header h1{font-size:24px;letter-spacing:6px;text-indent:6px;}
+    .counter{font-size:20px;min-width:72px;}
+    #faceBtn{width:46px;height:46px;font-size:24px;}
+    body{padding:12px 6px 30px;}
+    .panel{padding:10px;}
+  }
+</style>
+</head>
+<body>
+<a class="back" href="../">← AI4399</a>
+<header>
+  <h1><span class="mine-ico">💣</span> 扫雷</h1>
+  <div class="sub">AI4399 · 经典街机小游戏</div>
+</header>
+
+<div class="panel" id="panel">
+  <div class="diffbar">
+    <button class="diff-btn" data-diff="easy">初级 9×9</button>
+    <button class="diff-btn" data-diff="medium">中级 16×16</button>
+    <button class="diff-btn" data-diff="hard">高级 30×16</button>
+    <div class="spacer"></div>
+    <span class="best" id="bestLabel">最佳 --</span>
+    <button class="icon-btn" id="soundBtn" title="音效开关">🔊</button>
+  </div>
+  <div class="statusbar">
+    <div class="counter" id="mineCounter"><span class="ico">🚩</span><span id="mineNum">010</span></div>
+    <button id="faceBtn" title="重新开始">🙂</button>
+    <div class="counter" id="timeCounter"><span class="ico">⏱️</span><span id="timeNum">000</span></div>
+  </div>
+  <div class="viewport" id="viewport">
+    <div class="board" id="board"></div>
+  </div>
+  <div class="msg" id="msg"></div>
+</div>
+
+<footer class="hint">
+  <span class="key">左键</span> 翻开 · <span class="key">右键</span> 插旗/问号 · <span class="key">双击/左右键</span> 数字和弦快开<br>
+  移动端：<span class="key">点按</span> 翻开 · <span class="key">长按</span> 插旗 · <span class="key">双指</span> 缩放 · <span class="key">拖动</span> 平移
+</footer>
+
+<script>
+'use strict';
+(function(){
+
+/* ============ 配置 ============ */
+var DIFFS = {
+  easy:   { cols: 9,  rows: 9,  mines: 10, label: '初级' },
+  medium: { cols: 16, rows: 16, mines: 40, label: '中级' },
+  hard:   { cols: 30, rows: 16, mines: 99, label: '高级' }
+};
+var CELL = 34, GAP = 2;
+var LP_MS = 360;           // 长按阈值
+var FLOOD_STEP = 26;       // 波纹扩散每层延迟 ms
+var FLOOD_MAX_DELAY = 620;
+
+/* ============ DOM ============ */
+var $ = function(id){ return document.getElementById(id); };
+var boardEl = $('board'), viewportEl = $('viewport'), panelEl = $('panel');
+var faceBtn = $('faceBtn'), mineNumEl = $('mineNum'), timeNumEl = $('timeNum');
+var msgEl = $('msg'), bestLabel = $('bestLabel'), soundBtn = $('soundBtn');
+
+/* ============ 状态 ============ */
+var diff = 'easy';
+var cols = 9, rows = 9, totalMines = 10;
+var cells = [];            // {mine,num,revealed,flag,el}  flag: 0无 1旗 2问号
+var minesPlaced = false;
+var gameOver = false, won = false;
+var flagsUsed = 0, revealedCount = 0;
+var timerInt = null, startTime = 0, elapsedSec = 0;
+var muted = false;
+var pendingTimers = [];
+
+/* ============ 工具 ============ */
+function neighbors(i){
+  var r = Math.floor(i / cols), c = i % cols, out = [];
+  for (var dr = -1; dr <= 1; dr++){
+    for (var dc = -1; dc <= 1; dc++){
+      if (dr === 0 && dc === 0) continue;
+      var nr = r + dr, nc = c + dc;
+      if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) out.push(nr * cols + nc);
+    }
+  }
+  return out;
+}
+function later(fn, ms){ pendingTimers.push(setTimeout(fn, ms)); }
+function clearPending(){
+  for (var i = 0; i < pendingTimers.length; i++) clearTimeout(pendingTimers[i]);
+  pendingTimers = [];
+}
+function pad3(n){
+  if (n < 0) return '-' + String(Math.min(99, -n)).padStart(2, '0');
+  return String(Math.min(999, n)).padStart(3, '0');
+}
+function bestKey(d){ return 'ai4399-mines-best-' + d; }
+function getBest(d){
+  try {
+    var v = localStorage.getItem(bestKey(d));
+    return v === null ? null : parseInt(v, 10);
+  } catch(e){ return null; }
+}
+function setBest(d, sec){
+  try { localStorage.setItem(bestKey(d), String(sec)); } catch(e){}
+}
+function updateBestLabel(){
+  var b = getBest(diff);
+  bestLabel.innerHTML = b === null ? '最佳 --' : '最佳 <b>' + b + 's</b>';
+}
+
+/* ============ 音效（WebAudio 合成） ============ */
+var actx = null;
+function ac(){
+  if (muted) return null;
+  if (!actx){
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    actx = new AC();
+  }
+  if (actx.state === 'suspended') actx.resume();
+  return actx;
+}
+function tone(freq, dur, type, vol, delay, slideTo){
+  var a = ac(); if (!a) return;
+  var t0 = a.currentTime + (delay || 0);
+  var o = a.createOscillator(), g = a.createGain();
+  o.type = type || 'sine';
+  o.frequency.setValueAtTime(freq, t0);
+  if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t0 + dur);
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(vol || 0.12, t0 + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g); g.connect(a.destination);
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+function noiseBurst(dur, vol, delay){
+  var a = ac(); if (!a) return;
+  var t0 = a.currentTime + (delay || 0);
+  var len = Math.floor(a.sampleRate * dur);
+  var buf = a.createBuffer(1, len, a.sampleRate);
+  var data = buf.getChannelData(0);
+  for (var i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / len);
+  var src = a.createBufferSource(); src.buffer = buf;
+  var f = a.createBiquadFilter(); f.type = 'lowpass';
+  f.frequency.setValueAtTime(2200, t0);
+  f.frequency.exponentialRampToValueAtTime(120, t0 + dur);
+  var g = a.createGain();
+  g.gain.setValueAtTime(vol, t0);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  src.connect(f); f.connect(g); g.connect(a.destination);
+  src.start(t0);
+}
+function sndReveal(count){
+  tone(520 + Math.random() * 80, 0.08, 'sine', 0.10);
+  if (count > 6){
+    tone(660, 0.09, 'sine', 0.07, 0.06);
+    tone(780, 0.10, 'sine', 0.06, 0.13);
+  }
+}
+function sndFlag(){ tone(880, 0.06, 'triangle', 0.10); }
+function sndUnflag(){ tone(620, 0.06, 'triangle', 0.08); }
+function sndBoom(){
+  noiseBurst(0.6, 0.35, 0);
+  tone(120, 0.5, 'sawtooth', 0.18, 0, 38);
+  noiseBurst(0.4, 0.2, 0.12);
+  noiseBurst(0.35, 0.15, 0.26);
+}
+function sndWin(){
+  var seq = [523, 659, 784, 1047, 1319];
+  for (var i = 0; i < seq.length; i++) tone(seq[i], 0.22, 'triangle', 0.12, i * 0.09);
+  tone(1568, 0.4, 'sine', 0.08, 0.5);
+}
+
+/* ============ 视图（平移 + 缩放） ============ */
+var view = { x: 0, y: 0, z: 1, fit: 1 };
+var boardW = 0, boardH = 0;
+
+function fitBoard(){
+  boardW = cols * CELL + (cols - 1) * GAP;
+  boardH = rows * CELL + (rows - 1) * GAP;
+  var availW = Math.min(window.innerWidth - 38, 1180);
+  view.fit = Math.min(1, availW / boardW);
+  var vw = Math.round(boardW * view.fit);
+  var vh = Math.round(boardH * view.fit);
+  viewportEl.style.width = vw + 'px';
+  viewportEl.style.height = vh + 'px';
+  clampView();
+  applyView();
+}
+function clampView(){
+  var vw = viewportEl.clientWidth, vh = viewportEl.clientHeight;
+  var bw = boardW * view.fit * view.z, bh = boardH * view.fit * view.z;
+  if (bw <= vw) view.x = (vw - bw) / 2;
+  else view.x = Math.max(vw - bw, Math.min(0, view.x));
+  if (bh <= vh) view.y = (vh - bh) / 2;
+  else view.y = Math.max(vh - bh, Math.min(0, view.y));
+}
+function applyView(){
+  boardEl.style.transform = 'translate(' + view.x + 'px,' + view.y + 'px) scale(' + (view.fit * view.z) + ')';
+}
+function resetView(){ view.z = 1; view.x = 0; view.y = 0; fitBoard(); }
+
+/* ============ 计时 ============ */
+function startTimer(){
+  startTime = Date.now();
+  elapsedSec = 0;
+  timerInt = setInterval(function(){
+    elapsedSec = Math.floor((Date.now() - startTime) / 1000);
+    timeNumEl.textContent = pad3(elapsedSec);
+  }, 250);
+}
+function stopTimer(){
+  if (timerInt){ clearInterval(timerInt); timerInt = null; }
+  if (startTime) elapsedSec = Math.floor((Date.now() - startTime) / 1000);
+}
+
+/* ============ 渲染辅助 ============ */
+function updateMineCounter(){ mineNumEl.textContent = pad3(totalMines - flagsUsed); }
+function setFace(f){ faceBtn.textContent = f; }
+function renderFlag(c){
+  c.el.classList.remove('flagged', 'quest');
+  if (c.flag === 1){ c.el.textContent = '🚩'; c.el.classList.add('flagged'); }
+  else if (c.flag === 2){ c.el.textContent = '?'; c.el.classList.add('quest'); }
+  else c.el.textContent = '';
+}
+
+/* ============ 建局 ============ */
+function newGame(){
+  clearPending();
+  stopTimer();
+  startTime = 0; elapsedSec = 0;
+  var cfg = DIFFS[diff];
+  cols = cfg.cols; rows = cfg.rows; totalMines = cfg.mines;
+  cells = [];
+  minesPlaced = false; gameOver = false; won = false;
+  flagsUsed = 0; revealedCount = 0;
+  timeNumEl.textContent = '000';
+  updateMineCounter();
+  setFace('🙂');
+  msgEl.innerHTML = '';
+  updateBestLabel();
+
+  boardEl.style.gridTemplateColumns = 'repeat(' + cols + ', var(--cs))';
+  boardEl.innerHTML = '';
+  var frag = document.createDocumentFragment();
+  for (var i = 0; i < cols * rows; i++){
+    var el = document.createElement('div');
+    el.className = 'cell' + ((Math.floor(i / cols) + i % cols) % 2 ? ' alt' : '');
+    el.dataset.i = i;
+    frag.appendChild(el);
+    cells.push({ mine: false, num: 0, revealed: false, flag: 0, el: el });
+  }
+  boardEl.appendChild(frag);
+  resetView();
+
+  var btns = document.querySelectorAll('.diff-btn');
+  for (var b = 0; b < btns.length; b++){
+    btns[b].classList.toggle('active', btns[b].dataset.diff === diff);
+  }
+}
+
+function placeMines(safeIdx){
+  var excluded = {};
+  excluded[safeIdx] = true;
+  var ns = neighbors(safeIdx);
+  for (var k = 0; k < ns.length; k++) excluded[ns[k]] = true;
+  var pool = [];
+  for (var i = 0; i < cells.length; i++) if (!excluded[i]) pool.push(i);
+  // Fisher-Yates 取前 totalMines 个
+  for (var j = pool.length - 1; j > 0; j--){
+    var r = Math.floor(Math.random() * (j + 1));
+    var t = pool[j]; pool[j] = pool[r]; pool[r] = t;
+  }
+  for (var m = 0; m < totalMines; m++) cells[pool[m]].mine = true;
+  for (var c = 0; c < cells.length; c++){
+    if (cells[c].mine) continue;
+    var cnt = 0, nb = neighbors(c);
+    for (var n = 0; n < nb.length; n++) if (cells[nb[n]].mine) cnt++;
+    cells[c].num = cnt;
+  }
+  minesPlaced = true;
+}
+
+/* ============ 核心逻辑 ============ */
+function showRevealed(i, delay){
+  var c = cells[i];
+  later(function(){
+    c.el.classList.remove('flagged', 'quest');
+    c.el.classList.add('revealed');
+    if (c.num > 0){
+      c.el.textContent = c.num;
+      c.el.classList.add('n' + c.num);
+    } else {
+      c.el.textContent = '';
+    }
+  }, delay);
+}
+
+function floodReveal(start){
+  // BFS，按层级延迟做波纹扩散动画；逻辑状态立即更新
+  var queue = [[start, 0]];
+  var seen = {}; seen[start] = true;
+  var count = 0, maxD = 0;
+  while (queue.length){
+    var item = queue.shift();
+    var i = item[0], d = item[1];
+    var c = cells[i];
+    if (c.revealed || c.flag === 1 || c.mine) continue;
+    c.revealed = true;
+    if (c.flag === 2){ c.flag = 0; }
+    revealedCount++;
+    count++;
+    if (d > maxD) maxD = d;
+    showRevealed(i, Math.min(d * FLOOD_STEP, FLOOD_MAX_DELAY));
+    if (c.num === 0){
+      var nb = neighbors(i);
+      for (var n = 0; n < nb.length; n++){
+        var ni = nb[n];
+        if (!seen[ni] && !cells[ni].revealed && !cells[ni].mine){
+          seen[ni] = true;
+          queue.push([ni, d + 1]);
+        }
+      }
+    }
+  }
+  return { count: count, maxDelay: Math.min(maxD * FLOOD_STEP, FLOOD_MAX_DELAY) };
+}
+
+function reveal(i){
+  var c = cells[i];
+  if (gameOver || c.revealed || c.flag === 1) return;
+  if (!minesPlaced){
+    placeMines(i);
+    startTimer();
+  }
+  if (c.mine){ lose(i); return; }
+  var res = floodReveal(i);
+  if (res.count > 0) sndReveal(res.count);
+  checkWin(res.maxDelay);
+}
+
+function cycleFlag(i){
+  var c = cells[i];
+  if (gameOver || c.revealed) return;
+  if (c.flag === 0){ c.flag = 1; flagsUsed++; sndFlag(); }
+  else if (c.flag === 1){ c.flag = 2; flagsUsed--; sndUnflag(); }
+  else { c.flag = 0; }
+  renderFlag(c);
+  updateMineCounter();
+}
+function toggleFlag(i){ // 移动端长按：旗 ↔ 无
+  var c = cells[i];
+  if (gameOver || c.revealed) return;
+  if (c.flag === 1){ c.flag = 0; flagsUsed--; sndUnflag(); }
+  else {
+    if (c.flag === 2) c.flag = 0;
+    c.flag = 1; flagsUsed++; sndFlag();
+  }
+  renderFlag(c);
+  updateMineCounter();
+  if (navigator.vibrate) navigator.vibrate(30);
+}
+
+function chord(i){
+  var c = cells[i];
+  if (gameOver || !c.revealed || c.num === 0) return;
+  var nb = neighbors(i), flags = 0, n;
+  for (n = 0; n < nb.length; n++) if (cells[nb[n]].flag === 1) flags++;
+  if (flags !== c.num) return;
+  var hitMine = -1, opened = 0, maxDelay = 0;
+  for (n = 0; n < nb.length; n++){
+    var t = cells[nb[n]];
+    if (t.revealed || t.flag === 1) continue;
+    if (t.mine){ if (hitMine < 0) hitMine = nb[n]; continue; }
+    var res = floodReveal(nb[n]);
+    opened += res.count;
+    if (res.maxDelay > maxDelay) maxDelay = res.maxDelay;
+  }
+  if (hitMine >= 0){ lose(hitMine); return; }
+  if (opened > 0){
+    sndReveal(opened);
+    checkWin(maxDelay);
+  }
+}
+
+function checkWin(delay){
+  if (gameOver) return;
+  if (revealedCount === cols * rows - totalMines) win(delay || 0);
+}
+
+/* ============ 胜负 ============ */
+function win(delay){
+  gameOver = true; won = true;
+  stopTimer();
+  var t = elapsedSec;
+  later(function(){
+    setFace('😎');
+    // 剩余雷自动插旗
+    var di = 0;
+    for (var i = 0; i < cells.length; i++){
+      if (cells[i].mine && cells[i].flag !== 1){
+        (function(c, d){
+          later(function(){
+            c.flag = 1;
+            renderFlag(c);
+            c.el.classList.add('win-flag');
+          }, d);
+        })(cells[i], di * 40);
+        di++;
+      }
+    }
+    flagsUsed = totalMines;
+    updateMineCounter();
+    sndWin();
+    confetti();
+    var best = getBest(diff);
+    var isRecord = best === null || t < best;
+    if (isRecord) setBest(diff, t);
+    updateBestLabel();
+    msgEl.innerHTML = '<span class="win">🎉 胜利！用时 ' + t + ' 秒</span>' +
+      (isRecord ? '<span class="record">新纪录！</span>' : '');
+  }, delay + 60);
+}
+
+function lose(hitIdx){
+  gameOver = true; won = false;
+  stopTimer();
+  setFace('😵');
+  sndBoom();
+  panelEl.classList.add('shake');
+  later(function(){ panelEl.classList.remove('shake'); }, 600);
+
+  var hc = cells[hitIdx];
+  hc.revealed = true;
+  hc.el.classList.add('revealed', 'mine-show', 'hit');
+  hc.el.textContent = '💥';
+
+  // 其余雷依次爆开；标错的旗打叉
+  var order = [];
+  for (var i = 0; i < cells.length; i++){
+    if (i === hitIdx) continue;
+    var c = cells[i];
+    if (c.mine && c.flag !== 1) order.push(i);
+    else if (!c.mine && c.flag === 1){
+      c.el.classList.add('wrong');
+    }
+  }
+  // 按与触雷点距离排序，爆炸向外扩散
+  var hr = Math.floor(hitIdx / cols), hcc = hitIdx % cols;
+  order.sort(function(a, b){
+    var ar = Math.floor(a / cols) - hr, acl = a % cols - hcc;
+    var br = Math.floor(b / cols) - hr, bcl = b % cols - hcc;
+    return (ar * ar + acl * acl) - (br * br + bcl * bcl);
+  });
+  for (var k = 0; k < order.length; k++){
+    (function(c, d){
+      later(function(){
+        c.el.classList.remove('flagged', 'quest');
+        c.el.classList.add('revealed', 'mine-show');
+        c.el.textContent = '💣';
+      }, d);
+    })(cells[order[k]], 120 + k * Math.max(18, 360 / Math.max(1, order.length)));
+  }
+  later(function(){ noiseBurst(0.3, 0.12, 0); }, 300);
+  msgEl.innerHTML = '<span class="lose">💥 踩雷了…</span> 点击表情重新开始';
+}
+
+/* ============ 撒花粒子 ============ */
+function confetti(){
+  var cv = document.createElement('canvas');
+  cv.className = 'confetti';
+  document.body.appendChild(cv);
+  var ctx = cv.getContext('2d');
+  var W = cv.width = window.innerWidth;
+  var H = cv.height = window.innerHeight;
+  var colors = ['#ffcc00', '#5aa9ff', '#ff6259', '#5fce6f', '#c792ea', '#ffffff', '#ffa94d'];
+  var parts = [];
+  for (var i = 0; i < 150; i++){
+    parts.push({
+      x: W / 2 + (Math.random() - 0.5) * W * 0.5,
+      y: H * 0.35 + (Math.random() - 0.5) * 60,
+      vx: (Math.random() - 0.5) * 14,
+      vy: -Math.random() * 13 - 3,
+      w: 5 + Math.random() * 6,
+      h: 3 + Math.random() * 4,
+      rot: Math.random() * Math.PI * 2,
+      vr: (Math.random() - 0.5) * 0.35,
+      color: colors[Math.floor(Math.random() * colors.length)]
+    });
+  }
+  var t0 = performance.now();
+  function frame(t){
+    var dt = Math.min((t - t0) / 1000, 3.2);
+    ctx.clearRect(0, 0, W, H);
+    for (var i = 0; i < parts.length; i++){
+      var p = parts[i];
+      p.vy += 0.32;
+      p.vx *= 0.985;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.vr;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.globalAlpha = Math.max(0, 1 - dt / 3);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    }
+    if (dt < 3.1) requestAnimationFrame(frame);
+    else cv.remove();
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ============ 桌面输入 ============ */
+var chordAt = 0; // 和弦时间戳，用于短暂屏蔽随后的 click/contextmenu
+
+function cellFromEvent(e){
+  var el = e.target.closest ? e.target.closest('.cell') : null;
+  if (!el || !boardEl.contains(el)) return -1;
+  return parseInt(el.dataset.i, 10);
+}
+
+boardEl.addEventListener('mousedown', function(e){
+  var i = cellFromEvent(e);
+  if (i < 0 || gameOver) return;
+  if ((e.buttons & 3) === 3){
+    // 左右键同按 → 和弦
+    e.preventDefault();
+    chordAt = Date.now();
+    chord(i);
+    return;
+  }
+  if (e.button === 0 && !cells[i].revealed && cells[i].flag !== 1) setFace('😮');
+});
+document.addEventListener('mouseup', function(){
+  if (!gameOver) setFace('🙂');
+});
+boardEl.addEventListener('click', function(e){
+  if (Date.now() - chordAt < 400) return;
+  var i = cellFromEvent(e);
+  if (i < 0) return;
+  reveal(i);
+});
+boardEl.addEventListener('dblclick', function(e){
+  var i = cellFromEvent(e);
+  if (i < 0) return;
+  e.preventDefault();
+  chord(i);
+});
+boardEl.addEventListener('contextmenu', function(e){
+  e.preventDefault();
+  if (Date.now() - chordAt < 400) return;
+  var i = cellFromEvent(e);
+  if (i < 0) return;
+  cycleFlag(i);
+});
+viewportEl.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+
+/* ============ 触摸输入（点按/长按/平移/双指缩放） ============ */
+var touch = {
+  mode: 'none',          // none | tap | pan | pinch
+  startX: 0, startY: 0,
+  lastX: 0, lastY: 0,
+  cell: -1,
+  lpTimer: null,
+  lpFired: false,
+  pinchDist: 0, pinchZ: 1,
+  pinchCX: 0, pinchCY: 0
+};
+function cancelLP(){
+  if (touch.lpTimer){ clearTimeout(touch.lpTimer); touch.lpTimer = null; }
+}
+function touchDist(t1, t2){
+  var dx = t1.clientX - t2.clientX, dy = t1.clientY - t2.clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+viewportEl.addEventListener('touchstart', function(e){
+  if (e.touches.length === 1){
+    var t = e.touches[0];
+    touch.mode = 'tap';
+    touch.startX = touch.lastX = t.clientX;
+    touch.startY = touch.lastY = t.clientY;
+    touch.lpFired = false;
+    touch.cell = cellFromEvent(e);
+    cancelLP();
+    if (touch.cell >= 0 && !gameOver && !cells[touch.cell].revealed){
+      setFace('😮');
+      touch.lpTimer = setTimeout(function(){
+        touch.lpFired = true;
+        touch.lpTimer = null;
+        toggleFlag(touch.cell);
+        if (!gameOver) setFace('🙂');
+      }, LP_MS);
+    }
+  } else if (e.touches.length === 2){
+    cancelLP();
+    touch.mode = 'pinch';
+    touch.pinchDist = touchDist(e.touches[0], e.touches[1]);
+    touch.pinchZ = view.z;
+    var rect = viewportEl.getBoundingClientRect();
+    touch.pinchCX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+    touch.pinchCY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+    if (!gameOver) setFace('🙂');
+  }
+}, { passive: true });
+
+viewportEl.addEventListener('touchmove', function(e){
+  e.preventDefault(); // 防页面滚动
+  if (touch.mode === 'pinch' && e.touches.length >= 2){
+    var d = touchDist(e.touches[0], e.touches[1]);
+    var nz = Math.max(1, Math.min(4, touch.pinchZ * d / touch.pinchDist));
+    // 围绕双指中心缩放
+    var scaleOld = view.fit * view.z, scaleNew = view.fit * nz;
+    var bx = (touch.pinchCX - view.x) / scaleOld;
+    var by = (touch.pinchCY - view.y) / scaleOld;
+    view.z = nz;
+    view.x = touch.pinchCX - bx * scaleNew;
+    view.y = touch.pinchCY - by * scaleNew;
+    clampView();
+    applyView();
+    return;
+  }
+  if (e.touches.length !== 1) return;
+  var t = e.touches[0];
+  var dx = t.clientX - touch.lastX, dy = t.clientY - touch.lastY;
+  if (touch.mode === 'tap'){
+    var mx = t.clientX - touch.startX, my = t.clientY - touch.startY;
+    if (mx * mx + my * my > 144){ // >12px 判定为平移
+      touch.mode = 'pan';
+      cancelLP();
+      if (!gameOver) setFace('🙂');
+    }
+  }
+  if (touch.mode === 'pan'){
+    view.x += dx; view.y += dy;
+    clampView();
+    applyView();
+  }
+  touch.lastX = t.clientX; touch.lastY = t.clientY;
+}, { passive: false });
+
+viewportEl.addEventListener('touchend', function(e){
+  cancelLP();
+  if (!gameOver) setFace('🙂');
+  if (touch.mode === 'tap' && !touch.lpFired && touch.cell >= 0){
+    e.preventDefault(); // 阻止后续模拟 click
+    var c = cells[touch.cell];
+    if (c.revealed && c.num > 0) chord(touch.cell);
+    else reveal(touch.cell);
+  }
+  if (e.touches.length === 0) touch.mode = 'none';
+  else if (e.touches.length === 1 && touch.mode === 'pinch'){
+    touch.mode = 'pan';
+    touch.lastX = e.touches[0].clientX;
+    touch.lastY = e.touches[0].clientY;
+  }
+}, { passive: false });
+
+viewportEl.addEventListener('touchcancel', function(){
+  cancelLP();
+  touch.mode = 'none';
+  if (!gameOver) setFace('🙂');
+});
+
+/* ============ 顶部控件 ============ */
+faceBtn.addEventListener('click', function(){ newGame(); });
+soundBtn.addEventListener('click', function(){
+  muted = !muted;
+  soundBtn.textContent = muted ? '🔇' : '🔊';
+});
+(function(){
+  var btns = document.querySelectorAll('.diff-btn');
+  for (var i = 0; i < btns.length; i++){
+    btns[i].addEventListener('click', function(){
+      diff = this.dataset.diff;
+      newGame();
+    });
+  }
+})();
+
+window.addEventListener('resize', function(){ fitBoard(); });
+
+/* ============ 启动 ============ */
+newGame();
+
+})();
+</script>
+</body>
+</html>

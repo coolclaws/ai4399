@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>大球吃小球 · AI4399</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:#0a0a12;color:#e8e8f0;
+  font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+#game{position:fixed;inset:0;display:block}
+#vignette{position:fixed;inset:0;pointer-events:none;z-index:5;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(5,5,10,.55) 100%)}
+#back{position:fixed;top:14px;left:14px;z-index:60;color:#8888a0;text-decoration:none;
+  background:rgba(20,20,31,.6);border:1px solid #2a2a3d;padding:6px 13px;border-radius:8px;
+  font-size:14px;backdrop-filter:blur(4px);transition:color .15s,border-color .15s}
+#back:hover{color:#ffcc00;border-color:#ffcc00}
+#board{position:fixed;top:14px;right:14px;z-index:20;min-width:178px;
+  background:rgba(20,20,31,.72);border:1px solid #2a2a3d;border-radius:10px;
+  padding:10px 12px;font-size:13px;backdrop-filter:blur(4px);display:none}
+#board h3{font-size:13px;color:#ffcc00;font-weight:600;margin-bottom:6px;letter-spacing:2px;text-align:center}
+#board .row{display:flex;justify-content:space-between;gap:10px;line-height:1.7;color:#c8c8d8;white-space:nowrap}
+#board .row .nm{overflow:hidden;text-overflow:ellipsis;max-width:110px}
+#board .row .ms{color:#8888a0}
+#board .row.me{color:#ffcc00}
+#board .row.me .ms{color:#ffcc00}
+#minimap{position:fixed;left:14px;bottom:14px;z-index:20;border:1px solid #2a2a3d;border-radius:8px;
+  background:rgba(20,20,31,.72);display:none}
+#hud{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:20;
+  background:rgba(20,20,31,.66);border:1px solid #2a2a3d;border-radius:20px;
+  padding:6px 18px;font-size:14px;color:#c8c8d8;white-space:nowrap;display:none}
+#hud b{color:#ffcc00;font-weight:600}
+#hint{position:fixed;bottom:58px;left:50%;transform:translateX(-50%);z-index:19;
+  font-size:12px;color:#8888a0;opacity:0;transition:opacity .6s;pointer-events:none;white-space:nowrap}
+.overlay{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;
+  background:rgba(10,10,18,.8);backdrop-filter:blur(3px)}
+.overlay.show{display:flex}
+.panel{background:#14141f;border:1px solid #2a2a3d;border-radius:18px;padding:34px 44px;
+  text-align:center;max-width:min(420px,92vw);box-shadow:0 24px 70px rgba(0,0,0,.6);
+  animation:pop .35s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.panel h1{font-size:30px;color:#ffcc00;margin-bottom:4px;letter-spacing:3px}
+.panel .sub{color:#8888a0;font-size:13px;margin-bottom:20px}
+.panel input{width:100%;background:#0a0a12;border:1px solid #2a2a3d;border-radius:9px;
+  color:#e8e8f0;font-size:16px;padding:10px 14px;text-align:center;outline:none;
+  font-family:inherit;margin-bottom:14px;transition:border-color .15s}
+.panel input:focus{border-color:#ffcc00}
+.panel .ctrl{font-size:13px;color:#8888a0;line-height:2;margin-bottom:18px;text-align:left}
+.panel .ctrl b{color:#e8e8f0;background:#22222f;border:1px solid #2a2a3d;border-radius:5px;
+  padding:1px 8px;margin-right:8px;font-weight:500;font-size:12px;display:inline-block;min-width:44px;text-align:center}
+.bigbtn{display:inline-block;background:#ffcc00;color:#0a0a12;border:none;border-radius:10px;
+  font-size:17px;font-weight:700;padding:12px 46px;cursor:pointer;font-family:inherit;
+  letter-spacing:4px;transition:transform .12s,box-shadow .12s}
+.bigbtn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,204,0,.3)}
+.bigbtn:active{transform:translateY(0)}
+.best{font-size:12px;color:#8888a0;margin-top:16px}
+.best b{color:#ffcc00}
+#dStats{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin-bottom:22px}
+#dStats .it{background:#0a0a12;border:1px solid #2a2a3d;border-radius:10px;padding:10px 6px}
+#dStats .v{font-size:21px;color:#e8e8f0;font-weight:700}
+#dStats .v.gold{color:#ffcc00}
+#dStats .k{font-size:11px;color:#8888a0;margin-top:3px}
+#newBest{display:none;color:#ffcc00;font-size:14px;margin-bottom:14px;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.4}}
+#touchUI{position:fixed;right:18px;bottom:24px;z-index:25;display:none;flex-direction:column;gap:14px}
+#touchUI div{width:64px;height:64px;border-radius:50%;background:rgba(20,20,31,.7);
+  border:1.5px solid #2a2a3d;color:#e8e8f0;font-size:14px;display:flex;align-items:center;
+  justify-content:center;backdrop-filter:blur(3px)}
+#touchUI div:active{background:rgba(255,204,0,.25);border-color:#ffcc00}
+@media (pointer:coarse){#touchUI.on{display:flex}}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="vignette"></div>
+<a id="back" href="../">← AI4399</a>
+<div id="board"></div>
+<canvas id="minimap" width="132" height="132"></canvas>
+<div id="hud"></div>
+<div id="hint">移动鼠标控制方向 · 空格分裂 · W 喷射质量</div>
+<div id="touchUI"><div id="btnSplit">分裂</div><div id="btnEject">喷射</div></div>
+
+<div class="overlay show" id="startOv">
+  <div class="panel">
+    <h1>大球吃小球</h1>
+    <div class="sub">吞噬比你小的，躲开比你大的</div>
+    <input id="nameIn" maxlength="8" placeholder="输入你的昵称" autocomplete="off">
+    <div class="ctrl">
+      <div><b>鼠标</b>移动控制方向（手机拖动屏幕）</div>
+      <div><b>空格</b>分裂弹射，突袭猎物</div>
+      <div><b>W</b>喷出质量，轻装逃命</div>
+    </div>
+    <button class="bigbtn" id="startBtn">开始游戏</button>
+    <div class="best" id="startBest"></div>
+  </div>
+</div>
+
+<div class="overlay" id="deathOv">
+  <div class="panel">
+    <h1 style="font-size:24px">你被吞掉了</h1>
+    <div class="sub" id="deathBy"></div>
+    <div id="newBest">★ 新纪录！ ★</div>
+    <div id="dStats">
+      <div class="it"><div class="v gold" id="dMass">0</div><div class="k">本局最大质量</div></div>
+      <div class="it"><div class="v" id="dTime">0:00</div><div class="k">存活时间</div></div>
+      <div class="it"><div class="v" id="dKills">0</div><div class="k">击杀数</div></div>
+      <div class="it"><div class="v" id="dBest">0</div><div class="k">最高纪录</div></div>
+    </div>
+    <button class="bigbtn" id="againBtn">再来一局</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ===== 大球吃小球 · AI4399 ===== */
+const WORLD=4000, FOOD_N=600, AI_N=15, START_MASS=30, BEST_KEY='ai4399-balls-best';
+const cv=document.getElementById('game'), ctx=cv.getContext('2d');
+const mm=document.getElementById('minimap'), mctx=mm.getContext('2d');
+const boardEl=document.getElementById('board'), hudEl=document.getElementById('hud'),
+      hintEl=document.getElementById('hint'), touchUI=document.getElementById('touchUI');
+let W=innerWidth, H=innerHeight, DPR=Math.min(2,devicePixelRatio||1);
+
+function resize(){
+  W=innerWidth; H=innerHeight; DPR=Math.min(2,devicePixelRatio||1);
+  cv.width=W*DPR; cv.height=H*DPR; cv.style.width=W+'px'; cv.style.height=H+'px';
+}
+addEventListener('resize',resize); resize();
+
+/* ---------- 工具 ---------- */
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const clamp=(v,a,b)=>v<a?a:(v>b?b:v);
+const lerp=(a,b,t)=>a+(b-a)*t;
+const radius=m=>Math.sqrt(m)*4;
+const speedOf=m=>Math.max(72,300*Math.pow(START_MASS/m,0.22));
+const esc=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtTime=s=>{s=Math.floor(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+
+/* ---------- 音效（WebAudio 合成） ---------- */
+let AC=null, lastFoodSfx=0;
+function ensureAudio(){
+  if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+  if(AC&&AC.state==='suspended')AC.resume();
+}
+function tone(f0,f1,dur,type,vol,delay){
+  if(!AC)return;
+  const t=AC.currentTime+(delay||0);
+  const o=AC.createOscillator(), g=AC.createGain();
+  o.type=type||'sine';
+  o.frequency.setValueAtTime(Math.max(1,f0),t);
+  o.frequency.exponentialRampToValueAtTime(Math.max(1,f1),t+dur);
+  g.gain.setValueAtTime(vol||0.12,t);
+  g.gain.exponentialRampToValueAtTime(0.0008,t+dur);
+  o.connect(g); g.connect(AC.destination);
+  o.start(t); o.stop(t+dur+0.02);
+}
+const sfxFood=()=>{const n=performance.now();if(n-lastFoodSfx<50)return;lastFoodSfx=n;tone(rnd(480,640),rnd(800,1000),0.07,'sine',0.045);};
+const sfxKill=()=>{tone(320,640,0.14,'triangle',0.16);tone(480,960,0.16,'triangle',0.13,0.07);};
+const sfxHurt=()=>tone(220,90,0.28,'sawtooth',0.14);
+const sfxDeath=()=>{tone(300,55,0.75,'sawtooth',0.2);tone(150,40,0.9,'triangle',0.14,0.1);};
+const sfxSplit=()=>tone(760,260,0.13,'square',0.07);
+const sfxEject=()=>tone(900,520,0.06,'sine',0.05);
+const sfxMerge=()=>tone(330,560,0.12,'sine',0.08);
+
+/* ---------- 状态 ---------- */
+let state='menu';                 // menu | play | dead
+let foods=[], ais=[], cells=[], ejecta=[], absorbs=[], parts=[];
+let cam={x:WORLD/2,y:WORLD/2,zoom:1,tz:1};
+let mouse={x:W/2,y:H/2};
+let shake=0, flashA=0, flashC='255,80,80';
+let stats={maxMass:0,kills:0,t0:0};
+let best=0; try{best=parseInt(localStorage.getItem(BEST_KEY))||0;}catch(e){}
+let playerName='无名球球';
+let tNow=0, ejectCd=0, hintT=0;
+const keys={};
+
+const AI_NAMES=['球球大作战','干饭王','别吃我','奥利给','躺平大师','一口闷','吃货本货',
+  '滚雪球','碰瓷专业户','夜宵刺客','大胃王','摸鱼怪','跑路达人','圆滚滚','能吃是福',
+  '退退退','球不可貌相','显眼包'];
+const AI_HUES=[0,18,32,140,160,180,200,215,235,260,280,300,325,90,70,205,10,150];
+
+/* ---------- 生成 ---------- */
+function spawnFood(){
+  foods.push({x:rnd(40,WORLD-40),y:rnd(40,WORLD-40),m:rnd(1.2,2),
+    r:rnd(4.5,6.5),h:Math.floor(rnd(0,360)),ph:rnd(0,6.28)});
+}
+function makeAI(i){
+  return {x:rnd(200,WORLD-200),y:rnd(200,WORLD-200),m:rnd(22,90),
+    name:AI_NAMES[i%AI_NAMES.length],h:AI_HUES[i%AI_HUES.length],
+    dx:rnd(-1,1),dy:rnd(-1,1),tdx:0,tdy:0,decideT:rnd(0,0.2),
+    wx:rnd(300,WORLD-300),wy:rnd(300,WORLD-300),wT:0,
+    vx:0,vy:0,dead:false,respawnT:0,drawR:0,eaten:false};
+}
+function makeCell(x,y,m){
+  return {x,y,m,vx:0,vy:0,mergeAt:0,drawR:0,eaten:false};
+}
+function resetGame(){
+  foods=[];ais=[];cells=[];ejecta=[];absorbs=[];parts=[];
+  for(let i=0;i<FOOD_N;i++)spawnFood();
+  for(let i=0;i<AI_N;i++)ais.push(makeAI(i));
+  const px=rnd(WORLD*0.3,WORLD*0.7), py=rnd(WORLD*0.3,WORLD*0.7);
+  cells=[makeCell(px,py,START_MASS)];
+  cam.x=px;cam.y=py;cam.zoom=1;cam.tz=1;
+  stats={maxMass:START_MASS,kills:0,t0:tNow};
+  shake=0;flashA=0;hintT=8;
+}
+
+/* ---------- 粒子 / 吸入动画 ---------- */
+function burst(x,y,color,n,sp){
+  for(let i=0;i<n;i++){
+    const a=rnd(0,6.28), s=rnd(20,sp||110);
+    parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:rnd(0.25,0.5),t:0,color,r:rnd(1.5,3.5)});
+  }
+}
+function absorbAnim(prey,eater){
+  absorbs.push({x:prey.x,y:prey.y,r:prey.drawR||radius(prey.m),
+    color:colorOf(prey),target:eater,t:0});
+}
+function colorOf(o){
+  if(o.h===undefined)return '#ffcc00';
+  return 'hsl('+o.h+',75%,60%)';
+}
+function rimOf(o){
+  if(o.h===undefined)return 'hsl(48,90%,38%)';
+  return 'hsl('+o.h+',70%,42%)';
+}
+
+/* ---------- 吞噬 ---------- */
+function totalMass(){let s=0;for(const c of cells)s+=c.m;return s;}
+
+function consume(big,small){           // big/small: {o, p(layer?)}
+  big.o.m+=small.o.m*0.85;
+  small.o.eaten=true;
+  absorbAnim(small.o,big.o);
+  burst(small.o.x,small.o.y,colorOf(small.o),8);
+  if(small.p){
+    const idx=cells.indexOf(small.o);
+    if(idx>=0)cells.splice(idx,1);
+    if(cells.length===0){ die(big.o); }
+    else { sfxHurt(); shake=Math.min(14,shake+7); flashA=Math.max(flashA,0.22); flashC='255,80,80'; }
+  }else{
+    small.o.dead=true;
+    small.o.respawnT=rnd(2.5,4.5);
+    if(big.p){
+      stats.kills++; sfxKill();
+      shake=Math.min(12,shake+5);
+      flashA=Math.max(flashA,0.16); flashC='255,204,0';
+    }
+  }
+}
+
+function die(killer){
+  state='dead';
+  keys.w=false;
+  hudEl.style.display='none';
+  hintEl.style.opacity='0';
+  sfxDeath();
+  shake=16; flashA=0.45; flashC='255,60,60';
+  const mx=Math.round(stats.maxMass);
+  const isNew=mx>best;
+  if(isNew){best=mx;try{localStorage.setItem(BEST_KEY,String(best));}catch(e){}}
+  document.getElementById('deathBy').textContent=
+    killer&&killer.name?('凶手：'+killer.name):'世界很危险，球球要小心';
+  document.getElementById('dMass').textContent=mx;
+  document.getElementById('dTime').textContent=fmtTime(tNow-stats.t0);
+  document.getElementById('dKills').textContent=stats.kills;
+  document.getElementById('dBest').textContent=best;
+  document.getElementById('newBest').style.display=isNew?'block':'none';
+  setTimeout(()=>document.getElementById('deathOv').classList.add('show'),600);
+}
+
+/* ---------- 玩家 ---------- */
+function worldTarget(){
+  return {x:cam.x+(mouse.x-W/2)/cam.zoom, y:cam.y+(mouse.y-H/2)/cam.zoom};
+}
+function updatePlayer(dt){
+  const tg=worldTarget();
+  for(const c of cells){
+    const r=radius(c.m);
+    const dx=tg.x-c.x, dy=tg.y-c.y, d=Math.hypot(dx,dy);
+    if(d>1){
+      const f=Math.min(1,d/(r*0.6+8));
+      const sp=speedOf(c.m)*f;
+      c.x+=dx/d*sp*dt; c.y+=dy/d*sp*dt;
+    }
+    c.x+=c.vx*dt; c.y+=c.vy*dt;
+    const k=Math.exp(-3.1*dt); c.vx*=k; c.vy*=k;
+    c.x=clamp(c.x,r*0.4,WORLD-r*0.4);
+    c.y=clamp(c.y,r*0.4,WORLD-r*0.4);
+  }
+  // 同体碰撞 / 融合
+  for(let i=0;i<cells.length;i++)for(let j=i+1;j<cells.length;j++){
+    const a=cells[i], b=cells[j];
+    const ra=radius(a.m), rb=radius(b.m);
+    let dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy);
+    if(d<0.01){dx=1;dy=0;d=1;}
+    const canMerge=tNow>a.mergeAt&&tNow>b.mergeAt;
+    if(canMerge){
+      // 轻微相互吸引，靠近则融合
+      if(d<ra+rb){
+        const pull=70*dt;
+        a.x+=dx/d*pull;a.y+=dy/d*pull;b.x-=dx/d*pull;b.y-=dy/d*pull;
+      }
+      if(d<Math.max(ra,rb)-Math.min(ra,rb)*0.35){
+        const tm=a.m+b.m;
+        a.x=(a.x*a.m+b.x*b.m)/tm; a.y=(a.y*a.m+b.y*b.m)/tm;
+        a.m=tm; a.drawR=Math.max(a.drawR,b.drawR);
+        cells.splice(j,1); j--; sfxMerge();
+        burst(a.x,a.y,'#ffcc00',6,70);
+      }
+    }else if(d<ra+rb){
+      const ov=(ra+rb-d)*0.5;
+      a.x-=dx/d*ov; a.y-=dy/d*ov; b.x+=dx/d*ov; b.y+=dy/d*ov;
+    }
+  }
+}
+function split(){
+  if(state!=='play')return;
+  const tg=worldTarget();
+  const src=cells.slice().sort((a,b)=>b.m-a.m);
+  let did=false;
+  for(const c of src){
+    if(cells.length>=8)break;
+    if(c.m<40)continue;
+    const dx=tg.x-c.x, dy=tg.y-c.y, d=Math.hypot(dx,dy)||1;
+    c.m/=2;
+    const nc=makeCell(c.x+dx/d*4,c.y+dy/d*4,c.m);
+    nc.vx=dx/d*760; nc.vy=dy/d*760;
+    nc.drawR=radius(c.m)*0.8;
+    nc.mergeAt=tNow+15; c.mergeAt=tNow+15;
+    cells.push(nc); did=true;
+  }
+  if(did)sfxSplit();
+}
+function eject(){
+  if(state!=='play')return;
+  const tg=worldTarget();
+  let did=false;
+  for(const c of cells){
+    if(c.m<44)continue;
+    const dx=tg.x-c.x, dy=tg.y-c.y, d=Math.hypot(dx,dy)||1;
+    c.m-=14;
+    const r=radius(c.m);
+    ejecta.push({x:c.x+dx/d*(r+6),y:c.y+dy/d*(r+6),
+      vx:dx/d*820+rnd(-40,40),vy:dy/d*820+rnd(-40,40),
+      m:11,h:48,age:0});
+    did=true;
+  }
+  if(did)sfxEject();
+}
+
+/* ---------- AI ---------- */
+function bigEntities(){               // 活着的可吞噬实体（含玩家细胞）
+  const arr=[];
+  for(const c of cells)arr.push({o:c,p:true});
+  for(const a of ais)if(!a.dead)arr.push({o:a,p:false});
+  return arr;
+}
+function aiDecide(a){
+  const r=radius(a.m);
+  let fx=0,fy=0,fleeing=false;
+  let prey=null,preyScore=0;
+  for(const e of bigEntities()){
+    const o=e.o; if(o===a)continue;
+    const dx=o.x-a.x, dy=o.y-a.y;
+    const d=Math.hypot(dx,dy)||1;
+    if(o.m>a.m*1.25){
+      const range=480+radius(o.m);
+      if(d<range){const w=1-d/range; fx-=dx/d*w; fy-=dy/d*w; fleeing=true;}
+    }else if(a.m>o.m*1.3){
+      if(d<620){const sc=o.m/(d+60); if(sc>preyScore){preyScore=sc;prey=o;}}
+    }
+  }
+  let tx,ty;
+  if(fleeing){
+    tx=fx; ty=fy;
+  }else if(prey){
+    tx=prey.x-a.x; ty=prey.y-a.y;
+  }else{
+    // 找最近食物
+    let bf=null,bd=1e9;
+    for(let i=0;i<foods.length;i+=2){
+      const f=foods[i];
+      const d2=(f.x-a.x)*(f.x-a.x)+(f.y-a.y)*(f.y-a.y);
+      if(d2<bd){bd=d2;bf=f;}
+    }
+    if(bf&&bd<700*700){tx=bf.x-a.x;ty=bf.y-a.y;}
+    else{
+      a.wT-=0.15;
+      const wd=Math.hypot(a.wx-a.x,a.wy-a.y);
+      if(wd<150||a.wT<=0){a.wx=rnd(300,WORLD-300);a.wy=rnd(300,WORLD-300);a.wT=rnd(4,8);}
+      tx=a.wx-a.x; ty=a.wy-a.y;
+    }
+  }
+  // 边界回避
+  const M=260+r;
+  if(a.x<M)tx+=(M-a.x)*0.012;
+  if(a.x>WORLD-M)tx-=(a.x-(WORLD-M))*0.012;
+  if(a.y<M)ty+=(M-a.y)*0.012;
+  if(a.y>WORLD-M)ty-=(a.y-(WORLD-M))*0.012;
+  const d=Math.hypot(tx,ty)||1;
+  a.tdx=tx/d; a.tdy=ty/d;
+}
+function updateAI(dt){
+  for(const a of ais){
+    if(a.dead){
+      a.respawnT-=dt;
+      if(a.respawnT<=0){
+        const fresh=makeAI(AI_NAMES.indexOf(a.name)>=0?AI_NAMES.indexOf(a.name):0);
+        Object.assign(a,fresh,{name:a.name,h:a.h,m:rnd(20,55),dead:false,eaten:false,drawR:0});
+      }
+      continue;
+    }
+    a.decideT-=dt;
+    if(a.decideT<=0){aiDecide(a);a.decideT=rnd(0.1,0.25);}
+    const sm=Math.min(1,dt*5);
+    a.dx=lerp(a.dx,a.tdx,sm); a.dy=lerp(a.dy,a.tdy,sm);
+    const dl=Math.hypot(a.dx,a.dy)||1;
+    const sp=speedOf(a.m);
+    a.x+=a.dx/dl*sp*dt+a.vx*dt;
+    a.y+=a.dy/dl*sp*dt+a.vy*dt;
+    const k=Math.exp(-3.1*dt); a.vx*=k; a.vy*=k;
+    const r=radius(a.m);
+    a.x=clamp(a.x,r*0.4,WORLD-r*0.4);
+    a.y=clamp(a.y,r*0.4,WORLD-r*0.4);
+  }
+}
+
+/* ---------- 进食 ---------- */
+function eatFoods(){
+  const ents=bigEntities();
+  for(const e of ents){
+    const o=e.o, r=radius(o.m);
+    for(let i=foods.length-1;i>=0;i--){
+      const f=foods[i];
+      const dx=f.x-o.x, dy=f.y-o.y;
+      if(dx*dx+dy*dy<(r-f.r*0.3)*(r-f.r*0.3)){
+        o.m+=f.m;
+        if(e.p){sfxFood();parts.push({x:f.x,y:f.y,vx:(o.x-f.x)*4,vy:(o.y-f.y)*4,life:0.18,t:0,color:'hsl('+f.h+',80%,65%)',r:f.r*0.7});}
+        foods[i]=foods[foods.length-1]; foods.pop();
+      }
+    }
+    for(let i=ejecta.length-1;i>=0;i--){
+      const p=ejecta[i];
+      if(p.age<0.35&&e.p)continue;          // 刚喷出，自己暂时吃不到
+      const dx=p.x-o.x, dy=p.y-o.y;
+      if(dx*dx+dy*dy<r*r){
+        o.m+=p.m*0.85;
+        if(e.p)sfxFood();
+        ejecta.splice(i,1);
+      }
+    }
+  }
+}
+function eatBalls(){
+  const arr=bigEntities();
+  for(let i=0;i<arr.length;i++)for(let j=i+1;j<arr.length;j++){
+    const A=arr[i], B=arr[j];
+    if(A.p&&B.p)continue;                   // 玩家细胞之间走融合逻辑
+    if(A.o.eaten||B.o.eaten)continue;
+    let big=A,small=B;
+    if(B.o.m>A.o.m){big=B;small=A;}
+    if(big.o.m<small.o.m*1.15)continue;
+    const rb=radius(big.o.m), rs=radius(small.o.m);
+    const dx=small.o.x-big.o.x, dy=small.o.y-big.o.y;
+    const need=rb-rs*0.35;
+    if(need>0&&dx*dx+dy*dy<need*need){
+      consume(big,small);
+      if(state==='dead')return;
+    }
+  }
+}
+
+/* ---------- 其它更新 ---------- */
+function updateEjecta(dt){
+  const k=Math.exp(-2.3*dt);
+  for(const p of ejecta){
+    p.age+=dt;
+    p.x+=p.vx*dt; p.y+=p.vy*dt;
+    p.vx*=k; p.vy*=k;
+    p.x=clamp(p.x,8,WORLD-8); p.y=clamp(p.y,8,WORLD-8);
+  }
+}
+function updateFX(dt){
+  for(let i=absorbs.length-1;i>=0;i--){
+    const a=absorbs[i];
+    a.t+=dt/0.2;
+    if(a.t>=1){absorbs.splice(i,1);continue;}
+    a.x=lerp(a.x,a.target.x,Math.min(1,dt*14));
+    a.y=lerp(a.y,a.target.y,Math.min(1,dt*14));
+  }
+  for(let i=parts.length-1;i>=0;i--){
+    const p=parts[i];
+    p.t+=dt;
+    if(p.t>=p.life){parts.splice(i,1);continue;}
+    p.x+=p.vx*dt; p.y+=p.vy*dt;
+    p.vx*=0.93; p.vy*=0.93;
+  }
+  shake=Math.max(0,shake-dt*26);
+  flashA=Math.max(0,flashA-dt*1.6);
+}
+function decay(dt){
+  for(const c of cells)if(c.m>START_MASS)
+    c.m*=1-(c.m>2500?0.012:0.0035)*dt;
+  for(const a of ais)if(!a.dead&&a.m>25)
+    a.m*=1-(a.m>2500?0.014:0.0035)*dt;
+}
+function refillFood(){
+  let n=0;
+  while(foods.length<FOOD_N&&n<3){spawnFood();n++;}
+}
+
+/* ---------- 摄像机 ---------- */
+function updateCam(dt){
+  if(cells.length){
+    let mx=0,my=0,tm=0;
+    for(const c of cells){mx+=c.x*c.m;my+=c.y*c.m;tm+=c.m;}
+    mx/=tm; my/=tm;
+    const f=Math.min(1,dt*4.5);
+    cam.x=lerp(cam.x,mx,f); cam.y=lerp(cam.y,my,f);
+    const tr=radius(tm);
+    cam.tz=clamp(Math.pow(34/tr,0.36),0.28,1.25)*Math.min(W,H)/760;
+  }
+  cam.zoom=lerp(cam.zoom,cam.tz,Math.min(1,dt*2.6));
+}
+
+/* ---------- 绘制 ---------- */
+function drawBall(o,name){
+  const r=radius(o.m);
+  if(o.drawR===0)o.drawR=r*0.3;            // 出生膨胀动画
+  o.drawR=lerp(o.drawR,r,Math.min(1,9*lastDt));
+  const dr=o.drawR;
+  ctx.beginPath();
+  ctx.arc(o.x,o.y,dr,0,6.2832);
+  ctx.fillStyle=colorOf(o);
+  ctx.fill();
+  ctx.lineWidth=Math.max(2,dr*0.085);
+  ctx.strokeStyle=rimOf(o);
+  ctx.stroke();
+  const sr=dr*cam.zoom;             // 屏幕上的半径
+  if(name&&sr>13){
+    const fs=Math.max(12/cam.zoom,dr*0.36);
+    ctx.font='600 '+fs+'px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.lineWidth=fs*0.16; ctx.strokeStyle='rgba(0,0,0,.45)';
+    ctx.strokeText(name,o.x,o.y);
+    ctx.fillStyle='#fff';
+    ctx.fillText(name,o.x,o.y);
+    if(sr>30){
+      const fs2=fs*0.62;
+      ctx.font='500 '+fs2+'px "PingFang SC",sans-serif';
+      ctx.lineWidth=fs2*0.16;
+      ctx.strokeText(Math.round(o.m),o.x,o.y+fs*0.95);
+      ctx.fillStyle='rgba(255,255,255,.85)';
+      ctx.fillText(Math.round(o.m),o.x,o.y+fs*0.95);
+    }
+  }
+}
+let lastDt=0.016;
+function draw(){
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.fillStyle='#0a0a12';
+  ctx.fillRect(0,0,W,H);
+  const sx=shake>0?rnd(-shake,shake):0, sy=shake>0?rnd(-shake,shake):0;
+  ctx.translate(W/2+sx,H/2+sy);
+  ctx.scale(cam.zoom,cam.zoom);
+  ctx.translate(-cam.x,-cam.y);
+
+  const vw=W/cam.zoom, vh=H/cam.zoom;
+  const L=cam.x-vw/2-20, R=cam.x+vw/2+20, T=cam.y-vh/2-20, B=cam.y+vh/2+20;
+
+  // 世界底色 + 网格
+  ctx.fillStyle='#0d0d17';
+  ctx.fillRect(Math.max(0,L),Math.max(0,T),
+    Math.min(WORLD,R)-Math.max(0,L),Math.min(WORLD,B)-Math.max(0,T));
+  ctx.strokeStyle='rgba(130,130,170,0.07)';
+  ctx.lineWidth=1/cam.zoom;
+  ctx.beginPath();
+  const g0x=Math.max(0,Math.floor(L/100)*100), g1x=Math.min(WORLD,R);
+  const g0y=Math.max(0,Math.floor(T/100)*100), g1y=Math.min(WORLD,B);
+  for(let x=g0x;x<=g1x;x+=100){ctx.moveTo(x,Math.max(0,T));ctx.lineTo(x,Math.min(WORLD,B));}
+  for(let y=g0y;y<=g1y;y+=100){ctx.moveTo(Math.max(0,L),y);ctx.lineTo(Math.min(WORLD,R),y);}
+  ctx.stroke();
+  // 世界边界
+  ctx.strokeStyle='rgba(255,204,0,0.35)';
+  ctx.lineWidth=5/cam.zoom;
+  ctx.strokeRect(0,0,WORLD,WORLD);
+
+  // 食物
+  for(const f of foods){
+    if(f.x<L||f.x>R||f.y<T||f.y>B)continue;
+    const pr=f.r*(1+0.13*Math.sin(tNow*2.2+f.ph));
+    ctx.beginPath();
+    ctx.arc(f.x,f.y,pr,0,6.2832);
+    ctx.fillStyle='hsl('+f.h+',78%,62%)';
+    ctx.fill();
+  }
+  // 喷射小球
+  for(const p of ejecta){
+    if(p.x<L||p.x>R||p.y<T||p.y>B)continue;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,radius(p.m)*0.72,0,6.2832);
+    ctx.fillStyle='hsl(48,90%,60%)';
+    ctx.fill();
+  }
+  // 球体（小的先画）
+  const balls=[];
+  for(const a of ais)if(!a.dead)balls.push({o:a,name:a.name});
+  if(state!=='menu')for(const c of cells)balls.push({o:c,name:playerName});
+  balls.sort((x,y)=>x.o.m-y.o.m);
+  for(const b of balls)drawBall(b.o,b.name);
+  // 吸入动画
+  for(const a of absorbs){
+    ctx.globalAlpha=1-a.t;
+    ctx.beginPath();
+    ctx.arc(a.x,a.y,a.r*(1-a.t),0,6.2832);
+    ctx.fillStyle=a.color;
+    ctx.fill();
+    ctx.globalAlpha=1;
+  }
+  // 粒子
+  for(const p of parts){
+    ctx.globalAlpha=1-p.t/p.life;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,6.2832);
+    ctx.fillStyle=p.color;
+    ctx.fill();
+  }
+  ctx.globalAlpha=1;
+
+  // 屏幕闪光
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  if(flashA>0){
+    ctx.fillStyle='rgba('+flashC+','+flashA.toFixed(3)+')';
+    ctx.fillRect(0,0,W,H);
+  }
+}
+function drawMinimap(){
+  const S=132, k=S/WORLD;
+  mctx.clearRect(0,0,S,S);
+  mctx.fillStyle='rgba(13,13,23,.9)';
+  mctx.fillRect(0,0,S,S);
+  mctx.strokeStyle='#2a2a3d';
+  mctx.strokeRect(0.5,0.5,S-1,S-1);
+  for(const a of ais){
+    if(a.dead)continue;
+    mctx.beginPath();
+    mctx.arc(a.x*k,a.y*k,Math.max(1.5,radius(a.m)*k*2),0,6.2832);
+    mctx.fillStyle='rgba(136,136,160,.6)';
+    mctx.fill();
+  }
+  if(cells.length){
+    mctx.beginPath();
+    mctx.arc(cam.x*k,cam.y*k,4,0,6.2832);
+    mctx.fillStyle='#ffcc00';
+    mctx.fill();
+    mctx.beginPath();
+    mctx.arc(cam.x*k,cam.y*k,6.5,0,6.2832);
+    mctx.strokeStyle='rgba(255,204,0,.5)';
+    mctx.stroke();
+  }
+}
+
+/* ---------- 排行榜 / HUD ---------- */
+let boardT=0;
+function updateBoard(dt){
+  boardT-=dt;
+  if(boardT>0)return;
+  boardT=0.4;
+  const list=[];
+  for(const a of ais)if(!a.dead)list.push({name:a.name,m:a.m,me:false});
+  const pm=totalMass();
+  if(state==='play')list.push({name:playerName,m:pm,me:true});
+  list.sort((a,b)=>b.m-a.m);
+  let html='<h3>排行榜</h3>';
+  let myRank=0;
+  list.forEach((e,i)=>{if(e.me)myRank=i+1;});
+  for(let i=0;i<Math.min(10,list.length);i++){
+    const e=list[i];
+    html+='<div class="row'+(e.me?' me':'')+'"><span class="nm">'+(i+1)+'. '+esc(e.name)+
+      '</span><span class="ms">'+Math.round(e.m)+'</span></div>';
+  }
+  if(myRank>10)
+    html+='<div class="row me"><span class="nm">'+myRank+'. '+esc(playerName)+
+      '</span><span class="ms">'+Math.round(pm)+'</span></div>';
+  boardEl.innerHTML=html;
+  if(state==='play')
+    hudEl.innerHTML='质量 <b>'+Math.round(pm)+'</b> &nbsp;·&nbsp; 击杀 <b>'+stats.kills+
+      '</b> &nbsp;·&nbsp; 排名 <b>'+(myRank||'-')+'</b>';
+}
+
+/* ---------- 主循环 ---------- */
+let lastT=performance.now();
+function frame(now){
+  const dt=Math.min(0.05,(now-lastT)/1000)||0.016;
+  lastT=now; tNow+=dt; lastDt=dt;
+  if(state==='play'){
+    if(keys.w&&(ejectCd-=dt)<=0){eject();ejectCd=0.09;}
+    updatePlayer(dt);
+    stats.maxMass=Math.max(stats.maxMass,totalMass());
+    hintT-=dt;
+    hintEl.style.opacity=hintT>0?'1':'0';
+  }
+  updateAI(dt);                       // 菜单/死亡时世界继续运转（动态背景 / 旁观）
+  updateEjecta(dt);
+  eatFoods(); eatBalls();
+  decay(dt);
+  refillFood();
+  updateCam(dt);
+  if(state!=='menu'){updateBoard(dt);drawMinimap();}
+  updateFX(dt);
+  draw();
+  requestAnimationFrame(frame);
+}
+
+/* ---------- 输入 ---------- */
+addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
+cv.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches[0];mouse.x=t.clientX;mouse.y=t.clientY;},{passive:false});
+cv.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0];mouse.x=t.clientX;mouse.y=t.clientY;},{passive:false});
+addEventListener('keydown',e=>{
+  ensureAudio();
+  if(e.code==='Space'){e.preventDefault();if(!e.repeat)split();}
+  if(e.code==='KeyW')keys.w=true;
+});
+addEventListener('keyup',e=>{if(e.code==='KeyW')keys.w=false;});
+addEventListener('contextmenu',e=>e.preventDefault());
+document.getElementById('btnSplit').addEventListener('touchstart',e=>{e.preventDefault();ensureAudio();split();},{passive:false});
+const beBtn=document.getElementById('btnEject');
+beBtn.addEventListener('touchstart',e=>{e.preventDefault();ensureAudio();keys.w=true;},{passive:false});
+beBtn.addEventListener('touchend',e=>{e.preventDefault();keys.w=false;},{passive:false});
+beBtn.addEventListener('touchcancel',()=>{keys.w=false;});
+
+/* ---------- 开始 / 重开 ---------- */
+const nameIn=document.getElementById('nameIn');
+function startGame(){
+  ensureAudio();
+  playerName=(nameIn.value.trim()||'无名球球').slice(0,8);
+  resetGame();
+  state='play';
+  document.getElementById('startOv').classList.remove('show');
+  document.getElementById('deathOv').classList.remove('show');
+  boardEl.style.display='block';
+  mm.style.display='block';
+  hudEl.style.display='block';
+  touchUI.classList.add('on');
+  mouse.x=W/2; mouse.y=H/2;
+  tone(440,880,0.18,'sine',0.1);
+}
+document.getElementById('startBtn').addEventListener('click',startGame);
+document.getElementById('againBtn').addEventListener('click',startGame);
+nameIn.addEventListener('keydown',e=>{if(e.key==='Enter')startGame();e.stopPropagation();});
+document.getElementById('startBest').innerHTML=
+  best>0?('历史最高质量 <b>'+best+'</b>'):'快来创造你的第一个纪录';
+
+/* 菜单背景：先跑一个无玩家的世界当动态背景 */
+resetGame(); cells=[];
+cam.tz=0.5*Math.min(W,H)/760; cam.zoom=cam.tz;
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

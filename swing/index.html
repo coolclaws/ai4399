@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>荡绳侠 · AI4399</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%; height: 100%; overflow: hidden;
+    background: #0a0a12;
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    touch-action: none;
+    -webkit-user-select: none; user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  canvas { display: block; position: fixed; inset: 0; }
+  .back {
+    position: fixed; top: 14px; left: 16px; z-index: 30;
+    color: rgba(255,255,255,.55); text-decoration: none;
+    font-size: 14px; padding: 6px 12px; border-radius: 8px;
+    background: rgba(255,255,255,.07); backdrop-filter: blur(4px);
+    transition: .2s;
+  }
+  .back:hover { color: #ffcc00; background: rgba(255,204,0,.12); }
+  #muteBtn {
+    position: fixed; top: 14px; right: 16px; z-index: 30;
+    width: 38px; height: 32px; border: none; border-radius: 8px;
+    background: rgba(255,255,255,.07); color: rgba(255,255,255,.7);
+    font-size: 15px; cursor: pointer;
+  }
+  .overlay {
+    position: fixed; inset: 0; z-index: 20;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(10,10,18,.55); backdrop-filter: blur(3px);
+  }
+  .overlay.hidden { display: none; }
+  .panel {
+    text-align: center; padding: 36px 44px; border-radius: 18px;
+    background: rgba(14,14,26,.92);
+    border: 1px solid rgba(255,204,0,.28);
+    box-shadow: 0 0 60px rgba(255,204,0,.08), 0 18px 50px rgba(0,0,0,.6);
+    color: #e8e8f0; max-width: 86vw;
+  }
+  .panel h1 {
+    font-size: 44px; letter-spacing: 8px; color: #ffcc00;
+    text-shadow: 0 0 24px rgba(255,204,0,.45); margin-bottom: 6px;
+  }
+  .panel .sub { color: rgba(255,255,255,.45); font-size: 14px; letter-spacing: 3px; margin-bottom: 22px; }
+  .panel .how {
+    font-size: 15px; line-height: 2; color: rgba(255,255,255,.78);
+    margin-bottom: 22px;
+  }
+  .panel .how b { color: #ffcc00; font-weight: 600; }
+  .panel .best { font-size: 14px; color: rgba(255,255,255,.5); margin-bottom: 20px; }
+  .panel .best em { font-style: normal; color: #ffcc00; font-size: 18px; }
+  .panel .score-big { font-size: 52px; color: #ffcc00; font-weight: 700; text-shadow: 0 0 24px rgba(255,204,0,.4); }
+  .panel .score-label { font-size: 14px; color: rgba(255,255,255,.5); margin-bottom: 8px; }
+  .panel .newbest {
+    display: inline-block; margin: 10px 0 4px; padding: 4px 14px; border-radius: 999px;
+    background: rgba(255,204,0,.15); color: #ffcc00; font-size: 14px;
+    border: 1px solid rgba(255,204,0,.4);
+    animation: pulse 1s ease-in-out infinite;
+  }
+  @keyframes pulse { 50% { transform: scale(1.07); } }
+  .btn {
+    margin-top: 16px; padding: 13px 46px; font-size: 18px; letter-spacing: 4px;
+    font-family: inherit; font-weight: 600;
+    color: #0a0a12; background: linear-gradient(180deg, #ffd84d, #ffbb00);
+    border: none; border-radius: 12px; cursor: pointer;
+    box-shadow: 0 6px 20px rgba(255,204,0,.35);
+    transition: transform .12s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); }
+  .tip-key { color: rgba(255,255,255,.35); font-size: 12px; margin-top: 14px; }
+</style>
+</head>
+<body>
+<a class="back" href="../">← AI4399</a>
+<button id="muteBtn" title="静音">🔊</button>
+<canvas id="cv"></canvas>
+
+<div id="menu" class="overlay">
+  <div class="panel">
+    <h1>荡绳侠</h1>
+    <div class="sub">物理摆荡 · 无尽闯关</div>
+    <div class="how">
+      <b>按住</b>（鼠标 / 触屏 / 空格）＝ 抓住前方锚点荡绳<br>
+      <b>松开</b> ＝ 放手飞出 · 在最快时放手触发「完美」<br>
+      连续荡过锚点叠连击 · 小心下方尖刺 · 弹跳垫能救命
+    </div>
+    <div class="best">最高纪录 <em id="menuBest">0</em> 米</div>
+    <button class="btn" id="startBtn">开始游戏</button>
+    <div class="tip-key">空格键也可以开始 / 抓绳</div>
+  </div>
+</div>
+
+<div id="over" class="overlay hidden">
+  <div class="panel">
+    <div class="score-label">本局距离</div>
+    <div class="score-big"><span id="overDist">0</span> 米</div>
+    <div id="newBestTag" class="newbest" style="display:none">🏆 新纪录！</div>
+    <div class="best" style="margin-top:10px">最高纪录 <em id="overBest">0</em> 米 · 最高连击 ×<em id="overCombo">0</em></div>
+    <button class="btn" id="retryBtn">再来一局</button>
+    <div class="tip-key">空格键快速重开</div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ============== 荡绳侠 · Stickman 摆荡物理无尽闯关 ============== */
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+let W = 0, H = 0, DPR = 1;
+function resize() {
+  DPR = Math.min(2, window.devicePixelRatio || 1);
+  W = window.innerWidth; H = window.innerHeight;
+  cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+  // canvas 是替换元素，inset:0 不会拉伸，必须显式给 CSS 尺寸
+  cv.style.width = W + 'px'; cv.style.height = H + 'px';
+}
+window.addEventListener('resize', resize);
+resize();
+
+/* ---------- 常量（手感参数，反复调过的核心） ---------- */
+const PPM     = 25;      // 像素/米
+const G       = 2300;    // 重力 px/s²
+const GRAB_R  = 480;     // 最大抓绳距离
+const ROPE_MIN= 70;      // 最短绳
+const MAXV    = 1850;    // 速度上限
+const PUMP    = 0.50;    // 荡绳时每秒能量增益（在锚点下方时）
+const DEATH_Y = 560;     // 尖刺线（世界坐标）
+const KILL_Y  = DEATH_Y - 24;
+const BEST_KEY= 'ai4399-swing-best';
+
+/* ---------- 工具 ---------- */
+const clamp = (v, a, b) => v < a ? a : (v > b ? b : v);
+const rand  = (a, b) => a + Math.random() * (b - a);
+function hash1(n) { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); }
+
+let best = 0;
+try { best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10) || 0; } catch (e) {}
+function saveBest() { try { localStorage.setItem(BEST_KEY, String(best)); } catch (e) {} }
+
+/* ---------- 音效（WebAudio 合成） ---------- */
+let AC = null, master = null, muted = false;
+function initAudio() {
+  if (!AC) {
+    try {
+      AC = new (window.AudioContext || window.webkitAudioContext)();
+      master = AC.createGain(); master.gain.value = 0.42;
+      master.connect(AC.destination);
+    } catch (e) { AC = null; }
+  }
+  if (AC && AC.state === 'suspended') AC.resume();
+}
+function tone(f0, f1, dur, type, vol, delay) {
+  if (!AC || muted) return;
+  const t = AC.currentTime + (delay || 0);
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = type;
+  o.frequency.setValueAtTime(Math.max(1, f0), t);
+  o.frequency.exponentialRampToValueAtTime(Math.max(1, f1), t + dur);
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.0008, t + dur);
+  o.connect(g); g.connect(master);
+  o.start(t); o.stop(t + dur + 0.03);
+}
+function noiseBurst(dur, vol, freq) {
+  if (!AC || muted) return;
+  const n = Math.floor(AC.sampleRate * dur);
+  const buf = AC.createBuffer(1, n, AC.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+  const src = AC.createBufferSource(); src.buffer = buf;
+  const f = AC.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = freq; f.Q.value = 0.7;
+  const g = AC.createGain(); g.gain.value = vol;
+  src.connect(f); f.connect(g); g.connect(master);
+  src.start();
+}
+const sGrab    = () => { tone(320, 175, 0.08, 'square', 0.16); noiseBurst(0.05, 0.08, 2400); };
+const sRelease = () => noiseBurst(0.13, 0.16, 900);
+const sPerfect = () => { tone(784, 784, 0.09, 'sine', 0.26); tone(1175, 1175, 0.1, 'sine', 0.24, 0.07); tone(1568, 1568, 0.16, 'sine', 0.2, 0.14); };
+const sBounce  = () => tone(130, 560, 0.22, 'sine', 0.3);
+const sDie     = () => { tone(260, 48, 0.5, 'sawtooth', 0.28); noiseBurst(0.4, 0.22, 320); };
+const sMile    = () => tone(880, 880, 0.1, 'triangle', 0.18);
+
+const muteBtn = document.getElementById('muteBtn');
+muteBtn.addEventListener('click', () => {
+  muted = !muted;
+  muteBtn.textContent = muted ? '🔇' : '🔊';
+});
+
+/* ---------- 游戏状态 ---------- */
+let state = 'menu';   // menu | playing | dead
+const P = { x: 0, y: 0, vx: 0, vy: 0, rope: null, lean: 0, maxSwingSp: 0, swingT: 0, legPh: 0 };
+let camX = 0, camY = 0, shake = 0;
+let anchors = [], pads = [], genX = 0, genY = 0;
+let trail = [], texts = [], parts = [];
+let distM = 0, bonus = 0, combo = 0, maxCombo = 0, comboPop = 0;
+let lastAnchor = null, boostT = 0, runT = 0, deadT = 0, nextMile = 100;
+let tutorialDone = false, releasedOnce = false;
+const input = { down: false };
+
+function resetRun() {
+  P.x = -40; P.y = -130; P.vx = 330; P.vy = -160;
+  P.rope = null; P.lean = 0; P.maxSwingSp = 0; P.swingT = 0; P.legPh = 0;
+  camX = P.x - W * 0.33; camY = P.y - H * 0.48;
+  anchors = []; pads = []; trail = []; texts = []; parts = [];
+  distM = 0; bonus = 0; combo = 0; maxCombo = 0; comboPop = 0;
+  lastAnchor = null; boostT = 0; runT = 0; deadT = 0; nextMile = 100;
+  shake = 0; releasedOnce = false;
+  genX = 170; genY = -280;
+  anchors.push({ x: 170, y: -280 });
+  // 出生点抛物线落点处的保底弹跳垫：开局没抓住也有第二次机会
+  pads.push({ x: 235, y: DEATH_Y - 52, w: 200, hit: -9 });
+  genTo(camX + W + 900);
+}
+
+/* ---------- 程序化生成 ---------- */
+function genTo(xLimit) {
+  while (genX < xLimit) {
+    const m = genX / PPM;                       // 当前米数
+    const t = clamp((m - 200) / 700, 0, 1);     // 难度曲线：200m 后 700m 内升满
+    const friendly = m < 200;
+    const gap = friendly
+      ? 215 + rand(-25, 30)
+      : 255 + 195 * t + rand(-55, 55);
+    const amp = friendly ? 75 : 100 + 190 * t;
+    genX += gap;
+    genY = clamp(genY + rand(-amp, amp), -480, 40);
+    anchors.push({ x: genX, y: genY });
+    // 弹跳垫：教学段更多，之后变稀
+    const padP = friendly ? 0.5 : 0.34 - 0.12 * t;
+    if (Math.random() < padP) {
+      pads.push({ x: genX + rand(-70, 70), y: DEATH_Y - 52, w: 132, hit: -9 });
+    }
+  }
+  // 清理身后
+  const cut = camX - 900;
+  while (anchors.length && anchors[0].x < cut) anchors.shift();
+  while (pads.length && pads[0].x < cut) pads.shift();
+}
+
+/* ---------- 抓绳 / 放手 ---------- */
+function pickAnchor() {
+  let bestA = null, bestS = Infinity;
+  for (let i = 0; i < anchors.length; i++) {
+    const a = anchors[i];
+    const dx = a.x - P.x, dy = a.y - P.y;
+    if (a.x < P.x - 90) continue;
+    const d = Math.hypot(dx, dy);
+    if (d > GRAB_R || d < 36) continue;
+    let s = d;
+    if (a.y > P.y - 20) s += 190;   // 偏好上方锚点
+    if (a.x < P.x) s += 160;        // 偏好前方
+    if (a === lastAnchor && P.rope === null && d < 130) s += 400; // 刚放手别立刻原地抓回
+    if (s < bestS) { bestS = s; bestA = a; }
+  }
+  return bestA;
+}
+function grab() {
+  const a = pickAnchor();
+  if (!a) return;
+  const d = Math.hypot(a.x - P.x, a.y - P.y);
+  P.rope = { a, L: Math.max(ROPE_MIN, d) };
+  P.maxSwingSp = Math.hypot(P.vx, P.vy);
+  P.swingT = 0;
+  if (a !== lastAnchor) {
+    combo++;
+    maxCombo = Math.max(maxCombo, combo);
+    comboPop = 1;
+    if (combo > 1) {
+      const b = Math.min(combo, 3);   // 连击奖励封顶，保证得分以距离为主
+      bonus += b;
+      addText(P.x, P.y - 54, '连击 ×' + combo + '  +' + b + 'm', '#7dd3fc', 15);
+    }
+    lastAnchor = a;
+  }
+  sGrab();
+}
+function release() {
+  const sp = Math.hypot(P.vx, P.vy);
+  const perfect = P.swingT > 0.16 && sp > 560 && sp >= 0.94 * P.maxSwingSp;
+  if (perfect) {
+    const k = Math.min(1.13, MAXV / Math.max(1, sp));
+    P.vx *= k; P.vy *= k;
+    boostT = 0.9;
+    const b = 10;
+    bonus += b;
+    addText(P.x, P.y - 78, '完美！+' + b + 'm', '#ffcc00', 26);
+    burst(P.x, P.y, 14, '#ffcc00');
+    sPerfect();
+  } else {
+    sRelease();
+  }
+  P.rope = null;
+  releasedOnce = true;
+  if (P.swingT > 0.3) tutorialDone = true;
+}
+
+/* ---------- 飘字 / 粒子 ---------- */
+function addText(x, y, txt, col, size) {
+  texts.push({ x, y, txt, col, size, t: 0, life: 1.1 });
+}
+function burst(x, y, n, col) {
+  for (let i = 0; i < n; i++) {
+    const a = rand(0, Math.PI * 2), s = rand(80, 460);
+    parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 120, t: 0, life: rand(0.35, 0.8), col, r: rand(1.5, 3.5) });
+  }
+}
+
+/* ---------- 死亡 ---------- */
+function die() {
+  if (state !== 'playing') return;
+  distM = Math.max(distM, P.x / PPM);   // 先结算最终距离再存纪录
+  state = 'dead'; deadT = 0;
+  shake = 16;
+  P.rope = null;
+  burst(P.x, Math.min(P.y, KILL_Y), 26, '#ff4d6d');
+  burst(P.x, Math.min(P.y, KILL_Y), 12, '#ffcc00');
+  sDie();
+  const score = finalScore();
+  if (score > best) { best = score; saveBest(); }
+}
+function finalScore() { return Math.floor(distM + bonus); }
+function showOver() {
+  document.getElementById('overDist').textContent = finalScore();
+  document.getElementById('overBest').textContent = best;
+  document.getElementById('overCombo').textContent = maxCombo;
+  document.getElementById('newBestTag').style.display = (finalScore() >= best && finalScore() > 0) ? 'inline-block' : 'none';
+  document.getElementById('over').classList.remove('hidden');
+}
+
+/* ---------- 物理更新 ---------- */
+function physStep(dt) {
+  // 重力
+  P.vy += G * dt;
+  // 荡绳中轻微前进助力（避免垂直悬挂卡死）
+  if (P.rope) P.vx += 55 * dt;
+  P.x += P.vx * dt;
+  P.y += P.vy * dt;
+
+  if (P.rope) {
+    const a = P.rope.a, L = P.rope.L;
+    const dx = P.x - a.x, dy = P.y - a.y;
+    const d = Math.hypot(dx, dy);
+    if (d > L && d > 0.0001) {
+      // 位置约束到圆周
+      const nx = dx / d, ny = dy / d;
+      P.x = a.x + nx * L;
+      P.y = a.y + ny * L;
+      // 速度去掉径向向外分量，只留切向 —— 摆荡手感核心
+      const vr = P.vx * nx + P.vy * ny;
+      if (vr > 0) { P.vx -= vr * nx; P.vy -= vr * ny; }
+      // 在锚点下方时泵能量（越荡越快）
+      let sp = Math.hypot(P.vx, P.vy);
+      if (ny > 0.05 && sp > 40) {
+        const k = 1 + PUMP * dt * ny;
+        P.vx *= k; P.vy *= k;
+        sp *= k;
+      }
+      if (sp > MAXV) { const k = MAXV / sp; P.vx *= k; P.vy *= k; sp = MAXV; }
+      if (sp > P.maxSwingSp) P.maxSwingSp = sp;
+    }
+  } else {
+    const sp = Math.hypot(P.vx, P.vy);
+    if (sp > MAXV) { const k = MAXV / sp; P.vx *= k; P.vy *= k; }
+  }
+}
+
+function update(dt) {
+  runT += dt;
+  if (boostT > 0) boostT -= dt;
+  if (comboPop > 0) comboPop -= dt * 3;
+  shake *= Math.pow(0.0001, dt);
+
+  if (state === 'playing') {
+    // 输入 → 抓 / 放（按住期间持续尝试抓，进入范围即吸附）
+    if (input.down && !P.rope) grab();
+    if (!input.down && P.rope) release();
+    if (P.rope) P.swingT += dt;
+
+    // 两次子步提升约束稳定性
+    physStep(dt / 2);
+    physStep(dt / 2);
+
+    // 拖尾
+    trail.push({ x: P.x, y: P.y, lean: P.lean, roped: !!P.rope });
+    if (trail.length > 26) trail.shift();
+
+    // 弹跳垫
+    for (let i = 0; i < pads.length; i++) {
+      const pd = pads[i];
+      if (P.vy > 0 && Math.abs(P.x - pd.x) < pd.w / 2 + 10 && P.y > pd.y - 28 && P.y < pd.y + 26) {
+        P.y = pd.y - 28;
+        // 弹得足够高，保证能重新够到锚点（救命垫）
+        P.vy = -clamp(Math.max(1250, Math.abs(P.vy) * 0.95), 1250, 1600);
+        if (P.rope) P.rope = null;
+        pd.hit = runT;
+        combo = 0; lastAnchor = null;
+        addText(pd.x, pd.y - 60, '弹起！', '#7cfc9a', 18);
+        burst(P.x, pd.y - 10, 10, '#ffcc00');
+        sBounce();
+        shake = Math.max(shake, 5);
+      }
+    }
+
+    // 死亡：尖刺线
+    if (P.y > KILL_Y) { die(); }
+
+    // 姿态倾斜
+    let targetLean;
+    if (P.rope) {
+      const a = P.rope.a;
+      targetLean = Math.atan2(P.x - a.x, P.y - a.y); // 身体沿绳方向
+    } else {
+      targetLean = clamp(P.vx / 700, -1, 1) * 0.75 + clamp(P.vy / 1500, -1, 1) * 0.25;
+    }
+    P.lean += (targetLean - P.lean) * Math.min(1, dt * 10);
+    P.legPh += dt * (3 + Math.hypot(P.vx, P.vy) * 0.004);
+
+    // 距离 & 里程碑
+    distM = Math.max(distM, P.x / PPM);
+    if (distM + bonus >= nextMile) {
+      addText(P.x, P.y - 100, nextMile + ' 米！', '#a78bfa', 20);
+      sMile();
+      nextMile += 100;
+    }
+
+    // 生成 & 镜头
+    genTo(camX + W + 900);
+  }
+
+  if (state === 'dead') {
+    deadT += dt;
+    if (deadT > 0.85 && document.getElementById('over').classList.contains('hidden')) showOver();
+  }
+
+  // 镜头平滑跟随（角色在屏幕左 1/3）
+  if (state !== 'menu') {
+    const tx = P.x - W * 0.33;
+    let ty = P.y - H * 0.46;
+    ty = Math.min(ty, DEATH_Y - H + 230);   // 尖刺别升太高
+    camX += (tx - camX) * Math.min(1, dt * 6);
+    camY += (ty - camY) * Math.min(1, dt * 4.2);
+  }
+
+  // 飘字 / 粒子
+  for (let i = texts.length - 1; i >= 0; i--) {
+    const t = texts[i]; t.t += dt; t.y -= 46 * dt;
+    if (t.t > t.life) texts.splice(i, 1);
+  }
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i]; p.t += dt;
+    p.vy += G * 0.5 * dt;
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    if (p.t > p.life) parts.splice(i, 1);
+  }
+}
+
+/* ---------- 渲染 ---------- */
+function sx(wx) { return wx - camX; }
+function sy(wy) { return wy - camY; }
+
+function drawBackground() {
+  // 夜空渐变
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#0a0a12');
+  g.addColorStop(0.55, '#10142a');
+  g.addColorStop(1, '#1a1430');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+
+  // 星星（缓慢视差）
+  ctx.fillStyle = '#ffffff';
+  const sOff = camX * 0.06;
+  for (let i = 0; i < 70; i++) {
+    const px = ((hash1(i) * 2300 - sOff) % (W + 40) + W + 40) % (W + 40) - 20;
+    const py = hash1(i + 99) * H * 0.65;
+    const tw = 0.25 + 0.5 * Math.abs(Math.sin(runT * (0.6 + hash1(i + 7)) + i));
+    ctx.globalAlpha = tw * 0.8;
+    const r = 0.7 + hash1(i + 31) * 1.3;
+    ctx.fillRect(px, py, r, r);
+  }
+  ctx.globalAlpha = 1;
+
+  // 月亮
+  const mx = W * 0.78 - camX * 0.02 % W, my = H * 0.16 - camY * 0.02;
+  ctx.save();
+  ctx.shadowColor = 'rgba(255,240,200,.5)'; ctx.shadowBlur = 40;
+  ctx.fillStyle = '#f5ecd8';
+  ctx.beginPath(); ctx.arc(mx, my, 26, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  ctx.fillStyle = 'rgba(200,190,165,.5)';
+  ctx.beginPath(); ctx.arc(mx - 8, my - 5, 5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(mx + 7, my + 8, 3.4, 0, Math.PI * 2); ctx.fill();
+
+  // 远山 / 近山
+  drawMountains(0.18, H * 0.86, 230, '#161a33', 260);
+  drawClouds();
+  drawMountains(0.42, H * 0.96, 300, '#1d1f3f', 190);
+}
+function drawMountains(f, baseY, amp, col, period) {
+  const off = camX * f;
+  const yShift = -camY * f * 0.35;
+  ctx.fillStyle = col;
+  ctx.beginPath();
+  ctx.moveTo(-10, H + 10);
+  const k0 = Math.floor(off / period) - 1;
+  const kn = k0 + Math.ceil(W / period) + 3;
+  for (let k = k0; k <= kn; k++) {
+    const px = k * period - off;
+    const py = baseY + yShift - (hash1(k * 3.7) * 0.62 + hash1(k * 9.1 + 5) * 0.38) * amp;
+    ctx.lineTo(px, py);
+  }
+  ctx.lineTo(W + 10, H + 10);
+  ctx.closePath();
+  ctx.fill();
+}
+function drawClouds() {
+  ctx.fillStyle = 'rgba(110,120,170,.13)';
+  const f = 0.3;
+  for (let i = 0; i < 7; i++) {
+    const span = W + 360;
+    const px = ((hash1(i + 50) * 5100 - camX * f + runT * 9) % span + span) % span - 180;
+    const py = H * (0.12 + hash1(i + 77) * 0.4) - camY * f * 0.3;
+    const r = 36 + hash1(i + 13) * 52;
+    ctx.beginPath();
+    ctx.ellipse(px, py, r * 1.9, r * 0.55, 0, 0, Math.PI * 2);
+    ctx.ellipse(px + r, py - r * 0.3, r * 1.1, r * 0.45, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawSpikes() {
+  const y = sy(DEATH_Y);
+  if (y > H + 60) return;
+  const step = 26;
+  const x0 = Math.floor(camX / step) * step;
+  // 底部渐变
+  const g = ctx.createLinearGradient(0, y - 40, 0, y + 120);
+  g.addColorStop(0, 'rgba(80,10,30,0)');
+  g.addColorStop(1, 'rgba(90,12,35,.85)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, y - 40, W, 200);
+  ctx.fillStyle = '#3d0f22';
+  ctx.strokeStyle = '#ff3355';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  for (let wx = x0; wx < camX + W + step; wx += step) {
+    const px = sx(wx);
+    const hh = 30 + hash1(wx * 0.13) * 10;
+    ctx.moveTo(px, y + 12);
+    ctx.lineTo(px + step / 2, y + 12 - hh);
+    ctx.lineTo(px + step, y + 12);
+  }
+  ctx.fill();
+  ctx.globalAlpha = 0.55;
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = 'rgba(20,4,12,.95)';
+  ctx.fillRect(0, y + 11, W, Math.max(0, H - y - 11));
+}
+
+function drawPads() {
+  for (const pd of pads) {
+    const px = sx(pd.x), py = sy(pd.y);
+    if (px < -120 || px > W + 120) continue;
+    const since = runT - pd.hit;
+    const squash = since < 0.25 ? Math.sin(since / 0.25 * Math.PI) * 0.45 : 0;
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.scale(1 + squash * 0.4, 1 - squash);
+    // 支柱
+    ctx.strokeStyle = 'rgba(255,255,255,.22)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(-pd.w / 2 + 16, 6); ctx.lineTo(-pd.w / 2 + 8, 40);
+    ctx.moveTo(pd.w / 2 - 16, 6); ctx.lineTo(pd.w / 2 - 8, 40);
+    ctx.stroke();
+    // 垫面
+    ctx.shadowColor = 'rgba(124,252,154,.5)'; ctx.shadowBlur = 14;
+    ctx.fillStyle = '#34d56b';
+    roundRect(-pd.w / 2, -8, pd.w, 15, 7);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(255,255,255,.35)';
+    roundRect(-pd.w / 2 + 5, -6, pd.w - 10, 4, 2);
+    ctx.fill();
+    // 上箭头
+    ctx.fillStyle = 'rgba(10,30,16,.6)';
+    ctx.beginPath();
+    ctx.moveTo(0, -3); ctx.lineTo(-7, 4); ctx.lineTo(7, 4);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+}
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function drawAnchors(target) {
+  for (const a of anchors) {
+    const px = sx(a.x), py = sy(a.y);
+    if (px < -60 || px > W + 60) continue;
+    const isT = (a === target) && state === 'playing';
+    const isHeld = P.rope && P.rope.a === a;
+    if (isT || isHeld) {
+      const pulse = 11 + Math.sin(runT * 7) * 3;
+      ctx.strokeStyle = 'rgba(255,204,0,.65)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(px, py, pulse + (isHeld ? 2 : 0), 0, Math.PI * 2); ctx.stroke();
+      ctx.shadowColor = '#ffcc00'; ctx.shadowBlur = 16;
+      ctx.fillStyle = '#ffcc00';
+    } else {
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#39406b';
+    }
+    ctx.beginPath(); ctx.arc(px, py, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = isT || isHeld ? '#fff3c0' : '#1b2040';
+    ctx.beginPath(); ctx.arc(px, py, 2.8, 0, Math.PI * 2); ctx.fill();
+  }
+}
+
+function drawAimLine(target) {
+  if (!target || P.rope || state !== 'playing') return;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,204,0,.38)';
+  ctx.lineWidth = 1.6;
+  ctx.setLineDash([6, 8]);
+  ctx.lineDashOffset = -runT * 40;
+  ctx.beginPath();
+  ctx.moveTo(sx(P.x), sy(P.y) - 8);
+  ctx.lineTo(sx(target.x), sy(target.y));
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawRope() {
+  if (!P.rope) return;
+  const a = P.rope.a;
+  const ax = sx(a.x), ay = sy(a.y);
+  const hx = sx(P.x), hy = sy(P.y) - 10;
+  const dx = P.x - a.x, dy = P.y - a.y;
+  const d = Math.hypot(dx, dy);
+  // 弧度：松弛时下垂，绷紧时随摆动微弯
+  const slack = Math.max(0, P.rope.L - d);
+  const mx = (ax + hx) / 2, my = (ay + hy) / 2;
+  let cx = mx, cy = my + clamp(slack * 0.6, 0, 60);
+  if (slack < 2 && d > 1) {
+    const tx = -dy / d, ty = dx / d;   // 切向
+    const vt = P.vx * tx + P.vy * ty;
+    const bend = clamp(-vt * 0.014, -16, 16);
+    cx = mx + tx * bend; cy = my + ty * bend;
+  }
+  ctx.strokeStyle = 'rgba(235,235,245,.9)';
+  ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  ctx.moveTo(ax, ay);
+  ctx.quadraticCurveTo(cx, cy, hx, hy);
+  ctx.stroke();
+}
+
+/* 火柴人：local(lx,ly) 经 lean 旋转映射到世界 */
+function drawStickman(x, y, lean, alpha, ghost) {
+  const c = Math.cos(lean), s = Math.sin(lean);
+  const L2W = (lx, ly) => [x + lx * c - ly * s, y + lx * s + ly * c];
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  if (boostT > 0 && !ghost) {
+    ctx.shadowColor = '#ffcc00';
+    ctx.shadowBlur = 22;
+  }
+  ctx.strokeStyle = ghost ? '#ffcc00' : '#f2f2f8';
+  ctx.lineWidth = ghost ? 2.4 : 3.2;
+  ctx.lineCap = 'round';
+  const [hx, hy] = L2W(0, -17);
+  const [n1x, n1y] = L2W(0, -10);
+  const [pvx, pvy] = L2W(0, 7);
+  // 身体
+  ctx.beginPath();
+  ctx.moveTo(n1x, n1y); ctx.lineTo(pvx, pvy);
+  if (!ghost) {
+    const roped = !!P.rope;
+    // 腿
+    const sp2 = Math.hypot(P.vx, P.vy);
+    const kick = clamp(-P.vx * 0.009, -7, 7);
+    const fl = Math.sin(P.legPh) * (roped ? 2.5 : 4.5);
+    const [l1x, l1y] = L2W(-5 + kick + fl, 21);
+    const [l2x, l2y] = L2W(5 + kick - fl, 20);
+    ctx.moveTo(pvx, pvy); ctx.lineTo(l1x, l1y);
+    ctx.moveTo(pvx, pvy); ctx.lineTo(l2x, l2y);
+    // 手臂
+    const [shx, shy] = L2W(0, -8);
+    if (roped) {
+      const a = P.rope.a;
+      const rdx = a.x - P.x, rdy = a.y - P.y;
+      const rd = Math.hypot(rdx, rdy) || 1;
+      const g1x = P.x + rdx / rd * 15, g1y = P.y + rdy / rd * 15;
+      ctx.moveTo(shx, shy); ctx.lineTo(sx(g1x) - sx(P.x) + x, sy(g1y) - sy(P.y) + y);
+      const [a2x, a2y] = L2W(4, -2);
+      ctx.moveTo(shx, shy); ctx.lineTo(a2x, a2y);
+    } else {
+      const sw = clamp(sp2 * 0.004, 2, 8);
+      const [a1x, a1y] = L2W(-8, -14 + Math.sin(P.legPh * 1.3) * sw * 0.4);
+      const [a2x, a2y] = L2W(9, -4 - Math.cos(P.legPh * 1.3) * sw * 0.4);
+      ctx.moveTo(shx, shy); ctx.lineTo(a1x, a1y);
+      ctx.moveTo(shx, shy); ctx.lineTo(a2x, a2y);
+    }
+  }
+  ctx.stroke();
+  // 头
+  ctx.fillStyle = ghost ? 'rgba(255,204,0,.7)' : '#f2f2f8';
+  ctx.beginPath();
+  ctx.arc(hx, hy, ghost ? 4.5 : 6, 0, Math.PI * 2);
+  ctx.fill();
+  if (!ghost) {
+    ctx.fillStyle = '#0a0a12';
+    const [ex, ey] = L2W(2.6, -17.5);
+    ctx.beginPath(); ctx.arc(ex, ey, 1.4, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawTrail() {
+  if (state === 'dead') return;
+  const sp = Math.hypot(P.vx, P.vy);
+  const base = clamp(sp / 1000, 0, 1) * (P.rope ? 0.22 : 0.5);
+  if (base < 0.04) return;
+  for (let i = 0; i < trail.length - 2; i += 2) {
+    const t = trail[i];
+    const a = (i / trail.length) * base;
+    if (a < 0.02) continue;
+    drawStickman(sx(t.x), sy(t.y), t.lean, a, true);
+  }
+}
+
+function drawTexts() {
+  ctx.textAlign = 'center';
+  for (const t of texts) {
+    const k = t.t / t.life;
+    ctx.globalAlpha = k < 0.15 ? k / 0.15 : 1 - (k - 0.15) / 0.85;
+    const scale = t.size + (k < 0.18 ? (0.18 - k) * 26 : 0);
+    ctx.font = '700 ' + scale.toFixed(1) + 'px "PingFang SC","Microsoft YaHei",system-ui';
+    ctx.fillStyle = t.col;
+    ctx.shadowColor = t.col; ctx.shadowBlur = 10;
+    ctx.fillText(t.txt, sx(t.x), sy(t.y));
+    ctx.shadowBlur = 0;
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawParts() {
+  for (const p of parts) {
+    ctx.globalAlpha = 1 - p.t / p.life;
+    ctx.fillStyle = p.col;
+    ctx.beginPath();
+    ctx.arc(sx(p.x), sy(p.y), p.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawHUD() {
+  if (state === 'menu') return;
+  const score = finalScore();
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#ffffff';
+  ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 8;
+  ctx.font = '700 40px "PingFang SC","Microsoft YaHei",system-ui';
+  ctx.fillText(score + ' 米', W / 2, 64);
+  ctx.shadowBlur = 0;
+  ctx.font = '13px "PingFang SC","Microsoft YaHei",system-ui';
+  ctx.fillStyle = 'rgba(255,255,255,.45)';
+  ctx.fillText('最高 ' + Math.max(best, score) + ' 米', W / 2, 86);
+  // 连击
+  if (combo > 1 && state === 'playing') {
+    const pop = 1 + Math.max(0, comboPop) * 0.5;
+    ctx.save();
+    ctx.translate(W / 2, 118);
+    ctx.scale(pop, pop);
+    ctx.font = '700 20px "PingFang SC","Microsoft YaHei",system-ui';
+    ctx.fillStyle = '#ffcc00';
+    ctx.shadowColor = 'rgba(255,204,0,.6)'; ctx.shadowBlur = 12;
+    ctx.fillText('连击 ×' + combo, 0, 0);
+    ctx.restore();
+  }
+  // 教学提示
+  if (!tutorialDone && state === 'playing') {
+    const a = 0.55 + Math.sin(runT * 4) * 0.3;
+    ctx.globalAlpha = a;
+    ctx.font = '16px "PingFang SC","Microsoft YaHei",system-ui';
+    ctx.fillStyle = '#ffcc00';
+    ctx.fillText('按住 = 抓住锚点荡绳 · 松开 = 放手飞出', W / 2, H - 56);
+    ctx.globalAlpha = 1;
+  }
+  // 死亡红闪
+  if (state === 'dead' && deadT < 0.3) {
+    ctx.fillStyle = 'rgba(255,40,70,' + (0.35 * (1 - deadT / 0.3)).toFixed(3) + ')';
+    ctx.fillRect(0, 0, W, H);
+  }
+}
+
+function render() {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  drawBackground();
+
+  // 镜头抖动
+  const shX = shake > 0.3 ? rand(-shake, shake) : 0;
+  const shY = shake > 0.3 ? rand(-shake, shake) : 0;
+  ctx.save();
+  ctx.translate(shX, shY);
+
+  const target = (state === 'playing' && !P.rope) ? pickAnchor() : null;
+  drawPads();
+  drawSpikes();
+  drawAimLine(target);
+  drawAnchors(target);
+  drawTrail();
+  drawRope();
+  if (!(state === 'dead' && deadT > 0.05)) {
+    drawStickman(sx(P.x), sy(P.y), P.lean, 1, false);
+  }
+  drawParts();
+  drawTexts();
+  ctx.restore();
+
+  drawHUD();
+
+  // 暗角
+  const v = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.45, W / 2, H / 2, Math.max(W, H) * 0.78);
+  v.addColorStop(0, 'rgba(0,0,0,0)');
+  v.addColorStop(1, 'rgba(0,0,0,.42)');
+  ctx.fillStyle = v;
+  ctx.fillRect(0, 0, W, H);
+}
+
+/* ---------- 主循环 ---------- */
+let lastT = performance.now();
+function frame(now) {
+  let dt = (now - lastT) / 1000;
+  lastT = now;
+  if (dt > 0.05) dt = 0.05;   // 切后台/卡顿保护
+  if (dt > 0) update(dt);
+  render();
+  requestAnimationFrame(frame);
+}
+
+/* ---------- 流程控制 ---------- */
+const menuEl = document.getElementById('menu');
+const overEl = document.getElementById('over');
+function startGame() {
+  initAudio();
+  resetRun();
+  state = 'playing';
+  menuEl.classList.add('hidden');
+  overEl.classList.add('hidden');
+  input.down = false;
+}
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('retryBtn').addEventListener('click', startGame);
+document.getElementById('menuBest').textContent = best;
+
+/* ---------- 输入 ---------- */
+function pressDown(e) {
+  if (e && e.target && e.target.closest && e.target.closest('a, button')) return;
+  initAudio();
+  if (state === 'playing') input.down = true;
+}
+function pressUp() { input.down = false; }
+window.addEventListener('pointerdown', pressDown);
+window.addEventListener('pointerup', pressUp);
+window.addEventListener('pointercancel', pressUp);
+window.addEventListener('touchstart', e => { if (!e.target.closest('a, button')) e.preventDefault(); }, { passive: false });
+window.addEventListener('blur', pressUp);
+window.addEventListener('keydown', e => {
+  if (e.code !== 'Space') return;
+  e.preventDefault();
+  if (e.repeat) return;
+  initAudio();
+  if (state === 'menu') { startGame(); return; }
+  if (state === 'dead' && deadT > 0.85) { startGame(); return; }
+  if (state === 'playing') input.down = true;
+});
+window.addEventListener('keyup', e => {
+  if (e.code === 'Space') input.down = false;
+});
+document.addEventListener('visibilitychange', () => { if (document.hidden) input.down = false; });
+
+/* 菜单背景演示：摆一个静态场景 */
+resetRun();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

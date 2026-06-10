@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>笨鸟先飞 · AI4399</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%; height: 100%;
+    background: #0a0a12;
+    color: #e8e8f0;
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    overflow: hidden;
+    touch-action: none;
+    -webkit-user-select: none; user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+  #back {
+    position: fixed; top: 12px; left: 12px; z-index: 50;
+    color: #e8e8f0; text-decoration: none;
+    background: rgba(20,20,31,.6);
+    border: 1px solid rgba(42,42,61,.8);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 14px;
+    backdrop-filter: blur(4px);
+    opacity: .75;
+    transition: opacity .2s;
+  }
+  #back:hover { opacity: 1; }
+  #stage {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #wrap {
+    position: relative;
+    box-shadow: 0 0 0 1px #2a2a3d, 0 24px 64px rgba(0,0,0,.55);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #14141f;
+  }
+  canvas { display: block; }
+  .overlay {
+    position: absolute; inset: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(10,10,18,.45);
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s;
+  }
+  .overlay.show { opacity: 1; pointer-events: auto; }
+  .panel {
+    width: min(82%, 300px);
+    background: rgba(20,20,31,.94);
+    border: 1px solid #2a2a3d;
+    border-radius: 14px;
+    padding: 22px 20px 20px;
+    text-align: center;
+    box-shadow: 0 12px 40px rgba(0,0,0,.5);
+    transform: translateY(14px);
+    transition: transform .3s cubic-bezier(.2,1.4,.4,1);
+  }
+  .overlay.show .panel { transform: translateY(0); }
+  h1 {
+    font-size: 30px; letter-spacing: 4px;
+    color: #ffcc00; margin-bottom: 4px;
+    text-shadow: 0 2px 0 rgba(0,0,0,.4);
+  }
+  .sub { font-size: 13px; color: #8888a0; margin-bottom: 16px; }
+  .howto {
+    text-align: left; font-size: 13px; line-height: 1.9;
+    color: #e8e8f0;
+    background: rgba(10,10,18,.5);
+    border: 1px solid #2a2a3d;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+  }
+  .howto b { color: #ffcc00; font-weight: 600; }
+  .btn {
+    display: inline-block;
+    background: #ffcc00; color: #1a1400;
+    border: none; border-radius: 10px;
+    font-family: inherit;
+    font-size: 17px; font-weight: 700; letter-spacing: 2px;
+    padding: 11px 38px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #b08900;
+    transition: transform .08s, box-shadow .08s;
+  }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #b08900; }
+  .bestline { font-size: 13px; color: #8888a0; margin-top: 14px; }
+  .bestline span { color: #ffcc00; font-weight: 700; }
+  h2 { font-size: 20px; letter-spacing: 3px; color: #e8e8f0; margin-bottom: 14px; }
+  .scorebox {
+    display: flex; justify-content: center; gap: 26px; margin-bottom: 14px;
+  }
+  .scorebox .cell .lab { font-size: 12px; color: #8888a0; margin-bottom: 2px; }
+  .scorebox .cell .val { font-size: 34px; font-weight: 800; color: #ffcc00; line-height: 1.1; }
+  .scorebox .cell .val.dim { color: #e8e8f0; }
+  #newbest {
+    display: none;
+    font-size: 11px; font-weight: 700;
+    color: #1a1400; background: #ffcc00;
+    border-radius: 99px; padding: 2px 10px;
+    margin-bottom: 12px;
+    animation: pulse 1s ease-in-out infinite;
+  }
+  #newbest.show { display: inline-block; }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+  #medalbox { margin-bottom: 16px; }
+  #medal {
+    width: 64px; height: 64px; border-radius: 50%;
+    margin: 0 auto 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px;
+    border: 3px solid #2a2a3d;
+    background: #1b1b29;
+    color: #555570;
+  }
+  #medal.bronze { background: radial-gradient(circle at 35% 30%, #e8a26a, #a05a28 70%); border-color: #c87f43; color: #5a2d0c; }
+  #medal.silver { background: radial-gradient(circle at 35% 30%, #f0f0f5, #9a9ab0 70%); border-color: #c8c8d8; color: #4a4a5e; }
+  #medal.gold   { background: radial-gradient(circle at 35% 30%, #ffe680, #d4a000 70%); border-color: #ffd84d; color: #6b4d00; }
+  #medalname { font-size: 12px; color: #8888a0; }
+  .hint { font-size: 12px; color: #8888a0; margin-top: 12px; }
+</style>
+</head>
+<body>
+<a id="back" href="../">← AI4399</a>
+<div id="stage">
+  <div id="wrap">
+    <canvas id="cv"></canvas>
+    <div id="startOverlay" class="overlay">
+      <div class="panel">
+        <h1>笨鸟先飞</h1>
+        <div class="sub">勤能补拙 · 飞得更远</div>
+        <div class="howto">
+          <b>点按屏幕</b> 或 <b>空格 / ↑</b> 拍动翅膀<br>
+          穿过管道之间的缺口得 <b>1 分</b><br>
+          撞到管道或落地即失败<br>
+          奖牌：<b>10</b> 铜 · <b>25</b> 银 · <b>50</b> 金
+        </div>
+        <button class="btn" id="startBtn">开 始</button>
+        <div class="bestline">历史最高：<span id="bestStart">0</span> 分</div>
+      </div>
+    </div>
+    <div id="overOverlay" class="overlay">
+      <div class="panel">
+        <h2>本 局 结 束</h2>
+        <div id="newbest">★ 新纪录 ★</div>
+        <div class="scorebox">
+          <div class="cell"><div class="lab">得分</div><div class="val" id="finalScore">0</div></div>
+          <div class="cell"><div class="lab">最高分</div><div class="val dim" id="finalBest">0</div></div>
+        </div>
+        <div id="medalbox">
+          <div id="medal">—</div>
+          <div id="medalname">未获奖牌</div>
+        </div>
+        <button class="btn" id="restartBtn">再来一局</button>
+        <div class="hint">点按任意处 / 空格 也可重开</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+'use strict';
+(function () {
+  /* ============ 常量与世界参数（手感核心） ============ */
+  var W = 360, H = 640;            // 逻辑分辨率（竖屏 9:16）
+  var GROUND_Y = 552;              // 地面顶部
+  var GRAVITY = 1900;              // 重力 px/s^2
+  var FLAP_VY = -430;              // 拍翅瞬时上抛速度
+  var MAX_FALL = 640;              // 终端下落速度
+  var SPEED = 138;                 // 世界恒定滚动速度
+  var PIPE_W = 68;                 // 管道宽
+  var PIPE_GAP_MAX = 168;          // 初始缺口（先宽）
+  var PIPE_GAP_MIN = 122;          // 最窄缺口（后窄）
+  var PIPE_SPACING = 218;          // 管道水平间距
+  var BIRD_X = 98, BIRD_R = 13;    // 小鸟位置与碰撞半径
+  var GAP_TOP_MARGIN = 56;         // 缺口中心距顶部最小
+  var GAP_BOTTOM_MARGIN = 76;      // 缺口中心距地面最小
+  var GAP_MAX_JUMP = 150;          // 相邻缺口中心最大落差（保证可飞）
+
+  /* ============ 画布与缩放 ============ */
+  var cv = document.getElementById('cv');
+  var ctx = cv.getContext('2d');
+  var wrap = document.getElementById('wrap');
+
+  function resize() {
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var pad = (vw > 520 && vh > 760) ? 32 : 0; // 桌面留边，移动端满屏
+    var s = Math.min((vw - pad) / W, (vh - pad) / H);
+    var cssW = Math.floor(W * s), cssH = Math.floor(H * s);
+    var dpr = Math.min(window.devicePixelRatio || 1, 3);
+    cv.style.width = cssW + 'px';
+    cv.style.height = cssH + 'px';
+    cv.width = Math.floor(cssW * dpr);
+    cv.height = Math.floor(cssH * dpr);
+    var k = cv.width / W;
+    ctx.setTransform(k, 0, 0, k, 0, 0);
+    wrap.style.borderRadius = (vw - cssW < 8) ? '0' : '10px';
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  /* ============ 音效（WebAudio 合成） ============ */
+  var actx = null;
+  function audioCtx() {
+    if (!actx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) actx = new AC();
+    }
+    if (actx && actx.state === 'suspended') actx.resume();
+    return actx;
+  }
+  function tone(type, f0, f1, t0, dur, vol) {
+    var ac = audioCtx(); if (!ac) return;
+    var t = ac.currentTime + t0;
+    var o = ac.createOscillator(), g = ac.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f0, t);
+    o.frequency.exponentialRampToValueAtTime(Math.max(f1, 1), t + dur);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(ac.destination);
+    o.start(t); o.stop(t + dur + 0.02);
+  }
+  function noiseBurst(dur, vol, cutoff) {
+    var ac = audioCtx(); if (!ac) return;
+    var n = Math.floor(ac.sampleRate * dur);
+    var buf = ac.createBuffer(1, n, ac.sampleRate);
+    var d = buf.getChannelData(0);
+    for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+    var src = ac.createBufferSource(); src.buffer = buf;
+    var lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = cutoff;
+    var g = ac.createGain(); g.gain.value = vol;
+    src.connect(lp); lp.connect(g); g.connect(ac.destination);
+    src.start();
+  }
+  var sfx = {
+    flap:  function () { tone('triangle', 520, 760, 0, 0.07, 0.22); },
+    score: function () { tone('square', 988, 988, 0, 0.07, 0.14); tone('square', 1319, 1319, 0.07, 0.22, 0.14); },
+    hit:   function () { noiseBurst(0.22, 0.5, 900); tone('square', 220, 110, 0, 0.15, 0.25); },
+    die:   function () { tone('sawtooth', 520, 130, 0.22, 0.5, 0.2); }
+  };
+
+  /* ============ 游戏状态 ============ */
+  var STATE = { READY: 0, PLAY: 1, DYING: 2, OVER: 3 };
+  var state = STATE.READY;
+  var firstRun = true;          // 首次显示完整说明面板
+  var score = 0, best = 0;
+  try { best = parseInt(localStorage.getItem('ai4399-flappy-best'), 10) || 0; } catch (e) {}
+
+  var bird = { y: 0, vy: 0, rot: 0, wingT: 0, wingBoost: 0 };
+  var pipes = [];               // {x, gapY, gap, scored}
+  var lastGapY = H * 0.45;
+  var flashA = 0;               // 死亡白闪
+  var shakeT = 0;               // 撞击震屏
+  var overAt = 0;               // 进入结算的时间戳（防误触重开）
+  var groundOff = 0, cityOff = 0, cloudOff = 0, bushOff = 0;
+  var readyT = 0;               // ready 态计时（悬浮动画）
+
+  var startOverlay = document.getElementById('startOverlay');
+  var overOverlay = document.getElementById('overOverlay');
+  document.getElementById('bestStart').textContent = best;
+
+  /* ============ 远景程序化生成 ============ */
+  function mulberry(seed) {
+    return function () {
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  var buildings = [], cityW = 0;
+  (function () {
+    var rnd = mulberry(4399);
+    while (cityW < W + 160) {
+      var w = 26 + rnd() * 34, h = 50 + rnd() * 110;
+      buildings.push({ x: cityW, w: w, h: h, win: rnd() > 0.4 });
+      cityW += w + 2 + rnd() * 8;
+    }
+  })();
+  var clouds = [];
+  (function () {
+    var rnd = mulberry(1234);
+    for (var i = 0; i < 6; i++) {
+      clouds.push({ x: rnd() * (W + 160), y: 50 + rnd() * 150, s: 0.7 + rnd() * 0.8 });
+    }
+  })();
+  var bushes = [], bushW = 0;
+  (function () {
+    var rnd = mulberry(777);
+    while (bushW < W + 120) {
+      bushes.push({ x: bushW, r: 16 + rnd() * 18 });
+      bushW += 18 + rnd() * 26;
+    }
+  })();
+
+  /* ============ 流程控制 ============ */
+  function resetRound() {
+    score = 0;
+    pipes = [];
+    bird.y = H * 0.42; bird.vy = 0; bird.rot = 0;
+    bird.wingT = 0; bird.wingBoost = 0;
+    lastGapY = H * 0.45;
+    flashA = 0; shakeT = 0; readyT = 0;
+    state = STATE.READY;
+    overOverlay.classList.remove('show');
+    if (firstRun) startOverlay.classList.add('show');
+  }
+  function startPlay() {
+    firstRun = false;
+    startOverlay.classList.remove('show');
+    state = STATE.PLAY;
+    spawnPipe(W + 90);
+    flap();
+  }
+  function currentGap() {
+    var t = Math.min(score, 40) / 40;            // 40 分后达到最窄
+    return PIPE_GAP_MAX - (PIPE_GAP_MAX - PIPE_GAP_MIN) * t;
+  }
+  function spawnPipe(x) {
+    var gap = currentGap();
+    var lo = Math.max(GAP_TOP_MARGIN + gap / 2, lastGapY - GAP_MAX_JUMP);
+    var hi = Math.min(GROUND_Y - GAP_BOTTOM_MARGIN - gap / 2, lastGapY + GAP_MAX_JUMP);
+    var gapY = lo + Math.random() * Math.max(hi - lo, 1);
+    lastGapY = gapY;
+    pipes.push({ x: x, gapY: gapY, gap: gap, scored: false });
+  }
+  function flap() {
+    bird.vy = FLAP_VY;
+    bird.wingBoost = 1;
+    sfx.flap();
+  }
+  function die() {
+    state = STATE.DYING;
+    flashA = 1; shakeT = 0.3;
+    bird.vy = Math.min(bird.vy, -160);   // 撞击小弹跳
+    sfx.hit(); sfx.die();
+  }
+  function settle() {
+    state = STATE.OVER;
+    overAt = performance.now();
+    if (score > best) {
+      best = score;
+      try { localStorage.setItem('ai4399-flappy-best', String(best)); } catch (e) {}
+      document.getElementById('newbest').classList.add('show');
+    } else {
+      document.getElementById('newbest').classList.remove('show');
+    }
+    document.getElementById('finalScore').textContent = score;
+    document.getElementById('finalBest').textContent = best;
+    var medal = document.getElementById('medal');
+    var mname = document.getElementById('medalname');
+    medal.className = '';
+    if (score >= 50)      { medal.classList.add('gold');   medal.textContent = '★'; mname.textContent = '金牌 · 一飞冲天'; }
+    else if (score >= 25) { medal.classList.add('silver'); medal.textContent = '★'; mname.textContent = '银牌 · 轻车熟路'; }
+    else if (score >= 10) { medal.classList.add('bronze'); medal.textContent = '★'; mname.textContent = '铜牌 · 初出茅庐'; }
+    else                  { medal.textContent = '—';       mname.textContent = '未获奖牌（10 分起）'; }
+    document.getElementById('bestStart').textContent = best;
+    overOverlay.classList.add('show');
+  }
+  function tap() {
+    audioCtx();
+    if (state === STATE.READY) startPlay();
+    else if (state === STATE.PLAY) flap();
+    else if (state === STATE.OVER) {
+      if (performance.now() - overAt > 450) resetRound();  // 防手抖误触
+    }
+  }
+
+  /* ============ 输入 ============ */
+  document.getElementById('startBtn').addEventListener('pointerdown', function (e) {
+    e.stopPropagation(); audioCtx(); startPlay();
+  });
+  document.getElementById('restartBtn').addEventListener('pointerdown', function (e) {
+    e.stopPropagation(); resetRound();
+  });
+  document.getElementById('back').addEventListener('pointerdown', function (e) { e.stopPropagation(); });
+  document.getElementById('stage').addEventListener('pointerdown', function (e) {
+    e.preventDefault(); tap();
+  });
+  window.addEventListener('keydown', function (e) {
+    if (e.code === 'Space' || e.code === 'ArrowUp') {
+      e.preventDefault();
+      if (!e.repeat) tap();
+    }
+  });
+  document.addEventListener('touchmove', function (e) { e.preventDefault(); }, { passive: false });
+  document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+
+  /* ============ 更新 ============ */
+  function update(dt) {
+    var scroll = (state === STATE.READY || state === STATE.PLAY);
+    if (scroll) {
+      groundOff = (groundOff + SPEED * dt) % 26;
+      bushOff = (bushOff + SPEED * 0.45 * dt) % bushW;
+      cityOff = (cityOff + SPEED * 0.18 * dt) % cityW;
+      cloudOff = (cloudOff + SPEED * 0.07 * dt) % (W + 160);
+    }
+    // 翅膀动画：ready/play 持续扇动，刚拍翅时加速
+    var wingSpeed = (state === STATE.DYING || state === STATE.OVER) ? 0 : (9 + bird.wingBoost * 22);
+    bird.wingT += wingSpeed * dt;
+    bird.wingBoost = Math.max(0, bird.wingBoost - dt * 3);
+
+    if (state === STATE.READY) {
+      readyT += dt;
+      bird.y = H * 0.42 + Math.sin(readyT * 3.4) * 7;
+      bird.rot = Math.sin(readyT * 3.4 + 0.6) * 0.06;
+      return;
+    }
+    if (state === STATE.OVER) return;
+
+    // 物理
+    bird.vy = Math.min(bird.vy + GRAVITY * dt, MAX_FALL);
+    bird.y += bird.vy * dt;
+    if (bird.y < -30) { bird.y = -30; bird.vy = Math.max(bird.vy, 0); }
+
+    // 俯仰：上冲快速昂头，下落渐渐栽头
+    var target;
+    if (state === STATE.DYING) target = 1.5;
+    else if (bird.vy < 0) target = -0.42;
+    else target = Math.min(1.5, -0.42 + (bird.vy / MAX_FALL) * 2.4);
+    var rate = (target < bird.rot) ? 14 : (state === STATE.DYING ? 9 : 5.2);
+    bird.rot += (target - bird.rot) * Math.min(1, rate * dt);
+
+    // 落地
+    if (bird.y + BIRD_R >= GROUND_Y) {
+      bird.y = GROUND_Y - BIRD_R;
+      if (state === STATE.PLAY) { die(); return; } // die() 带小弹跳，二次落地再结算
+      bird.vy = 0;
+      settle();
+      return;
+    }
+    if (state === STATE.DYING) return;
+
+    // 管道滚动与生成
+    for (var i = 0; i < pipes.length; i++) pipes[i].x -= SPEED * dt;
+    if (pipes.length && pipes[0].x + PIPE_W < -10) pipes.shift();
+    if (!pipes.length || pipes[pipes.length - 1].x < W - (PIPE_SPACING - PIPE_W)) {
+      spawnPipe(pipes.length ? pipes[pipes.length - 1].x + PIPE_SPACING : W + 90);
+    }
+
+    // 计分与碰撞
+    for (var j = 0; j < pipes.length; j++) {
+      var p = pipes[j];
+      if (!p.scored && p.x + PIPE_W / 2 < BIRD_X) {
+        p.scored = true; score++; sfx.score();
+      }
+      if (p.x > BIRD_X + BIRD_R + 4 || p.x + PIPE_W < BIRD_X - BIRD_R - 4) continue;
+      var topH = p.gapY - p.gap / 2;
+      var botY = p.gapY + p.gap / 2;
+      if (circleRect(BIRD_X, bird.y, BIRD_R, p.x, 0, PIPE_W, topH) ||
+          circleRect(BIRD_X, bird.y, BIRD_R, p.x, botY, PIPE_W, GROUND_Y - botY)) {
+        die();
+        break;
+      }
+    }
+  }
+  function circleRect(cx, cy, r, rx, ry, rw, rh) {
+    var nx = Math.max(rx, Math.min(cx, rx + rw));
+    var ny = Math.max(ry, Math.min(cy, ry + rh));
+    var dx = cx - nx, dy = cy - ny;
+    return dx * dx + dy * dy < r * r;
+  }
+
+  /* ============ 绘制 ============ */
+  function draw(now) {
+    ctx.save();
+    if (shakeT > 0) {
+      ctx.fillStyle = '#69c4e0';
+      ctx.fillRect(0, 0, W, H); // 震屏时先垫底色，防边缘残影
+      ctx.translate((Math.random() - 0.5) * shakeT * 22, (Math.random() - 0.5) * shakeT * 22);
+    }
+    drawSky();
+    drawClouds();
+    drawCity();
+    drawBushes();
+    drawPipes();
+    drawGround();
+    drawBird();
+    ctx.restore();
+
+    // 分数
+    if (state !== STATE.READY && !(state === STATE.OVER)) {
+      drawScore(String(score));
+    } else if (state === STATE.READY && !firstRun) {
+      drawHint(now);
+    }
+    // 白闪
+    if (flashA > 0) {
+      ctx.fillStyle = 'rgba(255,255,255,' + flashA.toFixed(3) + ')';
+      ctx.fillRect(0, 0, W, H);
+    }
+  }
+  function drawSky() {
+    var g = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
+    g.addColorStop(0, '#69c4e0');
+    g.addColorStop(0.75, '#a8e4ef');
+    g.addColorStop(1, '#cdeff3');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, GROUND_Y);
+  }
+  function drawClouds() {
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    for (var i = 0; i < clouds.length; i++) {
+      var c = clouds[i];
+      var x = ((c.x - cloudOff) % (W + 160) + (W + 160)) % (W + 160) - 80;
+      cloudShape(x, c.y, c.s);
+    }
+  }
+  function cloudShape(x, y, s) {
+    ctx.beginPath();
+    ctx.arc(x, y, 16 * s, 0, 7);
+    ctx.arc(x + 18 * s, y - 8 * s, 13 * s, 0, 7);
+    ctx.arc(x + 36 * s, y, 15 * s, 0, 7);
+    ctx.arc(x + 18 * s, y + 6 * s, 14 * s, 0, 7);
+    ctx.fill();
+  }
+  function drawCity() {
+    var baseY = GROUND_Y - 18;
+    for (var rep = 0; rep < 2; rep++) {
+      var off = rep * cityW - cityOff;
+      for (var i = 0; i < buildings.length; i++) {
+        var b = buildings[i];
+        var x = b.x + off;
+        if (x + b.w < -10 || x > W + 10) continue;
+        ctx.fillStyle = '#9fd4dc';
+        ctx.fillRect(x, baseY - b.h, b.w, b.h);
+        if (b.win) {
+          ctx.fillStyle = 'rgba(255,255,255,0.55)';
+          for (var wy = baseY - b.h + 8; wy < baseY - 8; wy += 14) {
+            for (var wx = x + 5; wx < x + b.w - 6; wx += 11) {
+              ctx.fillRect(wx, wy, 4, 6);
+            }
+          }
+        }
+      }
+    }
+  }
+  function drawBushes() {
+    ctx.fillStyle = '#8fdc7a';
+    var baseY = GROUND_Y - 16; // 顶部嵌入草地后沿
+    for (var rep = 0; rep < 2; rep++) {
+      var off = rep * bushW - bushOff;
+      for (var i = 0; i < bushes.length; i++) {
+        var b = bushes[i];
+        var x = b.x + off;
+        if (x + b.r * 2 < -20 || x > W + 20) continue;
+        ctx.beginPath();
+        ctx.arc(x, baseY + 18, b.r, Math.PI, 0);
+        ctx.fill();
+      }
+    }
+  }
+  function drawPipes() {
+    for (var i = 0; i < pipes.length; i++) {
+      var p = pipes[i];
+      var topH = p.gapY - p.gap / 2;
+      var botY = p.gapY + p.gap / 2;
+      pipeRect(p.x, 0, topH, true);
+      pipeRect(p.x, botY, GROUND_Y - botY, false);
+    }
+  }
+  function pipeRect(x, y, h, isTop) {
+    if (h <= 0) return;
+    var g = ctx.createLinearGradient(x, 0, x + PIPE_W, 0);
+    g.addColorStop(0, '#4ea332');
+    g.addColorStop(0.18, '#8ee06a');
+    g.addColorStop(0.45, '#5ec23a');
+    g.addColorStop(1, '#3a8f24');
+    ctx.fillStyle = g;
+    ctx.fillRect(x, y, PIPE_W, h);
+    ctx.strokeStyle = '#27611a';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x + 1, y - (isTop ? 4 : 1), PIPE_W - 2, h + 4);
+    // 管口加宽帽
+    var capH = 24;
+    var cy = isTop ? y + h - capH : y;
+    var g2 = ctx.createLinearGradient(x - 4, 0, x + PIPE_W + 4, 0);
+    g2.addColorStop(0, '#56b13a');
+    g2.addColorStop(0.2, '#9bea78');
+    g2.addColorStop(0.5, '#67cc44');
+    g2.addColorStop(1, '#3f9a28');
+    ctx.fillStyle = g2;
+    ctx.fillRect(x - 4, cy, PIPE_W + 8, capH);
+    ctx.strokeRect(x - 3, cy + 1, PIPE_W + 6, capH - 2);
+  }
+  function drawGround() {
+    // 草皮
+    ctx.fillStyle = '#7ed957';
+    ctx.fillRect(0, GROUND_Y - 16, W, 16);
+    ctx.fillStyle = '#5cb83b';
+    ctx.fillRect(0, GROUND_Y - 3, W, 3);
+    // 泥土
+    ctx.fillStyle = '#e3d68f';
+    ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
+    // 斜纹滚动
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, GROUND_Y, W, H - GROUND_Y);
+    ctx.clip();
+    ctx.fillStyle = 'rgba(180,160,90,0.45)';
+    for (var x = -40 - groundOff; x < W + 40; x += 26) {
+      ctx.beginPath();
+      ctx.moveTo(x, GROUND_Y);
+      ctx.lineTo(x + 13, GROUND_Y);
+      ctx.lineTo(x + 13 - 18, H);
+      ctx.lineTo(x - 18, H);
+      ctx.fill();
+    }
+    ctx.restore();
+    // 草顶滚动小齿
+    ctx.fillStyle = '#6cc94a';
+    for (var gx = -26 - groundOff; gx < W + 26; gx += 26) {
+      ctx.beginPath();
+      ctx.arc(gx + 13, GROUND_Y - 16, 5, Math.PI, 0);
+      ctx.fill();
+    }
+  }
+  function drawBird() {
+    ctx.save();
+    ctx.translate(BIRD_X, bird.y);
+    ctx.rotate(bird.rot);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#7a5800';
+    // 尾羽
+    ctx.fillStyle = '#f0b429';
+    ctx.beginPath();
+    ctx.moveTo(-10, -2);
+    ctx.lineTo(-21, -7);
+    ctx.lineTo(-19, 1);
+    ctx.lineTo(-22, 6);
+    ctx.lineTo(-9, 5);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    // 身体
+    var bg = ctx.createRadialGradient(-3, -5, 3, 0, 0, 16);
+    bg.addColorStop(0, '#ffe66b');
+    bg.addColorStop(1, '#fcc419');
+    ctx.fillStyle = bg;
+    ctx.beginPath();
+    ctx.arc(0, 0, 14, 0, 7);
+    ctx.fill(); ctx.stroke();
+    // 肚皮
+    ctx.fillStyle = '#fff3c2';
+    ctx.beginPath();
+    ctx.ellipse(3, 6, 8, 6, 0, 0, 7);
+    ctx.fill();
+    // 翅膀（扇动）
+    var wingAng = Math.sin(bird.wingT) * (0.55 + bird.wingBoost * 0.5) - 0.2;
+    if (state === STATE.DYING || state === STATE.OVER) wingAng = 0.5;
+    ctx.save();
+    ctx.translate(-3, 1);
+    ctx.rotate(wingAng);
+    ctx.fillStyle = '#f59f00';
+    ctx.beginPath();
+    ctx.ellipse(-5, 0, 9, 5.5, -0.25, 0, 7);
+    ctx.fill(); ctx.stroke();
+    ctx.restore();
+    // 眼睛
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(5.5, -5.5, 5.5, 0, 7);
+    ctx.fill();
+    ctx.strokeStyle = '#7a5800';
+    ctx.stroke();
+    ctx.fillStyle = '#222233';
+    ctx.beginPath();
+    ctx.arc(7.2, -5.5, 2.4, 0, 7);
+    ctx.fill();
+    if (state === STATE.DYING || state === STATE.OVER) {
+      // 死亡 ×眼
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(5.5, -5.5, 5.5, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#444455'; ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(2.8, -8.2); ctx.lineTo(8.2, -2.8);
+      ctx.moveTo(8.2, -8.2); ctx.lineTo(2.8, -2.8);
+      ctx.stroke();
+      ctx.lineWidth = 2; ctx.strokeStyle = '#7a5800';
+      ctx.beginPath(); ctx.arc(5.5, -5.5, 5.5, 0, 7); ctx.stroke();
+    }
+    // 嘴
+    ctx.fillStyle = '#ff7733';
+    ctx.strokeStyle = '#b34a12';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(10, -1.5); ctx.lineTo(19, 0.5); ctx.lineTo(10, 2);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(10, 2.5); ctx.lineTo(17.5, 3.5); ctx.lineTo(10, 5.5);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+  function drawScore(s) {
+    ctx.font = '800 44px "PingFang SC","Microsoft YaHei",system-ui,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.lineWidth = 6;
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(40,40,60,0.85)';
+    ctx.strokeText(s, W / 2, 48);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(s, W / 2, 48);
+  }
+  function drawHint(now) {
+    var a = 0.65 + Math.sin(now / 280) * 0.3;
+    ctx.font = '600 19px "PingFang SC","Microsoft YaHei",system-ui,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.lineWidth = 5;
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(40,40,60,' + (a * 0.9).toFixed(3) + ')';
+    ctx.fillStyle = 'rgba(255,255,255,' + a.toFixed(3) + ')';
+    ctx.strokeText('点按 / 空格 起飞', W / 2, H * 0.3);
+    ctx.fillText('点按 / 空格 起飞', W / 2, H * 0.3);
+    // 上指小箭头
+    var ay = H * 0.3 + 36 + Math.sin(now / 200) * 4;
+    ctx.strokeStyle = 'rgba(40,40,60,0.8)';
+    ctx.fillStyle = '#ffffff';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(W / 2, ay - 10);
+    ctx.lineTo(W / 2 - 9, ay + 4);
+    ctx.lineTo(W / 2 - 3.5, ay + 4);
+    ctx.lineTo(W / 2 - 3.5, ay + 13);
+    ctx.lineTo(W / 2 + 3.5, ay + 13);
+    ctx.lineTo(W / 2 + 3.5, ay + 4);
+    ctx.lineTo(W / 2 + 9, ay + 4);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+  }
+
+  /* ============ 主循环 ============ */
+  var last = performance.now();
+  function frame(now) {
+    var dt = Math.min((now - last) / 1000, 1 / 30); // 切后台回来不跳帧
+    last = now;
+    flashA = Math.max(0, flashA - dt * 2.6);
+    shakeT = Math.max(0, shakeT - dt);
+    update(dt);
+    draw(now);
+    requestAnimationFrame(frame);
+  }
+  resetRound();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
