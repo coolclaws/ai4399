@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI4399 · AI 小游戏厅</title>
+<meta name="description" content="一个由 AI 编写的小游戏合集，打开就能玩。">
+<style>
+  :root {
+    --bg: #0a0a12;
+    --panel: #14141f;
+    --panel-hover: #1c1c2c;
+    --text: #e8e8f0;
+    --dim: #8888a0;
+    --accent: #ffcc00;
+    --border: #2a2a3d;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px 80px; }
+
+  header { text-align: center; padding: 64px 0 16px; }
+  h1 {
+    font-size: 56px;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, #ffcc00, #ff6b6b, #c44bff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 900;
+  }
+  .tagline { color: var(--dim); margin-top: 12px; font-size: 16px; }
+  .tagline b { color: var(--accent); font-weight: 600; }
+
+  .grid {
+    margin-top: 48px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+  }
+  .card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    background: var(--panel-hover);
+  }
+  .cover {
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-body { padding: 20px; }
+  .card h2 { font-size: 22px; margin-bottom: 4px; }
+  .card .en { color: var(--dim); font-size: 13px; letter-spacing: 1px; text-transform: uppercase; }
+  .card p { color: var(--dim); font-size: 14px; margin-top: 10px; line-height: 1.6; }
+  .tags { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .tag {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    border: 1px solid var(--border);
+    color: var(--dim);
+  }
+  .play {
+    margin-top: 16px;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .card:hover .play::after { content: " →"; }
+
+  footer { text-align: center; margin-top: 72px; color: var(--dim); font-size: 13px; line-height: 2; }
+  footer a { color: var(--dim); }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 40px; }
+    header { padding-top: 40px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>AI4399</h1>
+    <div class="tagline">AI 写的小游戏厅 · 打开就玩 · 由 <b>Claude</b> 一夜爆肝</div>
+  </header>
+
+  <main class="grid" id="games"></main>
+
+  <footer>
+    持续更新中，更多游戏在路上<br>
+    <a href="https://github.com/coolclaws/ai4399" target="_blank">GitHub · coolclaws/ai4399</a>
+  </footer>
+</div>
+
+<script>
+// 加新游戏：把游戏文件夹放进仓库根目录，然后在这里加一条即可
+const GAMES = [
+  {
+    dir: "roguelike",
+    icon: "⚔️",
+    coverBg: "linear-gradient(135deg, #1a1a2e, #3d1a4e)",
+    title: "深渊五层",
+    en: "Depths of Five",
+    desc: "回合制 Roguelike 地牢爬行。探索五层深渊，捡装备、躲陷阱、击败层主，每一局地图随机生成。",
+    tags: ["Roguelike", "回合制", "随机地牢"]
+  },
+  {
+    dir: "fps",
+    icon: "🔫",
+    coverBg: "linear-gradient(135deg, #2e0a0a, #501a1a)",
+    title: "血色深渊",
+    en: "Crimson Abyss",
+    desc: "第一人称射击。在幽闭的深渊设施里杀出一条血路，弹药有限，手要稳。",
+    tags: ["FPS", "射击", "3D"]
+  },
+  {
+    dir: "kart",
+    icon: "🏎️",
+    coverBg: "linear-gradient(135deg, #0a2e1a, #1a5030)",
+    title: "疾风卡丁 GP",
+    en: "Gale Kart GP",
+    desc: "3D 卡丁车竞速。漂移过弯、氮气加速，跟 AI 车手抢下 GP 冠军。",
+    tags: ["竞速", "3D", "Three.js"]
+  }
+];
+
+document.getElementById("games").innerHTML = GAMES.map(g => `
+  <a class="card" href="./${g.dir}/">
+    <div class="cover" style="background:${g.coverBg}">${g.icon}</div>
+    <div class="card-body">
+      <h2>${g.title}</h2>
+      <div class="en">${g.en}</div>
+      <p>${g.desc}</p>
+      <div class="tags">${g.tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
+      <span class="play">开始游戏</span>
+    </div>
+  </a>
+`).join("");
+</script>
+</body>
+</html>
