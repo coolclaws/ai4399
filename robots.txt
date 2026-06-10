@@ -1,0 +1,21 @@
+# 禁止 Google 系爬虫抓取本站
+User-agent: Googlebot
+Disallow: /
+
+User-agent: Googlebot-Image
+Disallow: /
+
+User-agent: Googlebot-Video
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: APIs-Google
+Disallow: /
+
+User-agent: AdsBot-Google
+Disallow: /
+
+User-agent: Storebot-Google
+Disallow: /
