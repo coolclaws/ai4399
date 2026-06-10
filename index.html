@@ -144,7 +144,7 @@ const GAMES = [
 ];
 
 document.getElementById("games").innerHTML = GAMES.map(g => `
-  <a class="card" href="./${g.dir}/">
+  <a class="card" href="./${g.dir}/" target="_blank" rel="noopener">
     <div class="cover" style="background:${g.coverBg}">${g.icon}</div>
     <div class="card-body">
       <h2>${g.title}</h2>
