@@ -35,6 +35,9 @@
     font-size:11px; color:#fff; text-shadow:0 1px 2px #000;
   }
   .statgrp{display:flex; align-items:center; gap:6px;}
+  a.back{color:var(--dim); text-decoration:none; padding-right:14px;
+    border-right:1px solid var(--line); transition:color .2s; white-space:nowrap;}
+  a.back:hover{color:var(--gold);}
   #floorind{margin-left:auto; color:var(--gold); font-weight:bold; letter-spacing:2px;}
   /* ---------- 画布 ---------- */
   #canvasbox{position:relative; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:#0a0810;}
@@ -89,6 +92,7 @@
 <body>
 <div id="wrap">
   <div id="topbar">
+    <a class="back" href="../">← AI4399</a>
     <div class="statgrp">❤ <div class="bar"><div class="fill" id="hpfill"></div><span id="hptext"></span></div></div>
     <div class="statgrp">✦ <div class="bar"><div class="fill" id="xpfill"></div><span id="xptext"></span></div></div>
     <div class="statgrp">⚔ <span id="atkv">3</span></div>

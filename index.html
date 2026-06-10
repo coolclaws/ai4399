@@ -381,7 +381,7 @@ const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'
 
 function render(filter) {
   grid.innerHTML = GAMES.map((g, i) => `
-    <a class="card" style="--glow:${g.glow};--i:${i}" href="./${g.dir}/" target="_blank" rel="noopener"
+    <a class="card" style="--glow:${g.glow};--i:${i}" href="./${g.dir}/"
        data-tags="${esc(g.tags.join(","))}">
       <div class="cover">
         <div class="pattern"></div>
