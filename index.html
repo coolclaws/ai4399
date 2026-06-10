@@ -7,117 +7,260 @@
 <meta name="description" content="一个由 AI 编写的小游戏合集，打开就能玩。">
 <style>
   :root {
-    --bg: #0a0a12;
-    --panel: #14141f;
-    --panel-hover: #1c1c2c;
-    --text: #e8e8f0;
-    --dim: #8888a0;
-    --accent: #ffcc00;
-    --border: #2a2a3d;
+    --bg: #07070d;
+    --panel: rgba(255,255,255,.025);
+    --panel-border: rgba(255,255,255,.07);
+    --text: #ecedf4;
+    --dim: #9094ab;
+    --faint: #5a5e75;
+    --accent: #ffd34d;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
     min-height: 100vh;
+    overflow-x: hidden;
   }
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px 80px; }
 
-  header { text-align: center; padding: 64px 0 16px; }
+  /* ---- 背景氛围层 ---- */
+  .fx { position: fixed; inset: 0; z-index: -1; overflow: hidden; }
+  .fx::before {
+    content: "";
+    position: absolute; inset: -20%;
+    background:
+      radial-gradient(42% 38% at 18% 8%,  rgba(124, 77, 255, .16), transparent 70%),
+      radial-gradient(36% 32% at 85% 12%, rgba(255, 122, 61, .12), transparent 70%),
+      radial-gradient(50% 44% at 50% 105%, rgba(38, 198, 218, .08), transparent 70%);
+    animation: drift 26s ease-in-out infinite alternate;
+  }
+  @keyframes drift {
+    from { transform: translate3d(-2%, -1%, 0) scale(1); }
+    to   { transform: translate3d(2%, 2%, 0) scale(1.06); }
+  }
+  .fx::after {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: radial-gradient(70% 60% at 50% 30%, #000 0%, transparent 100%);
+  }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 28px 96px; }
+
+  /* ---- 头部 ---- */
+  header { text-align: center; padding: 84px 0 12px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; letter-spacing: 3px; color: var(--dim);
+    border: 1px solid var(--panel-border);
+    background: var(--panel);
+    padding: 7px 16px; border-radius: 99px;
+    backdrop-filter: blur(6px);
+  }
+  .badge .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #5cf2a6;
+    box-shadow: 0 0 8px #5cf2a6;
+    animation: pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes pulse { 50% { opacity: .35; } }
+
   h1 {
-    font-size: 56px;
-    letter-spacing: 4px;
-    background: linear-gradient(135deg, #ffcc00, #ff6b6b, #c44bff);
+    margin-top: 26px;
+    font-size: clamp(56px, 9vw, 92px);
+    font-weight: 900;
+    letter-spacing: 2px;
+    line-height: 1.05;
+    background: linear-gradient(110deg, #fff 10%, #ffd34d 38%, #ff7a3d 58%, #c44bff 85%);
+    background-size: 200% 100%;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    font-weight: 900;
+    animation: shimmer 7s ease-in-out infinite alternate;
   }
-  .tagline { color: var(--dim); margin-top: 12px; font-size: 16px; }
-  .tagline b { color: var(--accent); font-weight: 600; }
+  @keyframes shimmer { from { background-position: 0% 0; } to { background-position: 100% 0; } }
 
+  .tagline { margin-top: 16px; color: var(--dim); font-size: 17px; letter-spacing: 1px; }
+  .tagline b { color: var(--text); font-weight: 600; }
+
+  .stats {
+    margin-top: 34px;
+    display: inline-flex; flex-wrap: wrap; justify-content: center;
+    border: 1px solid var(--panel-border);
+    background: var(--panel);
+    border-radius: 16px;
+    backdrop-filter: blur(6px);
+  }
+  .stat { padding: 14px 28px; text-align: center; }
+  .stat + .stat { border-left: 1px solid var(--panel-border); }
+  .stat .num { font-size: 20px; font-weight: 800; color: var(--text); }
+  .stat .lbl { margin-top: 3px; font-size: 12px; color: var(--faint); letter-spacing: 1px; }
+
+  /* ---- 筛选 ---- */
+  .filters {
+    margin: 52px 0 26px;
+    display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+  }
+  .chip {
+    font-size: 13px; color: var(--dim);
+    border: 1px solid var(--panel-border);
+    background: var(--panel);
+    padding: 7px 18px; border-radius: 99px;
+    cursor: pointer; user-select: none;
+    transition: all .18s ease;
+  }
+  .chip:hover { color: var(--text); border-color: rgba(255,255,255,.2); }
+  .chip.on {
+    color: #14110a; background: var(--accent); border-color: var(--accent);
+    font-weight: 700;
+    box-shadow: 0 4px 18px rgba(255, 211, 77, .25);
+  }
+
+  /* ---- 卡片 ---- */
   .grid {
-    margin-top: 48px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+    gap: 22px;
   }
   .card {
-    display: block;
-    text-decoration: none;
-    color: inherit;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 16px;
+    --glow: #ffd34d;
+    position: relative;
+    display: flex; flex-direction: column;
+    text-decoration: none; color: inherit;
+    background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
+    border: 1px solid var(--panel-border);
+    border-radius: 20px;
     overflow: hidden;
-    transition: transform .15s ease, border-color .15s ease, background .15s ease;
+    transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+    opacity: 0;
+    animation: rise .55s cubic-bezier(.2,.7,.3,1) forwards;
+    animation-delay: calc(var(--i) * 70ms);
   }
+  @keyframes rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
   .card:hover {
-    transform: translateY(-4px);
-    border-color: var(--accent);
-    background: var(--panel-hover);
+    transform: translateY(-6px);
+    border-color: color-mix(in srgb, var(--glow) 55%, transparent);
+    box-shadow:
+      0 18px 44px -16px color-mix(in srgb, var(--glow) 38%, transparent),
+      0 2px 0 rgba(255,255,255,.06) inset;
   }
+  .card.hide { display: none; }
+
   .cover {
-    height: 150px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 64px;
-    border-bottom: 1px solid var(--border);
+    position: relative;
+    height: 168px;
+    display: flex; align-items: center; justify-content: center;
+    border-bottom: 1px solid var(--panel-border);
+    overflow: hidden;
   }
-  .card-body { padding: 20px; }
-  .card h2 { font-size: 22px; margin-bottom: 4px; }
-  .card .en { color: var(--dim); font-size: 13px; letter-spacing: 1px; text-transform: uppercase; }
-  .card p { color: var(--dim); font-size: 14px; margin-top: 10px; line-height: 1.6; }
-  .tags { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .cover .pattern {
+    position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.04) 0 2px, transparent 2px 14px);
+  }
+  .cover .halo {
+    position: absolute; width: 130px; height: 130px; border-radius: 50%;
+    background: color-mix(in srgb, var(--glow) 32%, transparent);
+    filter: blur(38px);
+    transition: transform .35s ease;
+  }
+  .cover .icon {
+    position: relative;
+    font-size: 64px;
+    filter: drop-shadow(0 10px 22px rgba(0,0,0,.55));
+    transition: transform .35s cubic-bezier(.2,.7,.3,1);
+  }
+  .card:hover .cover .icon { transform: scale(1.14) translateY(-3px); }
+  .card:hover .cover .halo { transform: scale(1.25); }
+  .cover .num {
+    position: absolute; top: 14px; left: 16px;
+    font-size: 12px; font-weight: 700; letter-spacing: 2px;
+    color: rgba(255,255,255,.32);
+  }
+  .cover .shine {
+    position: absolute; inset: 0;
+    background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.14) 50%, transparent 62%);
+    transform: translateX(-120%);
+  }
+  .card:hover .cover .shine { transition: transform .7s ease; transform: translateX(120%); }
+
+  .card-body { display: flex; flex-direction: column; flex: 1; padding: 20px 22px 22px; }
+  .title-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .card h2 { font-size: 21px; font-weight: 800; }
+  .card .en { color: var(--faint); font-size: 11.5px; letter-spacing: 2px; text-transform: uppercase; }
+  .card p { color: var(--dim); font-size: 13.5px; margin-top: 10px; line-height: 1.75; flex: 1; }
+  .meta { margin-top: 16px; display: flex; align-items: center; justify-content: space-between; }
+  .tags { display: flex; gap: 7px; flex-wrap: wrap; }
   .tag {
-    font-size: 12px;
-    padding: 3px 10px;
-    border-radius: 99px;
-    border: 1px solid var(--border);
-    color: var(--dim);
+    font-size: 11.5px; padding: 3px 11px; border-radius: 99px;
+    border: 1px solid var(--panel-border); color: var(--faint);
   }
   .play {
-    margin-top: 16px;
-    display: inline-block;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--accent);
+    flex-shrink: 0;
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 700;
+    color: var(--glow);
   }
-  .card:hover .play::after { content: " →"; }
+  .play svg { transition: transform .2s ease; }
+  .card:hover .play svg { transform: translateX(4px); }
 
-  footer { text-align: center; margin-top: 72px; color: var(--dim); font-size: 13px; line-height: 2; }
-  footer a { color: var(--dim); }
+  /* ---- 占位卡 ---- */
+  .soon {
+    border: 1px dashed rgba(255,255,255,.14);
+    border-radius: 20px;
+    min-height: 320px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+    color: var(--faint); font-size: 14px; letter-spacing: 1px;
+    opacity: 0; animation: rise .55s cubic-bezier(.2,.7,.3,1) forwards;
+    animation-delay: calc(var(--i) * 70ms);
+  }
+  .soon .spark { font-size: 34px; animation: pulse 2.4s ease-in-out infinite; }
 
-  @media (max-width: 600px) {
-    h1 { font-size: 40px; }
-    header { padding-top: 40px; }
+  footer { text-align: center; margin-top: 84px; color: var(--faint); font-size: 13px; line-height: 2.1; }
+  footer a { color: var(--dim); text-decoration: none; border-bottom: 1px solid rgba(255,255,255,.15); }
+  footer a:hover { color: var(--text); }
+
+  @media (max-width: 640px) {
+    header { padding-top: 56px; }
+    .stat { padding: 11px 18px; }
+    .wrap { padding: 0 18px 72px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fx::before, h1, .badge .dot, .soon .spark { animation: none; }
+    .card, .soon { animation-duration: .01s; }
   }
 </style>
 </head>
 <body>
+<div class="fx"></div>
 <div class="wrap">
   <header>
+    <div class="badge"><span class="dot"></span>AI ARCADE · 持续上新</div>
     <h1>AI4399</h1>
-    <div class="tagline">AI 写的小游戏厅 · 打开就玩 · 由 <b>Claude</b> 一夜爆肝</div>
+    <div class="tagline">由 <b>Claude</b> 编写的小游戏厅 · 零下载 · 打开即玩</div>
+    <div class="stats" id="stats"></div>
   </header>
+
+  <nav class="filters" id="filters" aria-label="按标签筛选"></nav>
 
   <main class="grid" id="games"></main>
 
   <footer>
-    持续更新中，更多游戏在路上<br>
-    <a href="https://github.com/coolclaws/ai4399" target="_blank">GitHub · coolclaws/ai4399</a>
+    所有游戏均为单文件原生实现，无引擎、无广告、无埋点<br>
+    <a href="https://github.com/coolclaws/ai4399" target="_blank" rel="noopener">GitHub · coolclaws/ai4399</a>
   </footer>
 </div>
 
 <script>
-// 加新游戏：把游戏文件夹放进仓库根目录，然后在这里加一条即可
+// ====== 加新游戏：把游戏文件夹放进仓库根目录，然后在数组末尾追加一条 ======
+// dir: 文件夹名 | icon: 封面表情 | glow: 主题色 | title/en/desc/tags: 展示文案
 const GAMES = [
   {
     dir: "roguelike",
     icon: "⚔️",
-    coverBg: "linear-gradient(135deg, #1a1a2e, #3d1a4e)",
+    glow: "#b06cff",
     title: "深渊五层",
     en: "Depths of Five",
     desc: "回合制 Roguelike 地牢爬行。探索五层深渊，捡装备、躲陷阱、击败层主，每一局地图随机生成。",
@@ -126,35 +269,82 @@ const GAMES = [
   {
     dir: "fps",
     icon: "🔫",
-    coverBg: "linear-gradient(135deg, #2e0a0a, #501a1a)",
+    glow: "#ff5d5d",
     title: "血色深渊",
     en: "Crimson Abyss",
-    desc: "第一人称射击。在幽闭的深渊设施里杀出一条血路，弹药有限，手要稳。",
+    desc: "Doom 风格第一人称射击。自制光线投射引擎，在幽闭的深渊设施里杀出一条血路，弹药有限，手要稳。",
     tags: ["FPS", "射击", "3D"]
   },
   {
     dir: "kart",
     icon: "🏎️",
-    coverBg: "linear-gradient(135deg, #0a2e1a, #1a5030)",
+    glow: "#4dd2ff",
     title: "疾风卡丁 GP",
     en: "Gale Kart GP",
-    desc: "3D 卡丁车竞速。漂移过弯、氮气加速，跟 AI 车手抢下 GP 冠军。",
-    tags: ["竞速", "3D", "Three.js"]
+    desc: "Three.js 真 3D 卡丁车竞速。漂移蓄力、道具互扔、AI 车手陪跑，还支持双人同屏对战。",
+    tags: ["竞速", "3D", "双人"]
   }
 ];
 
-document.getElementById("games").innerHTML = GAMES.map(g => `
-  <a class="card" href="./${g.dir}/" target="_blank" rel="noopener">
-    <div class="cover" style="background:${g.coverBg}">${g.icon}</div>
-    <div class="card-body">
-      <h2>${g.title}</h2>
-      <div class="en">${g.en}</div>
-      <p>${g.desc}</p>
-      <div class="tags">${g.tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
-      <span class="play">开始游戏</span>
-    </div>
-  </a>
-`).join("");
+const grid = document.getElementById("games");
+const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function render(filter) {
+  grid.innerHTML = GAMES.map((g, i) => `
+    <a class="card" style="--glow:${g.glow};--i:${i}" href="./${g.dir}/" target="_blank" rel="noopener"
+       data-tags="${esc(g.tags.join(","))}">
+      <div class="cover">
+        <div class="pattern"></div>
+        <div class="halo"></div>
+        <span class="num">NO.${String(i + 1).padStart(2, "0")}</span>
+        <span class="icon">${g.icon}</span>
+        <div class="shine"></div>
+      </div>
+      <div class="card-body">
+        <div class="title-row"><h2>${esc(g.title)}</h2><span class="en">${esc(g.en)}</span></div>
+        <p>${esc(g.desc)}</p>
+        <div class="meta">
+          <div class="tags">${g.tags.map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>
+          <span class="play">进入游戏
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </span>
+        </div>
+      </div>
+    </a>
+  `).join("") + `
+    <div class="soon" style="--i:${GAMES.length}">
+      <span class="spark">✨</span>
+      <span>更多游戏制作中</span>
+    </div>`;
+
+  if (filter && filter !== "全部") {
+    grid.querySelectorAll(".card").forEach(c => {
+      c.classList.toggle("hide", !c.dataset.tags.split(",").includes(filter));
+    });
+  }
+}
+
+// 统计条
+const allTags = [...new Set(GAMES.flatMap(g => g.tags))];
+document.getElementById("stats").innerHTML = [
+  [GAMES.length, "款游戏"],
+  ["100%", "AI 编写"],
+  ["0", "广告"],
+  ["∞", "免费畅玩"]
+].map(([n, l]) => `<div class="stat"><div class="num">${n}</div><div class="lbl">${l}</div></div>`).join("");
+
+// 筛选 chips
+const filters = document.getElementById("filters");
+filters.innerHTML = ["全部", ...allTags].map((t, i) =>
+  `<span class="chip${i === 0 ? " on" : ""}" data-t="${esc(t)}">${esc(t)}</span>`).join("");
+filters.addEventListener("click", e => {
+  const chip = e.target.closest(".chip");
+  if (!chip) return;
+  filters.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c === chip));
+  render(chip.dataset.t);
+});
+
+render();
 </script>
 </body>
 </html>
