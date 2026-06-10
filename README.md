@@ -2,7 +2,7 @@
 
 一个由 AI（Claude）编写的纯静态小游戏合集，打开就能玩。
 
-**在线游玩：** 部署于 Cloudflare Pages（见下方部署说明）
+**在线游玩：** https://4399.myhubs.dev （备用：https://ai4399.pages.dev）
 
 ## 游戏列表
 
@@ -20,10 +20,4 @@
 
 ## 部署（Cloudflare Pages）
 
-纯静态站点，无构建步骤：
-
-- **Framework preset:** None
-- **Build command:**（留空）
-- **Build output directory:** `/`
-
-连接本仓库后，每次 push 到 `main` 自动部署。
+纯静态站点，无构建步骤。push 到 `main` 后由 [GitHub Actions](.github/workflows/deploy.yml) 自动执行 `wrangler pages deploy` 部署到 Cloudflare Pages（凭据存于仓库 Secrets：`CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID`）。
