@@ -6,6 +6,18 @@
 <title>成语方阵 · AI4399</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+:root {
+  --serif: "Songti SC", "STSong", "Noto Serif SC", "SimSun", serif;
+  --kai: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", "STSong", serif;
+  --jade: #3f9b72;
+  --jade-deep: #2a6e4f;
+  --amber: #c99a30;
+  --amber-deep: #8f6a14;
+  --ink: #34343f;
+  --ink-deep: #23232e;
+  --paper-ink: #ded6c2;
+  --hairline: #2c2c40;
+}
 html, body { height: 100%; }
 body {
   background: #0a0a12;
@@ -16,6 +28,19 @@ body {
   align-items: center;
   padding: 12px 12px 40px;
   overflow-x: hidden;
+}
+/* 远山氛围层：程序化 SVG 山影 + 极淡天光，零外部资源 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 36% at 50% -6%, rgba(255, 204, 0, .05), transparent 70%),
+    radial-gradient(40% 28% at 84% 6%, rgba(232, 226, 208, .04), transparent 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 360' preserveAspectRatio='none'%3E%3Cpath d='M0 360V230q90-78 182-50t172-24q94-60 190 6t184 10q98-54 198 16t154 6 120-36v182z' fill='%23191b2c' opacity='.5'/%3E%3Cpath d='M0 360v-64q122-62 236-18t216-32q110-56 220 18t206 0q112-52 322 32v64z' fill='%23121420' opacity='.85'/%3E%3C/svg%3E") bottom / 100% min(38vh, 360px) no-repeat,
+    linear-gradient(#0a0a12, #0b0c15);
 }
 a.back {
   position: fixed;
@@ -33,17 +58,45 @@ a.back {
 }
 a.back:hover { color: #ffcc00; opacity: 1; }
 
-header { text-align: center; margin-top: 40px; }
+header { text-align: center; margin-top: 42px; }
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.title-rule {
+  flex: 0 0 44px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #5a5340);
+}
+.title-rule.r { background: linear-gradient(to left, transparent, #5a5340); }
 h1 {
-  font-size: 28px;
-  letter-spacing: 8px;
-  margin-left: 8px;
-  background: linear-gradient(135deg, #ffcc00, #ff9a3d);
+  font-family: var(--kai);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 9px;
+  margin-right: -9px;
+  background: linear-gradient(172deg, #f6e8ba 8%, #ffcc00 46%, #c89a2a 92%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 10px rgba(255, 180, 0, .16));
 }
-.subtitle { color: #8888a0; font-size: 13px; margin-top: 6px; }
+.seal {
+  display: inline-block;
+  width: 26px; height: 26px;
+  line-height: 27px;
+  font-family: var(--kai);
+  font-size: 16px;
+  text-align: center;
+  color: #f3e2cd;
+  background: linear-gradient(150deg, #b9382a, #7e2116);
+  border-radius: 5px;
+  box-shadow: inset 0 0 0 1px rgba(243, 226, 205, .4), inset 0 0 6px rgba(60, 8, 2, .6), 0 2px 6px rgba(0, 0, 0, .45);
+  transform: rotate(8deg) translateY(-8px);
+}
+.subtitle { font-family: var(--kai); color: #8888a0; font-size: 13px; letter-spacing: 2px; margin-top: 7px; }
 
 .tabs {
   display: flex;
@@ -58,17 +111,19 @@ h1 {
   padding: 7px 16px;
   border-radius: 20px;
   border: 1px solid #2a2a3d;
-  background: #14141f;
+  background: linear-gradient(172deg, #171724, #12121c);
   color: #8888a0;
   cursor: pointer;
   transition: all .2s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .25);
 }
 .tabs button.active {
-  background: #2a2417;
-  border-color: #ffcc00;
+  background: linear-gradient(172deg, #2d2614, #231e10);
+  border-color: #b89a2e;
   color: #ffcc00;
+  box-shadow: inset 0 1px 0 rgba(255, 204, 0, .14), 0 2px 8px rgba(0, 0, 0, .3);
 }
-.tabs button:hover { border-color: #ffcc00; }
+.tabs button:hover { border-color: #b89a2e; }
 #statsBtn, #helpBtn { padding: 7px 12px; }
 
 .legend {
@@ -86,22 +141,25 @@ h1 {
   margin-right: 4px;
   vertical-align: -1px;
 }
-.legend .g { background: #4caf6d; }
-.legend .y { background: #d9a92f; }
-.legend .x { background: #3a3a4d; }
+.legend i {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 1px 2px rgba(0, 0, 0, .4);
+}
+.legend .g { background: linear-gradient(160deg, #49a87c, var(--jade-deep)); }
+.legend .y { background: linear-gradient(160deg, #d3a83c, var(--amber-deep)); }
+.legend .x { background: linear-gradient(160deg, #3c3c4a, var(--ink-deep)); }
 
 main { width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; }
 
 #board {
   display: grid;
   grid-template-rows: repeat(6, auto);
-  gap: 8px;
-  margin: 16px 0 14px;
+  gap: 9px;
+  margin: 18px 0 14px;
 }
 .row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: 9px;
 }
 .row.shake { animation: shake .45s; }
 @keyframes shake {
@@ -112,13 +170,13 @@ main { width: 100%; max-width: 420px; display: flex; flex-direction: column; ali
 .tile {
   width: min(17.5vw, 68px);
   height: min(17.5vw, 68px);
-  perspective: 600px;
+  perspective: 700px;
 }
 .tile-inner {
   position: relative;
   width: 100%; height: 100%;
   transform-style: preserve-3d;
-  transition: transform .5s;
+  transition: transform .62s cubic-bezier(.36, .04, .22, 1);
 }
 .tile.flip .tile-inner { transform: rotateX(180deg); }
 .face {
@@ -127,19 +185,27 @@ main { width: 100%; max-width: 420px; display: flex; flex-direction: column; ali
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: min(8vw, 32px);
-  font-weight: 600;
+  font-family: var(--serif);
+  font-size: min(8.4vw, 34px);
+  font-weight: 700;
   border-radius: 10px;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
+/* 空白字牌：宣纸暗面 + 极淡田字格中线 */
 .face.front {
-  background: #14141f;
-  border: 2px solid #2a2a3d;
+  color: var(--paper-ink);
+  background:
+    linear-gradient(to right, transparent calc(50% - .5px), rgba(222, 214, 194, .05) calc(50% - .5px), rgba(222, 214, 194, .05) calc(50% + .5px), transparent calc(50% + .5px)),
+    linear-gradient(to bottom, transparent calc(50% - .5px), rgba(222, 214, 194, .05) calc(50% - .5px), rgba(222, 214, 194, .05) calc(50% + .5px), transparent calc(50% + .5px)),
+    linear-gradient(165deg, #1d1d2b 0%, #15151f 55%, #11111a 100%);
+  border: 1px solid var(--hairline);
+  box-shadow: inset 0 1px 0 rgba(232, 226, 208, .07), 0 3px 8px rgba(0, 0, 0, .35);
 }
 .tile.typed .face.front {
-  border-color: #55556e;
-  animation: pop .12s;
+  border-color: #6a6450;
+  box-shadow: inset 0 1px 0 rgba(232, 226, 208, .1), 0 3px 10px rgba(0, 0, 0, .4);
+  animation: pop .14s;
 }
 @keyframes pop {
   0% { transform: scale(.85); }
@@ -148,12 +214,52 @@ main { width: 100%; max-width: 420px; display: flex; flex-direction: column; ali
 }
 .face.back {
   transform: rotateX(180deg);
-  color: #fff;
+  color: #fbf7ec;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
+  overflow: hidden;
 }
-.back.correct { background: linear-gradient(160deg, #4caf6d, #35935a); box-shadow: 0 2px 10px rgba(76,175,109,.35); }
-.back.present { background: linear-gradient(160deg, #d9a92f, #bd8d1c); box-shadow: 0 2px 10px rgba(217,169,47,.35); }
-.back.absent  { background: #3a3a4d; color: #b8b8c8; }
+/* 翻转落定时一道牌面光泽扫过 */
+.face.back::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(115deg, transparent 32%, rgba(255, 255, 255, .3) 47%, rgba(255, 255, 255, .12) 52%, transparent 65%) no-repeat;
+  background-size: 240% 100%;
+  background-position: 130% 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.tile.flip .face.back::after { animation: sheen .9s ease-out .34s; }
+.tile.instant .face.back::after { animation: none; }
+@keyframes sheen {
+  0% { background-position: 130% 0; opacity: 0; }
+  15% { opacity: 1; }
+  100% { background-position: -80% 0; opacity: 0; }
+}
+/* 三态玉牌：青玉绿 / 琥珀黄 / 墨灰 */
+.back.correct {
+  background:
+    radial-gradient(130% 70% at 50% -10%, rgba(255, 255, 255, .18), transparent 55%),
+    linear-gradient(165deg, #4aa57b 0%, #357a59 55%, #275c44 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), inset 0 -2px 5px rgba(10, 40, 28, .45), 0 4px 14px rgba(63, 155, 114, .28);
+}
+.back.present {
+  background:
+    radial-gradient(130% 70% at 50% -10%, rgba(255, 255, 255, .2), transparent 55%),
+    linear-gradient(165deg, #d5a83e 0%, #b0821e 55%, #8a6210 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), inset 0 -2px 5px rgba(74, 52, 4, .45), 0 4px 14px rgba(201, 154, 48, .28);
+}
+.back.absent {
+  background:
+    radial-gradient(130% 70% at 50% -10%, rgba(255, 255, 255, .07), transparent 55%),
+    linear-gradient(165deg, #3a3a48 0%, #2c2c38 55%, #23232e 100%);
+  color: #a6a6ba;
+  text-shadow: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 -2px 5px rgba(0, 0, 0, .35), 0 3px 10px rgba(0, 0, 0, .35);
+}
 .tile.dance { animation: dance .55s ease both; }
+.tile.dance .face.back { filter: brightness(1.12); }
 @keyframes dance {
   0%, 100% { transform: translateY(0); }
   40% { transform: translateY(-18px); }
@@ -162,41 +268,49 @@ main { width: 100%; max-width: 420px; display: flex; flex-direction: column; ali
 
 .input-row {
   display: flex;
-  gap: 8px;
+  gap: 9px;
   width: 100%;
-  max-width: 330px;
+  max-width: 332px;
 }
 #guessInput {
   flex: 1;
   min-width: 0;
-  font-family: inherit;
-  font-size: 18px;
-  letter-spacing: 6px;
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: 7px;
   text-align: center;
   padding: 11px 8px;
   border-radius: 10px;
-  border: 1px solid #2a2a3d;
-  background: #14141f;
-  color: #e8e8f0;
+  border: 1px solid var(--hairline);
+  background: linear-gradient(172deg, #15151f, #101019);
+  color: #ece5d3;
   outline: none;
-  transition: border-color .2s;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, .35);
+  transition: border-color .2s, box-shadow .2s;
 }
-#guessInput:focus { border-color: #ffcc00; }
-#guessInput::placeholder { color: #55556e; letter-spacing: 2px; font-size: 14px; }
+#guessInput:focus {
+  border-color: #b89a2e;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, .35), 0 0 0 2px rgba(255, 204, 0, .12);
+}
+#guessInput::placeholder { color: #55556e; letter-spacing: 2px; font-size: 14px; font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
 #guessInput:disabled { opacity: .45; }
 #submitBtn {
-  font-family: inherit;
-  font-size: 16px;
-  font-weight: 600;
-  padding: 0 22px;
+  font-family: var(--kai);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-indent: 3px;
+  padding: 0 19px;
   border-radius: 10px;
-  border: none;
-  background: linear-gradient(135deg, #ffcc00, #ffb300);
-  color: #1a1400;
+  border: 1px solid rgba(255, 230, 140, .55);
+  background: linear-gradient(172deg, #ffd84d, #f0b400);
+  color: #221a00;
   cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .42), 0 3px 10px rgba(255, 187, 0, .2);
   transition: transform .12s, filter .2s;
 }
-#submitBtn:hover { filter: brightness(1.1); }
+#submitBtn:hover { filter: brightness(1.07); }
 #submitBtn:active { transform: scale(.95); }
 #submitBtn:disabled { opacity: .4; cursor: default; }
 
@@ -205,12 +319,14 @@ main { width: 100%; max-width: 420px; display: flex; flex-direction: column; ali
   top: 64px;
   left: 50%;
   transform: translateX(-50%) translateY(-8px);
-  background: #e8e8f0;
-  color: #14141f;
+  background: linear-gradient(178deg, #f3ead6, #e7dbbc);
+  color: #29231a;
+  border: 1px solid #c9b98c;
   font-size: 14px;
   font-weight: 600;
   padding: 9px 18px;
   border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .45);
   opacity: 0;
   pointer-events: none;
   transition: opacity .25s, transform .25s;
@@ -223,42 +339,70 @@ main { width: 100%; max-width: 420px; display: flex; flex-direction: column; ali
 #letters {
   width: 100%;
   margin-top: 20px;
-  background: #14141f;
-  border: 1px solid #2a2a3d;
+  background: linear-gradient(176deg, #14141f, #10101a);
+  border: 1px solid var(--hairline);
   border-radius: 14px;
   padding: 12px 14px 14px;
+  box-shadow: inset 0 1px 0 rgba(232, 226, 208, .05), 0 4px 14px rgba(0, 0, 0, .25);
 }
 #letters h3 {
+  font-family: var(--kai);
   font-size: 13px;
-  color: #8888a0;
+  letter-spacing: 4px;
+  text-indent: 4px;
+  color: #9a916e;
   font-weight: 500;
-  margin-bottom: 8px;
-  text-align: center;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
-.letter-group { display: flex; align-items: flex-start; gap: 8px; margin-top: 8px; }
+#letters h3::before, #letters h3::after {
+  content: "";
+  flex: 0 0 34px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #3a3650);
+}
+#letters h3::after { background: linear-gradient(to left, transparent, #3a3650); }
+.letter-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px dashed #23233a;
+}
 .letter-group .tag {
   flex-shrink: 0;
-  font-size: 12px;
-  padding: 3px 8px;
-  border-radius: 6px;
-  margin-top: 2px;
+  font-family: var(--kai);
+  writing-mode: vertical-rl;
+  font-size: 11px;
+  letter-spacing: 3px;
+  line-height: 1;
+  padding: 5px 3px 8px;
+  border-radius: 4px;
+  margin-top: 0;
 }
-.tag.g { background: rgba(76,175,109,.18); color: #6fd693; }
-.tag.y { background: rgba(217,169,47,.18); color: #ecc35a; }
-.tag.x { background: rgba(90,90,115,.25); color: #8888a0; }
+.tag.g { background: rgba(63, 155, 114, .12); color: #7cc9a3; box-shadow: inset 2px 0 0 var(--jade); }
+.tag.y { background: rgba(201, 154, 48, .12); color: #dcb35a; box-shadow: inset 2px 0 0 var(--amber); }
+.tag.x { background: rgba(110, 110, 140, .12); color: #8888a0; box-shadow: inset 2px 0 0 #4a4a5e; }
 .letter-group .chars { display: flex; flex-wrap: wrap; gap: 6px; }
 .char-chip {
   width: 30px; height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 7px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: 6px;
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 700;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, .3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 2px 4px rgba(0, 0, 0, .3);
 }
-.char-chip.correct { background: #4caf6d; color: #fff; }
-.char-chip.present { background: #d9a92f; color: #fff; }
-.char-chip.absent { background: #3a3a4d; color: #8888a0; }
+.char-chip.correct { background: linear-gradient(165deg, #4aa57b, #2c684c); color: #f4fdf8; }
+.char-chip.present { background: linear-gradient(165deg, #d5a83e, #94690f); color: #fffdf2; }
+.char-chip.absent { background: linear-gradient(165deg, #34343f, #23232c); color: #8a8a9e; text-shadow: none; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 2px 4px rgba(0, 0, 0, .3); }
 .letter-group .none { color: #55556e; font-size: 13px; margin-top: 6px; }
 
 /* 弹窗 */
@@ -277,8 +421,8 @@ main { width: 100%; max-width: 420px; display: flex; flex-direction: column; ali
 }
 #overlay.show { opacity: 1; pointer-events: auto; }
 .modal {
-  background: #14141f;
-  border: 1px solid #2a2a3d;
+  background: linear-gradient(178deg, #16161f, #10101a);
+  border: 1px solid #3a3424;
   border-radius: 18px;
   padding: 24px 22px;
   width: 100%;
@@ -286,32 +430,65 @@ main { width: 100%; max-width: 420px; display: flex; flex-direction: column; ali
   max-height: 86vh;
   overflow-y: auto;
   text-align: center;
+  box-shadow: inset 0 0 0 1px rgba(232, 214, 160, .05), 0 18px 50px rgba(0, 0, 0, .55);
   transform: translateY(14px) scale(.97);
   transition: transform .25s;
 }
 #overlay.show .modal { transform: translateY(0) scale(1); }
-.modal h2 { font-size: 21px; margin-bottom: 6px; }
-.modal h2.win { color: #6fd693; }
-.modal h2.lose { color: #ff7a7a; }
+.modal h2 { font-family: var(--kai); font-size: 21px; letter-spacing: 3px; margin-bottom: 6px; }
+.modal h2.win { color: #7fd0a6; }
+.modal h2.lose { color: #d98b76; }
+/* 答案揭晓：卷轴质感，两侧轴杆 */
 .modal .answer-box {
-  background: #0a0a12;
-  border: 1px solid #2a2a3d;
-  border-radius: 12px;
-  padding: 14px;
+  position: relative;
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(232, 214, 160, .05), transparent 60%),
+    linear-gradient(176deg, #12121c, #0d0d15);
+  border: 1px solid #3d3526;
+  border-radius: 10px;
+  padding: 15px 26px;
   margin: 14px 0;
+  overflow: hidden;
+}
+.modal .answer-box::before, .modal .answer-box::after {
+  content: "";
+  position: absolute;
+  top: 6px; bottom: 6px;
+  width: 5px;
+  border-radius: 3px;
+  background: linear-gradient(to bottom, #7a6736, #4a3d1d 50%, #7a6736);
+  box-shadow: 0 0 4px rgba(0, 0, 0, .5);
+}
+.modal .answer-box::before { left: 7px; }
+.modal .answer-box::after { right: 7px; }
+/* 失败时答案庄重展开 */
+.modal .answer-box.unfurl {
+  transform-origin: 50% 0;
+  animation: unfurl .9s cubic-bezier(.25, .8, .3, 1) both;
+}
+@keyframes unfurl {
+  0% { transform: scaleY(.12); opacity: 0; }
+  55% { opacity: 1; }
+  100% { transform: scaleY(1); opacity: 1; }
 }
 .modal .answer-word {
-  font-size: 26px;
+  font-family: var(--kai);
+  font-size: 28px;
   font-weight: 700;
-  letter-spacing: 10px;
-  margin-left: 10px;
-  color: #ffcc00;
+  letter-spacing: 12px;
+  margin-left: 12px;
+  background: linear-gradient(172deg, #f6e8ba 8%, #ffcc00 50%, #c89a2a 92%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(255, 180, 0, .14));
 }
 .modal .answer-def {
+  font-family: var(--serif);
   font-size: 13px;
-  color: #8888a0;
-  margin-top: 8px;
-  line-height: 1.6;
+  color: #a89c85;
+  margin-top: 9px;
+  line-height: 1.7;
   text-align: left;
 }
 .stats-grid {
@@ -320,15 +497,23 @@ main { width: 100%; max-width: 420px; display: flex; flex-direction: column; ali
   gap: 6px;
   margin: 14px 0;
 }
-.stat-cell { background: #0a0a12; border-radius: 10px; padding: 10px 4px; }
-.stat-cell b { display: block; font-size: 22px; color: #ffcc00; }
+.stat-cell {
+  background: linear-gradient(176deg, #101019, #0c0c14);
+  border: 1px solid #23233a;
+  border-radius: 10px;
+  padding: 10px 4px;
+  box-shadow: inset 0 1px 0 rgba(232, 226, 208, .04);
+}
+.stat-cell b { display: block; font-family: var(--serif); font-size: 22px; color: #ffcc00; }
 .stat-cell span { font-size: 11px; color: #8888a0; }
 .modal .btns { display: flex; gap: 10px; margin-top: 14px; }
 .modal .btns button {
   flex: 1;
-  font-family: inherit;
-  font-size: 15px;
-  font-weight: 600;
+  font-family: var(--kai);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-indent: 2px;
   padding: 11px 0;
   border-radius: 10px;
   border: none;
@@ -336,9 +521,17 @@ main { width: 100%; max-width: 420px; display: flex; flex-direction: column; ali
   transition: filter .15s, transform .12s;
 }
 .modal .btns button:active { transform: scale(.96); }
-.btn-share { background: linear-gradient(135deg, #4caf6d, #35935a); color: #fff; }
-.btn-again { background: linear-gradient(135deg, #ffcc00, #ffb300); color: #1a1400; }
-.btn-plain { background: #2a2a3d; color: #e8e8f0; }
+.btn-share {
+  background: linear-gradient(172deg, #4aa57b, #2e6e50);
+  color: #f4fdf8;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 3px 10px rgba(63, 155, 114, .2);
+}
+.btn-again {
+  background: linear-gradient(172deg, #ffd84d, #f0b400);
+  color: #221a00;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .42), 0 3px 10px rgba(255, 187, 0, .2);
+}
+.btn-plain { background: #262638; color: #e8e8f0; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06); }
 .modal .btns button:hover { filter: brightness(1.12); }
 .countdown { font-size: 13px; color: #8888a0; margin-top: 12px; }
 .countdown b { color: #e8e8f0; font-variant-numeric: tabular-nums; }
@@ -362,10 +555,12 @@ main { width: 100%; max-width: 420px; display: flex; flex-direction: column; ali
   line-height: 26px;
   text-align: center;
   border-radius: 6px;
-  color: #fff;
-  font-weight: 600;
+  color: #fbf7ec;
+  font-family: var(--serif);
+  font-weight: 700;
   margin-right: 4px;
   vertical-align: -6px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 2px 4px rgba(0, 0, 0, .3);
 }
 
 #confettiCanvas {
@@ -390,11 +585,13 @@ main { width: 100%; max-width: 420px; display: flex; flex-direction: column; ali
 }
 @media (max-height: 740px) {
   header { margin-top: 34px; }
-  h1 { font-size: 23px; }
-  #board { gap: 6px; margin: 10px 0 10px; }
-  .row { gap: 6px; }
+  h1 { font-size: 24px; letter-spacing: 7px; margin-right: -7px; }
+  .title-rule { flex-basis: 34px; }
+  .seal { width: 22px; height: 22px; line-height: 23px; font-size: 13px; transform: rotate(8deg) translateY(-6px); }
+  #board { gap: 7px; margin: 11px 0 11px; }
+  .row { gap: 7px; }
   .tile { width: min(15.5vw, 56px); height: min(15.5vw, 56px); }
-  .face { font-size: min(7.5vw, 27px); }
+  .face { font-size: min(7.5vw, 28px); }
 }
 </style>
 </head>
@@ -403,7 +600,12 @@ main { width: 100%; max-width: 420px; display: flex; flex-direction: column; ali
 <canvas id="confettiCanvas"></canvas>
 
 <header>
-  <h1>成语方阵</h1>
+  <div class="title-row">
+    <span class="title-rule"></span>
+    <h1>成语方阵</h1>
+    <span class="seal" aria-hidden="true">成</span>
+    <span class="title-rule r"></span>
+  </div>
   <p class="subtitle">六次机会，猜出隐藏的四字成语</p>
   <div class="tabs">
     <button id="tabDaily" class="active">每日一题</button>
@@ -964,6 +1166,7 @@ function paintRowInstant(r, guess, result) {
     back.textContent = guess[c];
     back.classList.add(result[c]);
     tile.querySelector(".tile-inner").style.transition = "none";
+    tile.classList.add("instant");
     tile.classList.add("flip");
   }
 }
@@ -978,12 +1181,12 @@ function revealRow(r, guess, result, onDone) {
     setTimeout(() => {
       tile.classList.add("flip");
       sfx.flip();
-    }, c * 320);
+    }, c * 290);
   }
   setTimeout(() => {
     state.revealing = false;
     onDone();
-  }, (COLS - 1) * 320 + 560);
+  }, (COLS - 1) * 290 + 700);
 }
 
 function mirrorInput() {
@@ -1063,14 +1266,15 @@ function confetti() {
   const ctx = canvas.getContext("2d");
   canvas.width = innerWidth;
   canvas.height = innerHeight;
-  const colors = ["#ffcc00", "#4caf6d", "#d9a92f", "#ff7a7a", "#7ab8ff", "#e8e8f0"];
+  /* 金粉色系 */
+  const colors = ["#ffd86b", "#f0b429", "#d4920a", "#fff0c2", "#caa84e", "#f6e8ba"];
   const parts = [];
-  for (let i = 0; i < 130; i++) {
+  for (let i = 0; i < 150; i++) {
     parts.push({
       x: Math.random() * canvas.width,
       y: -20 - Math.random() * canvas.height * 0.4,
-      w: 6 + Math.random() * 6,
-      h: 8 + Math.random() * 8,
+      w: 3 + Math.random() * 7,
+      h: 4 + Math.random() * 9,
       vy: 2.2 + Math.random() * 3,
       vx: -1.5 + Math.random() * 3,
       rot: Math.random() * Math.PI,
@@ -1138,9 +1342,9 @@ function showHelpModal() {
     "<h2>玩法说明</h2>" +
     '<div class="help-list">' +
     "你有 <b>6 次</b>机会猜出一个四字成语。每次提交后，方格会逐一翻转：<br>" +
-    '<span class="demo" style="background:#4caf6d">画</span>绿色：这个字位置完全正确<br>' +
-    '<span class="demo" style="background:#d9a92f">蛇</span>黄色：成语里有这个字，但位置不对<br>' +
-    '<span class="demo" style="background:#3a3a4d">足</span>灰色：成语里没有这个字<br><br>' +
+    '<span class="demo" style="background:linear-gradient(165deg,#4aa57b,#2c684c)">画</span>绿色：这个字位置完全正确<br>' +
+    '<span class="demo" style="background:linear-gradient(165deg,#d5a83e,#94690f)">蛇</span>黄色：成语里有这个字，但位置不对<br>' +
+    '<span class="demo" style="background:linear-gradient(165deg,#34343f,#23232c);color:#8a8a9e">足</span>灰色：成语里没有这个字<br><br>' +
     "「每日一题」全网同题，每天一换；「无限模式」可以连续畅玩。猜测可以是任意四个汉字，不限于成语。" +
     "</div>" +
     '<div class="btns"><button class="btn-again" onclick="closeModal()">开始挑战</button></div>'
@@ -1192,7 +1396,7 @@ function showResultModal() {
     ? '<p style="color:#8888a0;font-size:13px">' + state.guesses.length + " 次猜中答案</p>"
     : "";
   const answerBox =
-    '<div class="answer-box"><div class="answer-word">' + state.answer + "</div>" +
+    '<div class="answer-box' + (state.win ? "" : " unfurl") + '"><div class="answer-word">' + state.answer + "</div>" +
     '<div class="answer-def">【释义】' + state.def + "</div></div>";
   let btns = '<div class="btns"><button class="btn-share" onclick="doShare()">分享战绩</button>';
   if (state.mode === "endless") {

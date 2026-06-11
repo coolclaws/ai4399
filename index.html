@@ -83,25 +83,25 @@
   }
   @keyframes shimmer { from { background-position: 0% 0; } to { background-position: 100% 0; } }
 
-  .tagline { margin-top: 16px; color: var(--dim); font-size: 17px; letter-spacing: 1px; }
+  .tagline { margin-top: 18px; color: var(--dim); font-size: 17px; letter-spacing: 1.5px; }
   .tagline b { color: var(--text); font-weight: 600; }
 
   .stats {
-    margin-top: 34px;
+    margin-top: 36px;
     display: inline-flex; flex-wrap: wrap; justify-content: center;
     border: 1px solid var(--panel-border);
     background: var(--panel);
     border-radius: 16px;
     backdrop-filter: blur(6px);
   }
-  .stat { padding: 14px 28px; text-align: center; }
+  .stat { padding: 15px 30px; text-align: center; }
   .stat + .stat { border-left: 1px solid var(--panel-border); }
-  .stat .num { font-size: 20px; font-weight: 800; color: var(--text); }
-  .stat .lbl { margin-top: 3px; font-size: 12px; color: var(--faint); letter-spacing: 1px; }
+  .stat .num { font-size: 21px; font-weight: 800; color: var(--text); letter-spacing: .5px; }
+  .stat .lbl { margin-top: 4px; font-size: 11.5px; color: var(--faint); letter-spacing: 2px; }
 
   /* ---- 筛选 ---- */
   .filters {
-    margin: 52px 0 26px;
+    margin: 54px 0 28px;
     display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
   }
   .chip {
@@ -130,7 +130,7 @@
     position: relative;
     display: flex; flex-direction: column;
     text-decoration: none; color: inherit;
-    background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
+    background: linear-gradient(180deg, #101019, rgba(255,255,255,.015));
     border: 1px solid var(--panel-border);
     border-radius: 20px;
     overflow: hidden;
@@ -151,56 +151,64 @@
 
   .cover {
     position: relative;
-    height: 168px;
-    display: flex; align-items: center; justify-content: center;
-    border-bottom: 1px solid var(--panel-border);
+    aspect-ratio: 16 / 10;
     overflow: hidden;
+    background: #0c0c15;
   }
-  .cover .pattern {
+  .cover .art {
     position: absolute; inset: 0;
-    background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.04) 0 2px, transparent 2px 14px);
+    width: 100%; height: 100%; display: block;
+    transform: scale(1.05);
+    transform-origin: 50% 40%;
+    transition: transform .65s cubic-bezier(.2,.7,.3,1), filter .65s ease;
   }
-  .cover .halo {
-    position: absolute; width: 130px; height: 130px; border-radius: 50%;
-    background: color-mix(in srgb, var(--glow) 32%, transparent);
-    filter: blur(38px);
-    transition: transform .35s ease;
+  .card:hover .cover .art { transform: scale(1.12) translateY(-3px); filter: saturate(1.18) brightness(1.05); }
+  .cover::after {
+    content: "";
+    position: absolute; left: 0; right: 0; bottom: -1px; height: 46%;
+    background: linear-gradient(180deg, transparent, rgba(16,16,25,.55) 58%, #101019);
+    pointer-events: none;
   }
-  .cover .icon {
-    position: relative;
-    font-size: 64px;
-    filter: drop-shadow(0 10px 22px rgba(0,0,0,.55));
-    transition: transform .35s cubic-bezier(.2,.7,.3,1);
-  }
-  .card:hover .cover .icon { transform: scale(1.14) translateY(-3px); }
-  .card:hover .cover .halo { transform: scale(1.25); }
   .cover .num {
-    position: absolute; top: 14px; left: 16px;
-    font-size: 12px; font-weight: 700; letter-spacing: 2px;
-    color: rgba(255,255,255,.32);
+    position: absolute; top: 13px; left: 16px;
+    font-size: 11.5px; font-weight: 700; letter-spacing: 2.5px;
+    color: rgba(255,255,255,.55);
+    text-shadow: 0 1px 10px rgba(0,0,0,.8);
+    padding: 3px 9px; border-radius: 99px;
+    background: rgba(8,8,14,.42);
+    border: 1px solid rgba(255,255,255,.1);
+    backdrop-filter: blur(3px);
+    z-index: 2;
   }
   .cover .shine {
-    position: absolute; inset: 0;
-    background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.14) 50%, transparent 62%);
-    transform: translateX(-120%);
+    position: absolute; inset: 0; z-index: 1;
+    background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.13) 50%, transparent 62%);
+    transform: translateX(-130%);
+    pointer-events: none;
   }
-  .card:hover .cover .shine { transition: transform .7s ease; transform: translateX(120%); }
+  .card:hover .cover .shine { transition: transform .75s ease; transform: translateX(130%); }
 
-  .card-body { display: flex; flex-direction: column; flex: 1; padding: 20px 22px 22px; }
+  .card-body { display: flex; flex-direction: column; flex: 1; padding: 18px 22px 20px; }
   .title-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-  .card h2 { font-size: 21px; font-weight: 800; }
-  .card .en { color: var(--faint); font-size: 11.5px; letter-spacing: 2px; text-transform: uppercase; }
-  .card p { color: var(--dim); font-size: 13.5px; margin-top: 10px; line-height: 1.75; flex: 1; }
-  .meta { margin-top: 16px; display: flex; align-items: center; justify-content: space-between; }
+  .card h2 { font-size: 21px; font-weight: 800; letter-spacing: .5px; }
+  .card .en { color: var(--faint); font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; }
+  .card p { color: var(--dim); font-size: 13.5px; margin-top: 9px; line-height: 1.75; flex: 1; }
+  .meta {
+    margin-top: 15px; padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,.06);
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
   .tags { display: flex; gap: 7px; flex-wrap: wrap; }
   .tag {
-    font-size: 11.5px; padding: 3px 11px; border-radius: 99px;
+    font-size: 11px; padding: 3.5px 11px; border-radius: 99px;
     border: 1px solid var(--panel-border); color: var(--faint);
+    background: rgba(255,255,255,.025);
+    letter-spacing: .5px;
   }
   .play {
     flex-shrink: 0;
     display: inline-flex; align-items: center; gap: 6px;
-    font-size: 13px; font-weight: 700;
+    font-size: 13px; font-weight: 700; letter-spacing: .5px;
     color: var(--glow);
   }
   .play svg { transition: transform .2s ease; }
@@ -210,7 +218,7 @@
   .soon {
     border: 1px dashed rgba(255,255,255,.14);
     border-radius: 20px;
-    min-height: 320px;
+    min-height: 380px;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
     color: var(--faint); font-size: 14px; letter-spacing: 1px;
     opacity: 0; animation: rise .55s cubic-bezier(.2,.7,.3,1) forwards;
@@ -226,10 +234,12 @@
     header { padding-top: 56px; }
     .stat { padding: 11px 18px; }
     .wrap { padding: 0 18px 72px; }
+    .grid { grid-template-columns: 1fr; }
   }
   @media (prefers-reduced-motion: reduce) {
     .fx::before, h1, .badge .dot, .soon .spark { animation: none; }
     .card, .soon { animation-duration: .01s; }
+    .cover .art, .card:hover .cover .art { transform: none; transition: none; }
   }
 </style>
 </head>
@@ -255,229 +265,647 @@
 
 <script>
 // ====== 加新游戏：把游戏文件夹放进仓库根目录，然后在数组末尾追加一条 ======
-// dir: 文件夹名 | icon: 封面表情 | glow: 主题色 | title/en/desc/tags: 展示文案
+// dir: 文件夹名 | glow: 主题色 | cover: 封面场景 SVG（320x200，外壳渐变/渐晕由 coverSVG 统一补齐）
 const GAMES = [
   {
     dir: "roguelike",
-    icon: "⚔️",
     glow: "#b06cff",
     title: "深渊五层",
     en: "Depths of Five",
     desc: "回合制 Roguelike 地牢爬行。探索五层深渊，捡装备、躲陷阱、击败层主，每一局地图随机生成。",
-    tags: ["Roguelike", "回合制", "随机地牢"]
+    tags: ["Roguelike", "回合制", "随机地牢"],
+    cover: `<defs><linearGradient id="rg-f" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff8c2e"/><stop offset="1" stop-color="#ffe49a"/></linearGradient></defs>
+<rect width="320" height="200" fill="#151026"/>
+<g stroke="#231a3e" stroke-width="2"><path d="M0 42h320M0 76h320M0 110h320M0 144h320"/><path d="M46 42v34M126 42v34M206 42v34M286 42v34M86 76v34M166 76v34M246 76v34M46 110v34M126 110v34M206 110v34M286 110v34"/></g>
+<circle cx="160" cy="118" r="74" fill="url(#cv-roguelike-halo)" opacity=".7"/>
+<path d="M124 168v-58a36 36 0 0 1 72 0v58z" fill="#07060f"/>
+<path d="M124 168v-58a36 36 0 0 1 72 0v58" fill="none" stroke="#46367a" stroke-width="3"/>
+<g fill="#221944"><rect x="132" y="160" width="56" height="8"/><rect x="140" y="151" width="40" height="9"/><rect x="148" y="142" width="24" height="9"/></g>
+<circle cx="64" cy="72" r="32" fill="url(#cv-roguelike-halo)"/>
+<rect x="60" y="82" width="8" height="24" rx="3" fill="#3b2c63"/>
+<path d="M64 54c9 9 8 18 0 25-8-7-9-16 0-25z" fill="url(#rg-f)"/>
+<ellipse cx="64" cy="72" rx="3" ry="6" fill="#fff3c9"/>
+<circle cx="256" cy="72" r="32" fill="url(#cv-roguelike-halo)"/>
+<rect x="252" y="82" width="8" height="24" rx="3" fill="#3b2c63"/>
+<path d="M256 54c9 9 8 18 0 25-8-7-9-16 0-25z" fill="url(#rg-f)"/>
+<ellipse cx="256" cy="72" rx="3" ry="6" fill="#fff3c9"/>
+<rect y="168" width="320" height="32" fill="#0e0a1c"/>
+<path d="M0 168h320" stroke="#312557" stroke-width="2"/>
+<g fill="#0a0716"><circle cx="158" cy="136" r="6"/><rect x="152" y="141" width="12" height="17" rx="3"/><rect x="149" y="145" width="4" height="11" rx="2"/><rect x="163" y="145" width="4" height="11" rx="2"/></g>
+<rect x="168" y="130" width="3" height="20" rx="1.5" fill="#9b8ad8"/><rect x="164" y="135" width="11" height="3" rx="1.5" fill="#9b8ad8"/>`
   },
   {
     dir: "fps",
-    icon: "🔫",
     glow: "#ff5d5d",
     title: "血色深渊",
     en: "Crimson Abyss",
     desc: "Doom 风格第一人称射击。自制光线投射引擎，在幽闭的深渊设施里杀出一条血路，弹药有限，手要稳。",
-    tags: ["FPS", "射击", "3D"]
+    tags: ["FPS", "射击", "3D"],
+    cover: `<rect width="320" height="200" fill="#140a10"/>
+<path d="M0 0h320L196 66h-72z" fill="#1b0e15"/>
+<path d="M0 0l124 66v68L0 200z" fill="#241218"/>
+<path d="M320 0L196 66v68l124 66z" fill="#1f1014"/>
+<path d="M0 200l124-66h72l124 66z" fill="#190c12"/>
+<rect x="124" y="66" width="72" height="68" fill="#0a0509"/>
+<rect x="148" y="80" width="24" height="54" fill="#2a0f16"/>
+<rect x="148" y="80" width="24" height="54" fill="none" stroke="#ff5d5d" stroke-width="2" opacity=".85"/>
+<g stroke="#ff5d5d" fill="none"><path d="M0 36l124 60" stroke-width="3" opacity=".7"/><path d="M320 36L196 96" stroke-width="3" opacity=".7"/><path d="M0 168l124-46" stroke-width="2" opacity=".45"/><path d="M320 168l-124-46" stroke-width="2" opacity=".45"/></g>
+<g stroke="#321820" stroke-width="2"><path d="M44 24v152M86 46v108M234 46v108M276 24v152"/></g>
+<circle cx="160" cy="156" r="46" fill="url(#cv-fps-halo)"/>
+<path d="M146 200v-26l6-6h16l6 6v26z" fill="#0b0609"/>
+<rect x="156" y="164" width="8" height="9" rx="2" fill="#1c0f14"/>
+<path d="M160 132l7 17 17-9-10 17 19 7-19 7 10 17-17-9-7 17-7-17-17 9 10-17-19-7 19-7-10-17 17 9z" fill="#ffd9a8"/>
+<circle cx="160" cy="160" r="8" fill="#fff6e8"/>`
   },
   {
     dir: "kart",
-    icon: "🏎️",
     glow: "#4dd2ff",
     title: "疾风卡丁 GP",
     en: "Gale Kart GP",
     desc: "Three.js 真 3D 卡丁车竞速。漂移蓄力、道具互扔、AI 车手陪跑，还支持双人同屏对战。",
-    tags: ["竞速", "3D", "双人"]
+    tags: ["竞速", "3D", "双人"],
+    cover: `<rect width="320" height="200" fill="#0a1322"/>
+<g fill="#9fd8ff" opacity=".5"><circle cx="40" cy="30" r="1.5"/><circle cx="120" cy="18" r="1"/><circle cx="260" cy="22" r="1.5"/><circle cx="300" cy="56" r="1"/><circle cx="196" cy="38" r="1"/></g>
+<path d="M0 84h28V64h20v20h26V70h18v14h40V60h22v24h30V72h24v12h32V66h20v18h40v8H0z" fill="#101c30"/>
+<path d="M-20 220C60 130 170 112 340 150" fill="none" stroke="#0f1a2c" stroke-width="92"/>
+<path d="M-20 220C60 130 170 112 340 150" fill="none" stroke="#1d2f4e" stroke-width="80"/>
+<path d="M-22 176C55 100 175 76 345 112" fill="none" stroke="#ff4d5e" stroke-width="7" stroke-dasharray="16 16"/>
+<path d="M-22 176C55 100 175 76 345 112" fill="none" stroke="#e8ecf4" stroke-width="7" stroke-dasharray="16 16" stroke-dashoffset="16"/>
+<path d="M-20 220C60 130 170 112 340 150" fill="none" stroke="#3f5e8e" stroke-width="3" stroke-dasharray="18 14" opacity=".8"/>
+<g stroke="#7fd4ff" opacity=".5" stroke-width="2"><path d="M238 96h34M252 110h40M244 124h30"/></g>
+<path d="M118 178c24-14 42-22 58-30" stroke="#0b1320" stroke-width="5" opacity=".9" fill="none"/>
+<path d="M126 188c24-14 42-22 58-30" stroke="#0b1320" stroke-width="5" opacity=".9" fill="none"/>
+<g fill="#bfe3ff" opacity=".16"><circle cx="120" cy="168" r="10"/><circle cx="103" cy="177" r="13"/><circle cx="136" cy="159" r="8"/></g>
+<circle cx="192" cy="138" r="52" fill="url(#cv-kart-halo)"/>
+<g transform="translate(192 138) rotate(-14)">
+<rect x="-27" y="-17" width="13" height="11" rx="3" fill="#0c1018"/><rect x="-27" y="7" width="13" height="11" rx="3" fill="#0c1018"/><rect x="15" y="-16" width="12" height="10" rx="3" fill="#0c1018"/><rect x="15" y="7" width="12" height="10" rx="3" fill="#0c1018"/>
+<rect x="-28" y="-12" width="6" height="25" rx="2" fill="#2a8fc0"/>
+<rect x="-21" y="-9" width="42" height="19" rx="8" fill="#4dd2ff"/>
+<rect x="9" y="-6" width="12" height="13" rx="4" fill="#bfeaff"/>
+<circle cx="-3" cy="0" r="6.5" fill="#ffd34d"/>
+</g>`
   },
   {
     dir: "2048",
-    icon: "🔢",
     glow: "#ffb84d",
     title: "2048",
     en: "2048",
     desc: "经典数字合成。滑动合并相同数字，一路冲向 2048——再往上你还能合到多少？",
-    tags: ["益智", "经典复刻"]
+    tags: ["益智", "经典复刻"],
+    cover: `<defs><linearGradient id="t2-a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd34d"/><stop offset="1" stop-color="#ff9a2e"/></linearGradient></defs>
+<rect width="320" height="200" fill="#141021"/>
+<g fill="#1b1530"><rect x="10" y="10" width="64" height="64" rx="10"/><rect x="82" y="10" width="64" height="64" rx="10"/><rect x="154" y="10" width="64" height="64" rx="10"/><rect x="226" y="10" width="64" height="64" rx="10"/><rect x="10" y="82" width="64" height="64" rx="10"/><rect x="226" y="82" width="64" height="64" rx="10"/><rect x="10" y="154" width="64" height="64" rx="10"/><rect x="82" y="154" width="64" height="64" rx="10"/><rect x="226" y="154" width="64" height="64" rx="10"/></g>
+<g font-family="Arial, sans-serif" font-weight="800" text-anchor="middle">
+<g transform="rotate(-10 70 62)"><rect x="41" y="33" width="58" height="58" rx="9" fill="#2e2546"/><text x="70" y="73" font-size="30" fill="#9b8fc0">2</text></g>
+<g transform="rotate(7 262 54)"><rect x="233" y="25" width="58" height="58" rx="9" fill="#372c52"/><text x="262" y="62" font-size="24" fill="#b7a8e0">16</text></g>
+<g transform="rotate(-6 84 152)"><rect x="52" y="120" width="64" height="64" rx="10" fill="#5d4a8a"/><text x="84" y="160" font-size="22" fill="#e8defc">512</text></g>
+<circle cx="186" cy="112" r="76" fill="url(#cv-2048-halo)"/>
+<g transform="rotate(4 186 112)"><rect x="138" y="64" width="96" height="96" rx="14" fill="url(#t2-a)"/><rect x="141" y="67" width="90" height="90" rx="12" fill="none" stroke="#ffe9b8" stroke-width="2" opacity=".75"/><text x="186" y="124" font-size="33" fill="#3a2406">2048</text></g>
+</g>
+<path d="M250 50l3 9 9 3-9 3-3 9-3-9-9-3 9-3z" fill="#ffe9b8"/>
+<path d="M118 96l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#ffe9b8" opacity=".7"/>`
   },
   {
     dir: "snake",
-    icon: "🐍",
     glow: "#50fa7b",
     title: "霓虹贪吃蛇",
     en: "Neon Snake",
     desc: "霓虹光效版贪吃蛇。吃豆变长别咬到自己，节奏越来越快，灯光越来越骚。",
-    tags: ["休闲", "经典复刻"]
+    tags: ["休闲", "经典复刻"],
+    cover: `<defs><linearGradient id="sn-g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1f9c4c"/><stop offset="1" stop-color="#7dffab"/></linearGradient></defs>
+<rect width="320" height="200" fill="#08130c"/>
+<g stroke="#12321e" stroke-width="1"><path d="M0 40h320M0 80h320M0 120h320M0 160h320M40 0v200M80 0v200M120 0v200M160 0v200M200 0v200M240 0v200M280 0v200"/></g>
+<path d="M30 158h96a26 26 0 0 0 0-52H80a24 24 0 0 1 0-48h148" stroke="#50fa7b" stroke-width="30" opacity=".15" fill="none" stroke-linecap="round"/>
+<path d="M30 158h96a26 26 0 0 0 0-52H80a24 24 0 0 1 0-48h148" stroke="url(#sn-g)" stroke-width="17" fill="none" stroke-linecap="round"/>
+<path d="M30 158h96a26 26 0 0 0 0-52H80a24 24 0 0 1 0-48h148" stroke="#0b2c18" stroke-width="17" fill="none" stroke-dasharray="2 13" opacity=".5"/>
+<circle cx="230" cy="58" r="34" fill="url(#cv-snake-halo)"/>
+<circle cx="231" cy="58" r="13" fill="#7dffab"/>
+<circle cx="236" cy="52" r="3.6" fill="#fff"/><circle cx="237" cy="52" r="1.9" fill="#06140b"/>
+<circle cx="236" cy="64" r="3.6" fill="#fff"/><circle cx="237" cy="64" r="1.9" fill="#06140b"/>
+<path d="M245 58h10m-4-4l4 4-4 4" stroke="#ff5d7a" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="282" cy="134" r="22" fill="#ff4d5e" opacity=".16"/>
+<circle cx="282" cy="134" r="10" fill="#ff4d5e"/>
+<circle cx="279" cy="131" r="3" fill="#ffb8c2" opacity=".85"/>
+<path d="M282 123c2-6 7-8 10-8-1 6-5 9-10 8z" fill="#50fa7b"/>`
   },
   {
     dir: "blocks",
-    icon: "🧱",
     glow: "#5d8bff",
     title: "方块消行",
     en: "Block Lines",
     desc: "经典落块消行。旋转、平移、速降，让七种方块严丝合缝，连消才是高分之道。",
-    tags: ["益智", "经典复刻"]
+    tags: ["益智", "经典复刻"],
+    cover: `<defs><linearGradient id="bl-t" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5d8bff" stop-opacity="0"/><stop offset="1" stop-color="#5d8bff" stop-opacity=".3"/></linearGradient></defs>
+<rect width="320" height="200" fill="#0b1020"/>
+<rect x="22" width="7" height="200" fill="#1a2440"/><rect x="291" width="7" height="200" fill="#1a2440"/>
+<rect x="136" y="0" width="78" height="42" fill="url(#bl-t)"/>
+<g fill="#5d8bff"><rect x="137" y="44" width="24" height="24" rx="4"/><rect x="163" y="44" width="24" height="24" rx="4"/><rect x="189" y="44" width="24" height="24" rx="4"/><rect x="163" y="70" width="24" height="24" rx="4"/></g>
+<g stroke="#bcd0ff" stroke-width="2.5" opacity=".7"><path d="M140 47h18M166 47h18M192 47h18M166 73h18"/></g>
+<rect x="29" y="138" width="262" height="36" fill="url(#cv-blocks-halo)"/>
+<rect x="31" y="146" width="258" height="22" rx="3" fill="#dfe9ff" opacity=".9"/>
+<g fill="#2a9d8f"><rect x="32" y="116" width="24" height="24" rx="4"/></g><g fill="#7a4ac0"><rect x="265" y="116" width="24" height="24" rx="4"/></g>
+<g fill="#2a9d8f"><rect x="32" y="172" width="24" height="24" rx="4"/><rect x="188" y="172" width="24" height="24" rx="4"/></g>
+<g fill="#c4762a"><rect x="58" y="172" width="24" height="24" rx="4"/><rect x="240" y="172" width="24" height="24" rx="4"/></g>
+<g fill="#7a4ac0"><rect x="84" y="172" width="24" height="24" rx="4"/><rect x="265" y="172" width="24" height="24" rx="4"/></g>
+<g fill="#3da05a"><rect x="110" y="172" width="24" height="24" rx="4"/><rect x="214" y="172" width="24" height="24" rx="4"/></g>
+<g fill="#bf4a5a"><rect x="162" y="172" width="24" height="24" rx="4"/></g>
+<g stroke="rgba(255,255,255,.3)" stroke-width="2"><path d="M35 175h18M61 175h18M87 175h18M113 175h18M165 175h18M191 175h18M217 175h18M243 175h18M268 175h18M35 119h18M268 119h18"/></g>
+<path d="M52 130l2.5 7 7 2.5-7 2.5-2.5 7-2.5-7-7-2.5 7-2.5z" fill="#fff" opacity=".9"/>
+<path d="M270 134l2 5.5 5.5 2-5.5 2-2 5.5-2-5.5-5.5-2 5.5-2z" fill="#fff" opacity=".7"/>`
   },
   {
     dir: "mines",
-    icon: "💣",
     glow: "#c8d0e0",
     title: "扫雷",
     en: "Minesweeper",
     desc: "经典扫雷复刻。靠数字推理排雷插旗，初级 / 中级 / 高级三档棋盘，手别抖。",
-    tags: ["益智", "经典复刻"]
+    tags: ["益智", "经典复刻"],
+    cover: `<rect width="320" height="200" fill="#0e1322"/>
+<g fill="#161c2c"><rect x="-8" y="62" width="64" height="64" rx="4"/><rect x="60" y="62" width="64" height="64" rx="4"/><rect x="128" y="62" width="64" height="64" rx="4"/><rect x="-8" y="130" width="64" height="64" rx="4"/><rect x="60" y="130" width="64" height="64" rx="4"/><rect x="128" y="130" width="64" height="64" rx="4"/></g>
+<g fill="#252e44"><rect x="-8" y="-6" width="64" height="64" rx="4"/><rect x="60" y="-6" width="64" height="64" rx="4"/><rect x="128" y="-6" width="64" height="64" rx="4"/><rect x="196" y="-6" width="64" height="64" rx="4"/><rect x="264" y="-6" width="64" height="64" rx="4"/><rect x="196" y="62" width="64" height="64" rx="4"/><rect x="264" y="62" width="64" height="64" rx="4"/><rect x="196" y="130" width="64" height="64" rx="4"/><rect x="264" y="130" width="64" height="64" rx="4"/></g>
+<g stroke="rgba(255,255,255,.16)" stroke-width="4" fill="none"><path d="M-8 50V-4h60M60 50V-4h60M128 50V-4h60M196 50V-4h60M264 50V-4h56M196 118V64h60M264 118V64h56M196 186v-54h60M264 186v-54h56"/></g>
+<g stroke="rgba(0,0,0,.4)" stroke-width="4" fill="none"><path d="M-6 56h60V0M62 56h60V0M130 56h60V0M198 56h60V0M266 56h54M198 124h60V68M266 124h54M198 192h60v-56M266 192h54"/></g>
+<g font-family="Arial, sans-serif" font-weight="800" font-size="34" text-anchor="middle">
+<text x="24" y="106" fill="#6da8ff">1</text>
+<text x="92" y="106" fill="#7ad97a">2</text>
+<text x="160" y="106" fill="#6da8ff">1</text>
+<text x="92" y="174" fill="#6da8ff">1</text>
+<text x="160" y="174" fill="#ff7a7a">3</text>
+</g>
+<circle cx="228" cy="92" r="36" fill="url(#cv-mines-halo)"/>
+<rect x="226" y="74" width="5" height="32" rx="2" fill="#d8dce8"/>
+<path d="M226 76l-20 9 20 9z" fill="#ff4d5e"/>
+<rect x="217" y="106" width="23" height="6" rx="2" fill="#9aa2b8"/>`
   },
   {
     dir: "flappy",
-    icon: "🐤",
     glow: "#ffe04d",
     title: "笨鸟先飞",
     en: "Flappy Bird",
     desc: "一键扇翅膀，钻过一根根管道缝隙。规则三秒学会，高分一晚上练不出来。",
-    tags: ["休闲", "街机"]
+    tags: ["休闲", "街机"],
+    cover: `<defs><linearGradient id="fl-p" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3da05a"/><stop offset=".5" stop-color="#5ac478"/><stop offset="1" stop-color="#2a7a44"/></linearGradient></defs>
+<rect width="320" height="200" fill="#0d1626"/>
+<g fill="#1b2940"><ellipse cx="60" cy="40" rx="34" ry="10"/><ellipse cx="280" cy="160" rx="30" ry="9"/><ellipse cx="160" cy="22" rx="26" ry="8"/></g>
+<g fill="#9fb8d8" opacity=".5"><circle cx="30" cy="70" r="1.4"/><circle cx="86" cy="26" r="1"/><circle cx="294" cy="40" r="1.4"/><circle cx="250" cy="80" r="1"/></g>
+<g opacity=".45"><rect x="290" y="-4" width="36" height="52" fill="url(#fl-p)"/><rect x="290" y="146" width="36" height="58" fill="url(#fl-p)"/></g>
+<rect x="206" y="-4" width="46" height="58" fill="url(#fl-p)"/>
+<rect x="200" y="54" width="58" height="17" rx="3" fill="#4ab368"/>
+<rect x="206" y="146" width="46" height="58" fill="url(#fl-p)"/>
+<rect x="200" y="130" width="58" height="17" rx="3" fill="#4ab368"/>
+<g stroke="rgba(255,255,255,.25)" stroke-width="3"><path d="M212 0v50M212 150v50"/></g>
+<circle cx="116" cy="98" r="38" fill="url(#cv-flappy-halo)"/>
+<circle cx="116" cy="98" r="17" fill="#ffe04d"/>
+<path d="M103 103a14 9 0 0 0 26 1z" fill="#fff0a8"/>
+<ellipse cx="106" cy="98" rx="8.5" ry="5.5" fill="#f0b32e" transform="rotate(-22 106 98)"/>
+<circle cx="124" cy="92" r="5.5" fill="#fff"/><circle cx="126" cy="92" r="2.6" fill="#1a1a24"/>
+<path d="M132 97l12 4-12 5z" fill="#ff8c42"/>
+<g stroke="#ffe04d" opacity=".35" stroke-width="2.5" stroke-linecap="round"><path d="M86 86H66M88 99H60M86 112H68"/></g>
+<rect y="190" width="320" height="10" fill="#16223a"/>`
   },
   {
     dir: "balls",
-    icon: "🫧",
     glow: "#4dc3ff",
     title: "大球吃小球",
     en: "Hungry Balls",
     desc: "吞噬比你小的，躲开比你大的。从一颗小不点一路吃成全场最大的球。",
-    tags: ["休闲", "街机"]
+    tags: ["休闲", "街机"],
+    cover: `<defs><radialGradient id="ba-g" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#9fdfff"/><stop offset=".5" stop-color="#4dc3ff"/><stop offset="1" stop-color="#1565c0"/></radialGradient></defs>
+<rect width="320" height="200" fill="#081120"/>
+<g fill="#3a558a"><circle cx="36" cy="36" r="2.5"/><circle cx="150" cy="24" r="2"/><circle cx="60" cy="170" r="2.5"/><circle cx="186" cy="178" r="2"/><circle cx="20" cy="104" r="2"/><circle cx="120" cy="60" r="1.6"/></g>
+<circle cx="238" cy="106" r="88" fill="url(#cv-balls-halo)"/>
+<circle cx="238" cy="106" r="58" fill="url(#ba-g)"/>
+<ellipse cx="217" cy="83" rx="16" ry="9" fill="#fff" opacity=".45" transform="rotate(-28 217 83)"/>
+<circle cx="196" cy="96" r="9.5" fill="#fff"/><circle cx="192" cy="97" r="4.6" fill="#0a1a30"/>
+<path d="M188 130a22 16 0 0 1-6-12" stroke="#0a3a66" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="92" cy="76" r="13" fill="#ff7ab8"/><circle cx="87" cy="73" r="3.6" fill="#fff"/><circle cx="86" cy="73" r="1.8" fill="#301020"/>
+<g stroke="#ff7ab8" opacity=".4" stroke-width="2" stroke-linecap="round"><path d="M110 70h13M112 80h11"/></g>
+<circle cx="58" cy="130" r="9" fill="#ffd34d"/><circle cx="54" cy="128" r="2.6" fill="#fff"/><circle cx="53.4" cy="128" r="1.3" fill="#302008"/>
+<g stroke="#ffd34d" opacity=".4" stroke-width="2" stroke-linecap="round"><path d="M72 126h10M73 134h8"/></g>
+<circle cx="122" cy="152" r="6" fill="#7ad97a"/>
+<g stroke="#7ad97a" opacity=".4" stroke-width="2" stroke-linecap="round"><path d="M132 149h8"/></g>`
   },
   {
     dir: "runner",
-    icon: "🏃",
     glow: "#4dffa6",
     title: "都市狂奔",
     en: "City Dash",
     desc: "三车道跑酷。跳跃、滑铲、左右闪避，一路收金币，速度只会越来越快。",
-    tags: ["跑酷", "街机"]
+    tags: ["跑酷", "街机"],
+    cover: `<rect width="320" height="200" fill="#0a1018"/>
+<path d="M0 30h22v26h16V36h20v44h18V52h16v40h14v108H0z" fill="#0f1a26"/>
+<path d="M320 34h-24v30h-14V46h-22v48h-16V64h-14v36h-12v100h102z" fill="#0f1a26"/>
+<g fill="#4dffa6" opacity=".22"><rect x="6" y="40" width="5" height="7"/><rect x="6" y="56" width="5" height="7"/><rect x="44" y="46" width="5" height="7"/><rect x="62" y="60" width="5" height="7"/><rect x="96" y="72" width="5" height="7"/><rect x="306" y="44" width="5" height="7"/><rect x="288" y="56" width="5" height="7"/><rect x="252" y="70" width="5" height="7"/><rect x="226" y="78" width="5" height="7"/></g>
+<path d="M58 200L148 66h24l90 134z" fill="#121a28"/>
+<path d="M58 200L148 66" stroke="#4dffa6" stroke-width="2" opacity=".5" fill="none"/>
+<path d="M262 200L172 66" stroke="#4dffa6" stroke-width="2" opacity=".5" fill="none"/>
+<path d="M155 66L122 200" stroke="#2c3c54" stroke-width="3" stroke-dasharray="10 12" fill="none"/>
+<path d="M165 66l33 134" stroke="#2c3c54" stroke-width="3" stroke-dasharray="10 12" fill="none"/>
+<g fill="#ffd34d"><circle cx="160" cy="90" r="4"/><circle cx="160" cy="108" r="5.5"/></g>
+<g fill="none" stroke="#b8901e" stroke-width="1.5"><circle cx="160" cy="90" r="2"/><circle cx="160" cy="108" r="3"/></g>
+<circle cx="160" cy="148" r="46" fill="url(#cv-runner-halo)"/>
+<g stroke="#08130e" stroke-linecap="round" fill="none">
+<circle cx="160" cy="120" r="9" fill="#08130e" stroke="none"/>
+<path d="M160 130v22" stroke-width="9"/>
+<path d="M158 136l-13 9M162 136l13-7" stroke-width="6.5"/>
+<path d="M159 151l-11 19M161 151l9 17" stroke-width="7"/>
+</g>
+<g fill="#4dffa6" opacity=".25"><circle cx="146" cy="176" r="5"/><circle cx="174" cy="172" r="4"/><circle cx="158" cy="184" r="3"/></g>`
   },
   {
     dir: "swing",
-    icon: "🦸",
     glow: "#ff7ab8",
     title: "荡绳侠",
     en: "Rope Hero",
     desc: "一键发射绳索荡过城市天际，松手时机决定飞多远，连击荡出风骚走位。",
-    tags: ["街机", "休闲"]
+    tags: ["街机", "休闲"],
+    cover: `<rect width="320" height="200" fill="#0c0d1d"/>
+<circle cx="262" cy="46" r="42" fill="url(#cv-swing-halo)"/>
+<circle cx="262" cy="46" r="20" fill="#ffe9f2"/>
+<circle cx="256" cy="42" r="4" fill="#f0c9da" opacity=".6"/><circle cx="269" cy="52" r="3" fill="#f0c9da" opacity=".5"/>
+<g fill="#c9cdf0" opacity=".6"><circle cx="40" cy="26" r="1.5"/><circle cx="96" cy="14" r="1"/><circle cx="180" cy="30" r="1.3"/><circle cx="306" cy="100" r="1"/><circle cx="20" cy="80" r="1"/></g>
+<g fill="#11122a"><rect x="0" y="118" width="46" height="82"/><rect x="52" y="94" width="40" height="106"/><rect x="98" y="130" width="36" height="70"/><rect x="206" y="108" width="44" height="92"/><rect x="256" y="134" width="64" height="66"/></g>
+<g fill="#ff7ab8" opacity=".28"><rect x="60" y="104" width="5" height="7"/><rect x="74" y="118" width="5" height="7"/><rect x="60" y="134" width="5" height="7"/><rect x="216" y="118" width="5" height="7"/><rect x="230" y="132" width="5" height="7"/><rect x="12" y="128" width="5" height="7"/><rect x="268" y="144" width="5" height="7"/></g>
+<path d="M48 128C92 170 172 170 234 122" stroke="#ff7ab8" stroke-width="2.5" stroke-dasharray="2 10" fill="none" opacity=".85" stroke-linecap="round"/>
+<circle cx="196" cy="6" r="3.5" fill="#ff7ab8"/>
+<path d="M196 6L124 96" stroke="#e8a8c4" stroke-width="2.5"/>
+<circle cx="122" cy="102" r="38" fill="url(#cv-swing-halo)"/>
+<g stroke="#2a1226" stroke-linecap="round" fill="none">
+<circle cx="118" cy="92" r="7.5" fill="#2a1226" stroke="none"/>
+<path d="M124 98c-7 7-11 11-19 15" stroke-width="7.5"/>
+<path d="M124 96l-2-8" stroke-width="5.5"/>
+<path d="M105 113l-13 3M105 113l-5 13" stroke-width="6"/>
+</g>
+<g stroke="#ff7ab8" opacity=".4" stroke-width="2" stroke-linecap="round"><path d="M88 84l-10-6M84 98l-12-2"/></g>`
   },
   {
     dir: "baozi",
-    icon: "🥟",
     glow: "#ffa94d",
     title: "包子铺大亨",
     en: "Baozi Tycoon",
     desc: "放置经营。捏包子、上蒸笼、雇伙计、升级铺面，把街角小店做成包子帝国。",
-    tags: ["经营", "放置"]
+    tags: ["经营", "放置"],
+    cover: `<defs><radialGradient id="bz-g" cx="42%" cy="28%" r="80%"><stop offset="0" stop-color="#fff8ec"/><stop offset="1" stop-color="#ead0a8"/></radialGradient></defs>
+<rect width="320" height="200" fill="#160f0d"/>
+<circle cx="44" cy="46" r="28" fill="url(#cv-baozi-halo)"/>
+<rect x="40" y="26" width="8" height="6" rx="1" fill="#c0392b"/>
+<ellipse cx="44" cy="46" rx="13" ry="15" fill="#ff5d4d"/>
+<g stroke="#d04030" stroke-width="1.5" fill="none" opacity=".8"><path d="M38 33c-3 8-3 18 0 26M50 33c3 8 3 18 0 26"/></g>
+<rect x="40" y="60" width="8" height="4" rx="1" fill="#c0392b"/>
+<path d="M44 64v9" stroke="#ffd34d" stroke-width="2"/>
+<ellipse cx="160" cy="58" rx="72" ry="36" fill="url(#cv-baozi-halo)" opacity=".7"/>
+<g stroke="#fff" opacity=".35" stroke-width="4" fill="none" stroke-linecap="round"><path d="M132 76c-6-10 6-14 0-26"/><path d="M160 70c-6-10 6-16 0-28"/><path d="M188 76c-6-10 6-14 0-26"/></g>
+<rect y="160" width="320" height="40" fill="#241410"/>
+<path d="M0 160h320" stroke="#3a2218" stroke-width="3"/>
+<rect x="92" y="150" width="136" height="24" rx="6" fill="#7c5230"/>
+<g stroke="#5e3c22" stroke-width="2" opacity=".7"><path d="M108 152v19M128 152v19M148 152v19M168 152v19M188 152v19M208 152v19"/></g>
+<ellipse cx="160" cy="150" rx="68" ry="9" fill="#946645"/>
+<path d="M86 120v13a74 13 0 0 0 148 0v-13" fill="#8a5e38"/>
+<ellipse cx="160" cy="120" rx="74" ry="13" fill="#4e3018"/>
+<path d="M102 114c0-16 10-25 22-25s22 9 22 25z" fill="url(#bz-g)"/>
+<path d="M118 94c2-3 4-5 6-5M130 94c-2-3-4-5-6-5M124 92v-4" stroke="#caa87e" stroke-width="2" fill="none" stroke-linecap="round"/>
+<path d="M138 108c0-16 10-25 22-25s22 9 22 25z" fill="url(#bz-g)"/>
+<path d="M154 88c2-3 4-5 6-5M166 88c-2-3-4-5-6-5M160 86v-4" stroke="#caa87e" stroke-width="2" fill="none" stroke-linecap="round"/>
+<path d="M174 114c0-16 10-25 22-25s22 9 22 25z" fill="url(#bz-g)"/>
+<path d="M190 94c2-3 4-5 6-5M202 94c-2-3-4-5-6-5M196 92v-4" stroke="#caa87e" stroke-width="2" fill="none" stroke-linecap="round"/>
+<path d="M86 120a74 13 0 0 0 148 0" fill="none" stroke="#a8744a" stroke-width="7"/>
+<path d="M100 124a66 10 0 0 0 120 0" fill="none" stroke="#c08a5a" stroke-width="2" opacity=".6"/>`
   },
   {
     dir: "idiom",
-    icon: "🏮",
     glow: "#ff6b6b",
     title: "成语方阵",
     en: "Idiom Square",
     desc: "成语版 Wordle。六次机会猜出隐藏的四字成语，逐字提示线索，考验你的词汇量。",
-    tags: ["文字", "益智"]
+    tags: ["文字", "益智"],
+    cover: `<rect width="320" height="200" fill="#160d12"/>
+<text x="278" y="186" font-size="130" fill="#ff6b6b" opacity=".05" font-weight="900" text-anchor="middle">成</text>
+<g font-size="32" font-weight="700" text-anchor="middle" fill="#f7f1e6">
+<rect x="33" y="32" width="56" height="56" rx="9" fill="#2c2f3c"/><text x="61" y="72">千</text>
+<rect x="99" y="32" width="56" height="56" rx="9" fill="#2c2f3c"/><text x="127" y="72">军</text>
+<rect x="165" y="32" width="56" height="56" rx="9" fill="#2c2f3c"/><text x="193" y="72">万</text>
+<rect x="231" y="32" width="56" height="56" rx="9" fill="#b8923a"/><text x="259" y="72">马</text>
+<rect x="20" y="92" width="280" height="84" fill="url(#cv-idiom-halo)"/>
+<rect x="33" y="104" width="56" height="56" rx="9" fill="#46b06a" stroke="#7fe3a3" stroke-width="2"/><text x="61" y="144">一</text>
+<rect x="99" y="104" width="56" height="56" rx="9" fill="#46b06a" stroke="#7fe3a3" stroke-width="2"/><text x="127" y="144">马</text>
+<rect x="165" y="104" width="56" height="56" rx="9" fill="#46b06a" stroke="#7fe3a3" stroke-width="2"/><text x="193" y="144">当</text>
+<rect x="231" y="104" width="56" height="56" rx="9" fill="#46b06a" stroke="#7fe3a3" stroke-width="2"/><text x="259" y="144">先</text>
+</g>
+<path d="M300 92l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#ffe9b8"/>
+<path d="M24 86l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#ffe9b8" opacity=".7"/>`
   },
   {
     dir: "drift",
-    icon: "🚗",
     glow: "#ffd84d",
     title: "指尖漂移",
     en: "Drift Tap",
     desc: "单键漂移。按住转弯、松手回正，在悬空高架上贴边过弯，一个走神就坠入深渊。",
-    tags: ["竞速", "单键", "街机"]
+    tags: ["竞速", "单键", "街机"],
+    cover: `<rect width="320" height="200" fill="#0d0d1a"/>
+<g fill="#8a8fb8" opacity=".55"><circle cx="36" cy="28" r="1.4"/><circle cx="110" cy="16" r="1"/><circle cx="230" cy="20" r="1.4"/><circle cx="300" cy="64" r="1"/><circle cx="66" cy="60" r="1"/></g>
+<g stroke="#15151f" stroke-width="9"><path d="M62 168v32M152 110v90M258 124v76"/></g>
+<path d="M-12 168C70 150 96 96 170 88s108 18 162-26" fill="none" stroke="#ffd84d" stroke-width="56" opacity=".12"/>
+<path d="M-12 168C70 150 96 96 170 88s108 18 162-26" fill="none" stroke="#ffd84d" stroke-width="46" opacity=".8"/>
+<path d="M-12 168C70 150 96 96 170 88s108 18 162-26" fill="none" stroke="#1d2030" stroke-width="40"/>
+<path d="M-12 168C70 150 96 96 170 88s108 18 162-26" fill="none" stroke="#5a5e75" stroke-width="2.5" stroke-dasharray="14 12" opacity=".8"/>
+<path d="M96 126c20-12 38-26 60-32" stroke="#ffd84d" stroke-width="5" opacity=".45" stroke-linecap="round" fill="none"/>
+<path d="M112 132c16-10 28-18 44-26" stroke="#0a0a12" stroke-width="3" opacity=".9" fill="none"/>
+<path d="M118 140c16-10 30-20 46-28" stroke="#0a0a12" stroke-width="3" opacity=".9" fill="none"/>
+<circle cx="172" cy="88" r="42" fill="url(#cv-drift-halo)"/>
+<g transform="translate(170 87) rotate(-8)">
+<rect x="-12" y="-8" width="24" height="16" rx="5" fill="#ffd84d"/>
+<rect x="-5" y="-4.5" width="9" height="9" rx="2.5" fill="#2a2410"/>
+<rect x="-14" y="-7" width="3" height="14" rx="1.5" fill="#c0a030"/>
+</g>`
   },
   {
     dir: "moto",
-    icon: "🏍️",
     glow: "#ff8c42",
     title: "特技摩托",
     en: "Stunt Moto",
     desc: "横版物理摩托。油门、刹车、空中翻转配重，飞越沟壑落地空翻拿特技分，小心别摔头。",
-    tags: ["物理", "特技", "街机"]
+    tags: ["物理", "特技", "街机"],
+    cover: `<rect width="320" height="200" fill="#190f0e"/>
+<circle cx="242" cy="118" r="64" fill="url(#cv-moto-halo)"/>
+<circle cx="242" cy="118" r="30" fill="#ff8c42" opacity=".85"/>
+<circle cx="242" cy="118" r="22" fill="#ffc26e"/>
+<path d="M0 168c40-10 70-26 96-26s60 18 96 18 80-26 128-20v60H0z" fill="#120a08"/>
+<path d="M0 168c40-10 70-26 96-26s60 18 96 18 80-26 128-20" fill="none" stroke="#2c1a10" stroke-width="3"/>
+<path d="M234 162l66-36v36z" fill="#1e110c"/>
+<path d="M234 162l66-36" stroke="#ff8c42" stroke-width="2.5" opacity=".85" fill="none"/>
+<path d="M92 84a52 52 0 0 1 92-22" stroke="#ff8c42" stroke-dasharray="3 9" stroke-width="2.5" fill="none" opacity=".8" stroke-linecap="round"/>
+<path d="M184 62l4-10M184 62l-10-3" stroke="#ff8c42" stroke-width="2.5" stroke-linecap="round" opacity=".8" fill="none"/>
+<circle cx="138" cy="62" r="48" fill="url(#cv-moto-halo)" opacity=".7"/>
+<g transform="translate(138 60) rotate(200)" stroke="#150a06" fill="#150a06">
+<circle cx="-20" cy="10" r="11" fill="none" stroke-width="5.5"/>
+<circle cx="20" cy="10" r="11" fill="none" stroke-width="5.5"/>
+<path d="M-14 9l8-9h13l8 9z" stroke="none"/>
+<rect x="-8" y="-7" width="18" height="8" rx="3" stroke="none"/>
+<circle cx="3" cy="-23" r="6.5" stroke="none"/>
+<path d="M0-3l4-13" stroke-width="6.5" stroke-linecap="round" fill="none"/>
+<path d="M5-13l13 7" stroke-width="5" stroke-linecap="round" fill="none"/>
+<path d="M-1-4l-9 9" stroke-width="5" stroke-linecap="round" fill="none"/>
+</g>
+<g fill="#ff8c42" opacity=".25"><circle cx="298" cy="120" r="5"/><circle cx="288" cy="130" r="3.5"/><circle cx="306" cy="132" r="3"/></g>`
   },
   {
     dir: "dash",
-    icon: "🔷",
     glow: "#5d9bff",
     title: "节奏冲刺",
     en: "Beat Dash",
     desc: "音乐节奏跑酷。方块踩着 128 BPM 的电子乐自动狂奔，点按起跳躲过尖刺，音画同步爽感拉满。",
-    tags: ["节奏", "单键", "音乐"]
+    tags: ["节奏", "单键", "音乐"],
+    cover: `<rect width="320" height="200" fill="#0b0c1c"/>
+<g fill="#5d9bff" opacity=".12"><rect x="10" y="92" width="14" height="64"/><rect x="34" y="70" width="14" height="86"/><rect x="58" y="104" width="14" height="52"/><rect x="250" y="84" width="14" height="72"/><rect x="274" y="60" width="14" height="96"/><rect x="298" y="96" width="14" height="60"/></g>
+<rect y="158" width="320" height="42" fill="#0e1126"/>
+<rect x="0" y="148" width="320" height="18" fill="url(#cv-dash-halo)"/>
+<rect x="0" y="156" width="320" height="3" fill="#5d9bff"/>
+<g fill="#171c38" stroke="#5d9bff" stroke-width="2"><path d="M196 156l14-26 14 26zM226 156l14-26 14 26z"/></g>
+<circle cx="92" cy="156" r="8" fill="none" stroke="#5d9bff" opacity=".5" stroke-width="2"/>
+<circle cx="92" cy="156" r="14" fill="none" stroke="#5d9bff" opacity=".25" stroke-width="2"/>
+<g fill="#5d9bff"><rect x="60" y="124" width="26" height="26" rx="5" opacity=".15" transform="rotate(24 73 137)"/><rect x="84" y="112" width="28" height="28" rx="5" opacity=".3" transform="rotate(36 98 126)"/></g>
+<circle cx="124" cy="102" r="46" fill="url(#cv-dash-halo)"/>
+<g transform="rotate(48 124 102)">
+<rect x="107" y="85" width="34" height="34" rx="6" fill="#5d9bff"/>
+<rect x="113" y="91" width="22" height="22" rx="4" fill="none" stroke="#cfe2ff" stroke-width="3.5"/>
+<rect x="118" y="96" width="5" height="8" fill="#0b0c1c"/><rect x="126" y="96" width="5" height="8" fill="#0b0c1c"/>
+</g>
+<g fill="#cfe2ff" opacity=".7"><rect x="160" y="70" width="5" height="5" transform="rotate(20 162 72)"/><rect x="174" y="96" width="4" height="4" transform="rotate(40 176 98)"/><rect x="70" y="84" width="4" height="4" transform="rotate(30 72 86)"/></g>`
   },
   {
     dir: "miner",
-    icon: "⛏️",
     glow: "#ffd24d",
     title: "黄金矿工",
     en: "Gold Miner",
     desc: "经典摆钩矿工。看准时机放钩，大金块拖得慢、钻石值钱、石头坑爹，关间商店买道具冲目标。",
-    tags: ["经典复刻", "街机"]
+    tags: ["经典复刻", "街机"],
+    cover: `<rect width="320" height="200" fill="#181006"/>
+<g stroke="#241808" stroke-width="3" opacity=".9" fill="none"><path d="M0 62q80 10 160 0t160 6M0 112q80-8 160 0t160-4M0 158q80 8 160 0t160 6"/></g>
+<g fill="#241a10"><circle cx="44" cy="84" r="5"/><circle cx="280" cy="64" r="4"/><circle cx="60" cy="186" r="6"/><circle cx="300" cy="180" r="5"/></g>
+<rect width="320" height="18" fill="#0d0903"/>
+<path d="M0 18h320" stroke="#352410" stroke-width="2"/>
+<path d="M148 18l12 16 12-16z" fill="#3a2a14"/>
+<path d="M160 24v68" stroke="#caa86a" stroke-width="2.5"/>
+<g stroke="#d8d2c4" stroke-width="5" fill="none" stroke-linecap="round"><path d="M160 90v9"/><path d="M160 99c-13 4-17 15-12 25"/><path d="M160 99c13 4 17 15 12 25"/></g>
+<circle cx="160" cy="96" r="4.5" fill="#8f8878"/>
+<circle cx="172" cy="146" r="56" fill="url(#cv-miner-halo)"/>
+<circle cx="172" cy="146" r="34" fill="url(#cv-miner-halo)"/>
+<g transform="translate(0 -10)">
+<path d="M138 176l8-28 20-13 27 6 13 21-6 18z" fill="#ffd24d"/>
+<path d="M146 148l21 9 25-4M167 157l-6 19" stroke="#b8901e" stroke-width="2.5" fill="none" opacity=".85"/>
+<path d="M150 145l15-9 15 4" stroke="#fff0b8" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M199 126l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#fff3c4"/>
+<path d="M143 128l2 5.5 5.5 2-5.5 2-2 5.5-2-5.5-5.5-2 5.5-2z" fill="#fff3c4" opacity=".8"/>
+</g>
+<path d="M76 152l11-11 11 11-11 16z" fill="#9be8ff"/>
+<path d="M81 152h12M87 141v11" stroke="#d8f6ff" stroke-width="1.5" opacity=".9"/>
+<path d="M101 134l1.6 4.5 4.5 1.6-4.5 1.6-1.6 4.5-1.6-4.5-4.5-1.6 4.5-1.6z" fill="#d8f6ff"/>
+<path d="M234 180l8-19 21-6 15 12-4 13z" fill="#4a443c"/>
+<path d="M244 166l12 5 13-3" stroke="#322d26" stroke-width="2" fill="none"/>`
   },
   {
     dir: "down100",
-    icon: "🕳️",
     glow: "#ff8c5d",
     title: "深渊百层",
     en: "Down 100 Floors",
     desc: "是男人就下一百层。尖刺、传送带、弹簧、碎裂板，越下越快，看你能撑到第几层。",
-    tags: ["经典复刻", "街机"]
+    tags: ["经典复刻", "街机"],
+    cover: `<rect width="320" height="200" fill="#140d0d"/>
+<rect width="34" height="200" fill="#1d1216"/><rect x="286" width="34" height="200" fill="#1d1216"/>
+<g stroke="#2c1b20" stroke-width="2"><path d="M0 36h34M0 76h34M0 116h34M0 156h34M286 36h34M286 76h34M286 116h34M286 156h34M17 16v20M17 56v20M17 96v20M303 16v20M303 56v20M303 96v20"/></g>
+<text x="248" y="152" font-size="96" font-weight="900" fill="#ff8c5d" opacity=".08" text-anchor="middle" font-family="Arial, sans-serif">87</text>
+<rect x="34" y="80" width="92" height="12" rx="3" fill="#33202a"/>
+<path d="M37 81h86" stroke="#ff8c5d" opacity=".5" stroke-width="2"/>
+<rect x="196" y="120" width="90" height="12" rx="3" fill="#33202a"/>
+<path d="M202 120l8-14 8 14zM222 120l8-14 8 14zM242 120l8-14 8 14zM262 120l8-14 8 14z" fill="#5a3340" stroke="#ff8c5d" stroke-width="1.5"/>
+<rect x="120" y="166" width="84" height="12" rx="3" fill="#33202a"/>
+<rect x="150" y="148" width="24" height="5" rx="2" fill="#9aead6"/>
+<path d="M154 162l16-3-16-4 16-3" stroke="#7ad9c0" stroke-width="2.5" fill="none"/>
+<circle cx="108" cy="40" r="36" fill="url(#cv-down100-halo)"/>
+<g stroke="#ffcfb0" stroke-linecap="round" fill="none">
+<circle cx="108" cy="29" r="7.5" fill="#ffcfb0" stroke="none"/>
+<path d="M108 37v16" stroke-width="6.5"/>
+<path d="M107 42l-13-10M109 42l13-8" stroke-width="5"/>
+<path d="M107 53l-8 15M109 53l10 13" stroke-width="5.5"/>
+</g>
+<g stroke="#ff8c5d" opacity=".4" stroke-width="2.5" stroke-linecap="round"><path d="M94 4v14M108 0v10M122 4v14"/></g>`
   },
   {
     dir: "tanks",
-    icon: "🪖",
     glow: "#5dff7a",
     title: "坦克大战",
     en: "Tank Battle",
     desc: "1990 经典复刻。守住基地老鹰，打砖墙吃星星升火力，支持双人同屏合作。",
-    tags: ["经典复刻", "射击", "双人"]
+    tags: ["经典复刻", "射击", "双人"],
+    cover: `<rect width="320" height="200" fill="#0c120a"/>
+<g fill="#16200f" opacity=".8"><circle cx="30" cy="170" r="2"/><circle cx="120" cy="20" r="2"/><circle cx="290" cy="180" r="2"/><circle cx="200" cy="170" r="2"/></g>
+<rect x="44" y="34" width="48" height="32" fill="#9c4f2a"/>
+<g stroke="#0c120a" stroke-width="2.5"><path d="M44 42h48M44 50h48M44 58h48M60 34v8M76 34v8M52 42v8M68 42v8M84 42v8M60 50v8M76 50v8M52 58v8M68 58v8M84 58v8"/></g>
+<rect x="228" y="44" width="48" height="32" fill="#9c4f2a"/>
+<g stroke="#0c120a" stroke-width="2.5"><path d="M228 52h48M228 60h48M228 68h48M244 44v8M260 44v8M236 52v8M252 52v8M268 52v8M244 60v8M260 60v8M236 68v8M252 68v8M268 68v8"/></g>
+<path d="M160 44l3.5 9.5 9.5 3.5-9.5 3.5-3.5 9.5-3.5-9.5-9.5-3.5 9.5-3.5z" fill="#ffd24d"/>
+<rect x="62" y="104" width="44" height="10" rx="2" fill="#1e3a20"/>
+<rect x="62" y="130" width="44" height="10" rx="2" fill="#1e3a20"/>
+<path d="M64 109h40M64 135h40" stroke="#0c120a" stroke-width="2" stroke-dasharray="3 5"/>
+<rect x="66" y="112" width="36" height="20" rx="2" fill="#3f7a40"/>
+<rect x="75" y="116" width="18" height="12" rx="2" fill="#5dff7a"/>
+<rect x="93" y="119" width="28" height="6" fill="#5dff7a"/>
+<rect x="142" y="119" width="11" height="6" rx="3" fill="#ffe9a8"/>
+<path d="M128 122h11" stroke="#ffe9a8" stroke-width="2" opacity=".6"/>
+<rect x="214" y="104" width="44" height="10" rx="2" fill="#33363c"/>
+<rect x="214" y="130" width="44" height="10" rx="2" fill="#33363c"/>
+<path d="M216 109h40M216 135h40" stroke="#0c120a" stroke-width="2" stroke-dasharray="3 5"/>
+<rect x="218" y="112" width="36" height="20" rx="2" fill="#5a5f68"/>
+<rect x="227" y="116" width="18" height="12" rx="2" fill="#8a8f98"/>
+<rect x="199" y="119" width="28" height="6" fill="#8a8f98"/>
+<circle cx="160" cy="152" r="46" fill="url(#cv-tanks-halo)"/>
+<circle cx="160" cy="152" r="28" fill="url(#cv-tanks-halo)"/>
+<rect x="137" y="132" width="46" height="44" rx="3" fill="#141f0e" stroke="#4a7a2c" stroke-width="2.5"/>
+<path d="M160 144l-5 6-13-4 10 9-12 7h40l-12-7 10-9-13 4z" fill="#ffd24d"/>
+<circle cx="160" cy="143" r="3.5" fill="#ffd24d"/>
+<path d="M156 141l3-4 4 3" stroke="#ffd24d" stroke-width="2" fill="none"/>`
   },
   {
     dir: "mota",
-    icon: "🗼",
     glow: "#c44bff",
     title: "魔塔",
     en: "Magic Tower",
     desc: "数值策略爬塔。血量、钥匙、宝石都很紧，先手在你，算好每一场仗再动手，十六层塔顶救公主。",
-    tags: ["经典复刻", "益智", "策略"]
+    tags: ["经典复刻", "益智", "策略"],
+    cover: `<rect width="320" height="200" fill="#120c1e"/>
+<g fill="#c9b8e8" opacity=".55"><circle cx="40" cy="36" r="1.5"/><circle cx="84" cy="80" r="1"/><circle cx="250" cy="30" r="1.3"/><circle cx="288" cy="90" r="1"/><circle cx="60" cy="130" r="1"/></g>
+<circle cx="262" cy="40" r="28" fill="url(#cv-mota-halo)"/>
+<circle cx="262" cy="40" r="13" fill="#ead8ff"/>
+<circle cx="160" cy="32" r="50" fill="url(#cv-mota-halo)" opacity=".8"/>
+<rect x="116" y="34" width="88" height="144" fill="#241a40" stroke="#4a3878" stroke-width="2"/>
+<g fill="#241a40" stroke="#4a3878" stroke-width="2"><rect x="116" y="22" width="15" height="12"/><rect x="140" y="22" width="15" height="12"/><rect x="164" y="22" width="15" height="12"/><rect x="189" y="22" width="15" height="12"/></g>
+<g stroke="#382b60" stroke-width="2"><path d="M116 62h88M116 90h88M116 118h88M116 146h88"/></g>
+<rect x="146" y="40" width="17" height="17" rx="2" fill="#ffd9ec"/>
+<circle cx="154" cy="46" r="2.8" fill="#ff7ab8"/><rect x="151" y="49" width="6" height="6" rx="1" fill="#ff7ab8"/>
+<rect x="176" y="42" width="13" height="15" rx="2" fill="#0d0918"/>
+<rect x="130" y="68" width="14" height="16" rx="2" fill="#0d0918"/>
+<g stroke="#ffd24d" stroke-width="2" fill="none"><circle cx="137" cy="73" r="2.5"/><path d="M137 76v6m0-2.5h3.5"/></g>
+<rect x="174" y="68" width="14" height="16" rx="2" fill="#0d0918"/>
+<path d="M181 70l4.5 4.5-4.5 7-4.5-7z" fill="#ff5d5d"/>
+<rect x="130" y="96" width="14" height="16" rx="2" fill="#0d0918"/>
+<circle cx="135" cy="103" r="1.7" fill="#ff5d5d"/><circle cx="140" cy="103" r="1.7" fill="#ff5d5d"/>
+<rect x="174" y="96" width="14" height="16" rx="2" fill="#0d0918"/>
+<circle cx="181" cy="105" r="4" fill="#7ad97a"/><circle cx="179.5" cy="103.5" r="1.3" fill="#c8f5c8"/>
+<rect x="130" y="124" width="14" height="16" rx="2" fill="#0d0918"/>
+<circle cx="137" cy="133" r="3.5" fill="none" stroke="#5da8ff" stroke-width="2"/><path d="M137 129v-3" stroke="#5da8ff" stroke-width="2"/>
+<rect x="174" y="124" width="14" height="16" rx="2" fill="#0d0918"/>
+<path d="M181 127v4m-3 6a3.5 3.5 0 0 0 6 0c0-2-1.2-3.5-3-6-1.8 2.5-3 4-3 6z" stroke="#ff8c42" stroke-width="2" fill="#ff8c42"/>
+<rect y="178" width="320" height="22" fill="#0d0918"/>
+<circle cx="160" cy="170" r="30" fill="url(#cv-mota-halo)"/>
+<path d="M146 178v-20a14 14 0 0 1 28 0v20z" fill="#08050f" stroke="#6a4fa8" stroke-width="2.5"/>
+<g><rect x="124" y="166" width="11" height="9" rx="2" fill="#5da8ff"/><rect x="126" y="158" width="7" height="7" rx="2" fill="#cfe2ff"/><rect x="136" y="160" width="2.5" height="13" fill="#e8ecf4"/><rect x="133" y="163" width="8" height="2.5" fill="#e8ecf4"/></g>`
   },
   {
     dir: "link",
-    icon: "🍎",
     glow: "#6dd25d",
     title: "果蔬连连看",
     en: "Fruit Link",
     desc: "两次转折连得上就能消。连击加倍、四种塌缩模式轮换，限时内清空全盘。",
-    tags: ["经典复刻", "益智", "休闲"]
+    tags: ["经典复刻", "益智", "休闲"],
+    cover: `<rect width="320" height="200" fill="#0c1410"/>
+<g fill="#16241a" stroke="#28402e" stroke-width="1.5"><rect x="88" y="26" width="58" height="58" rx="10"/><rect x="154" y="26" width="58" height="58" rx="10"/><rect x="22" y="92" width="58" height="58" rx="10"/><rect x="88" y="92" width="58" height="58" rx="10"/><rect x="154" y="92" width="58" height="58" rx="10"/><rect x="286" y="92" width="58" height="58" rx="10"/><rect x="22" y="158" width="58" height="58" rx="10"/><rect x="154" y="158" width="58" height="58" rx="10"/><rect x="220" y="158" width="58" height="58" rx="10"/></g>
+<circle cx="51" cy="55" r="30" fill="url(#cv-link-halo)"/>
+<rect x="22" y="26" width="58" height="58" rx="10" fill="#16241a" stroke="#6dd25d" stroke-width="2.5"/>
+<circle cx="51" cy="58" r="14" fill="#ff5d5d"/><circle cx="46" cy="53" r="4" fill="#ffb8b8" opacity=".8"/>
+<path d="M51 44v-5" stroke="#7c5230" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M51 42c3-6 8-7 11-7-1 6-6 8-11 7z" fill="#6dd25d"/>
+<circle cx="117" cy="55" r="14" fill="#ffa94d"/><path d="M117 41v28M107 45l20 20M127 45l-20 20" stroke="#d8842a" stroke-width="1.5" opacity=".7"/><circle cx="112" cy="50" r="3.5" fill="#ffd9a8" opacity=".8"/>
+<g fill="#b06cff"><circle cx="178" cy="50" r="6"/><circle cx="190" cy="50" r="6"/><circle cx="172" cy="60" r="6"/><circle cx="184" cy="61" r="6"/><circle cx="196" cy="60" r="6"/></g><path d="M184 42v-6" stroke="#5e8c3a" stroke-width="2.5"/>
+<path d="M38 136c-6-10 0-22 13-24 13 2 19 14 13 24-6 9-20 9-26 0z" fill="#ff7ab8"/><circle cx="45" cy="120" r="1.6" fill="#ffe0ee"/><circle cx="56" cy="122" r="1.6" fill="#ffe0ee"/><circle cx="50" cy="130" r="1.6" fill="#ffe0ee"/><path d="M51 112c2-4 5-5 8-5" stroke="#6dd25d" stroke-width="2.5" fill="none"/>
+<path d="M99 138a18 18 0 0 1 36 0z" fill="#ff6b6b"/><path d="M95 138a22 22 0 0 1 44 0h-4a18 18 0 0 0-36 0z" fill="#5e9c3a"/><circle cx="110" cy="131" r="1.4" fill="#301010"/><circle cx="118" cy="127" r="1.4" fill="#301010"/><circle cx="124" cy="132" r="1.4" fill="#301010"/>
+<circle cx="249" cy="121" r="30" fill="url(#cv-link-halo)"/>
+<rect x="220" y="92" width="58" height="58" rx="10" fill="#16241a" stroke="#6dd25d" stroke-width="2.5"/>
+<circle cx="249" cy="124" r="14" fill="#ff5d5d"/><circle cx="244" cy="119" r="4" fill="#ffb8b8" opacity=".8"/>
+<path d="M249 110v-5" stroke="#7c5230" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M249 108c3-6 8-7 11-7-1 6-6 8-11 7z" fill="#6dd25d"/>
+<g fill="#ffd84d" opacity=".85"><ellipse cx="183" cy="186" rx="14" ry="7" transform="rotate(-30 183 186)"/></g>
+<path d="M51 40V10h198v76" stroke="#6dd25d" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".2"/>
+<path d="M51 40V10h198v76" stroke="#6dd25d" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="51" cy="10" r="4" fill="#c8f5be"/><circle cx="249" cy="10" r="4" fill="#c8f5be"/>`
   },
   {
     dir: "zuma",
-    icon: "🔮",
     glow: "#4dd2a0",
     title: "轨道弹珠",
     en: "Marble Shooter",
     desc: "祖玛玩法。发珠插链凑三同色消除，缺口吸合触发连锁，别让珠链滚进骷髅之口。",
-    tags: ["经典复刻", "消除", "街机"]
+    tags: ["经典复刻", "消除", "街机"],
+    cover: `<rect width="320" height="200" fill="#0a1512"/>
+<path d="M0 0c30 4 48 20 52 44C24 44 6 28 0 0z" fill="#0f231c"/>
+<path d="M320 200c-30-4-48-20-52-44 28 0 46 16 52 44z" fill="#0f231c"/>
+<path d="M0 200c24-2 40-12 46-32-24-2-40 10-46 32z" fill="#0f231c"/>
+<path d="M-10 60C70 20 140 44 160 84c18 36 60 56 102 40 22-8 32-24 28-40" fill="none" stroke="#1d3a2e" stroke-width="34"/>
+<path d="M-10 60C70 20 140 44 160 84c18 36 60 56 102 40 22-8 32-24 28-40" fill="none" stroke="#13261f" stroke-width="28"/>
+<g><circle cx="6" cy="56" r="11" fill="#ff5d5d"/><circle cx="34" cy="44" r="11" fill="#ffd24d"/><circle cx="62" cy="37" r="11" fill="#4d8bff"/><circle cx="90" cy="37" r="11" fill="#4dd2a0"/><circle cx="117" cy="44" r="11" fill="#c44bff"/><circle cx="140" cy="58" r="11" fill="#ff5d5d"/><circle cx="156" cy="78" r="11" fill="#ffd24d"/><circle cx="168" cy="98" r="11" fill="#4dd2a0"/><circle cx="186" cy="113" r="11" fill="#4d8bff"/><circle cx="210" cy="122" r="11" fill="#c44bff"/><circle cx="236" cy="124" r="11" fill="#ffd24d"/></g>
+<g fill="#fff" opacity=".5"><circle cx="3" cy="52" r="3"/><circle cx="59" cy="33" r="3"/><circle cx="114" cy="40" r="3"/><circle cx="165" cy="94" r="3"/><circle cx="233" cy="120" r="3"/></g>
+<circle cx="290" cy="84" r="36" fill="#ff5d5d" opacity=".12"/>
+<circle cx="290" cy="84" r="20" fill="#06100c" stroke="#2c4a3c" stroke-width="3"/>
+<path d="M290 70c-9 0-14 6-14 13 0 5 3 8 6 10v6h16v-6c3-2 6-5 6-10 0-7-5-13-14-13z" fill="#d8d2c4"/>
+<circle cx="284" cy="84" r="3.5" fill="#06100c"/><circle cx="296" cy="84" r="3.5" fill="#06100c"/>
+<path d="M290 89l-2.5 4h5z" fill="#06100c"/>
+<path d="M286 96v4M290 96v4M294 96v4" stroke="#06100c" stroke-width="1.5"/>
+<circle cx="118" cy="138" r="34" fill="url(#cv-zuma-halo)"/>
+<circle cx="118" cy="138" r="18" fill="#1d3a2e" stroke="#2c5a44" stroke-width="3"/>
+<circle cx="110" cy="124" r="4" fill="#7ad9c0"/><circle cx="129" cy="127" r="4" fill="#7ad9c0"/>
+<circle cx="127" cy="125" r="8.5" fill="#ffd24d"/><circle cx="124" cy="122" r="2.5" fill="#fff" opacity=".6"/>
+<path d="M134 118L168 96" stroke="#fff" stroke-dasharray="2 8" opacity=".5" stroke-width="2.5" stroke-linecap="round"/>`
   },
   {
     dir: "devil",
-    icon: "😈",
     glow: "#ff5d8c",
     title: "整蛊关卡",
     en: "Prank Levels",
     desc: "一个充满善意、绝对没有恶意的平台跳跃。地板会消失、门会逃跑、出口是假的，共 18 关，心态请自备。",
-    tags: ["整蛊", "休闲", "街机"]
+    tags: ["整蛊", "休闲", "街机"],
+    cover: `<rect width="320" height="200" fill="#150a12"/>
+<rect y="160" width="320" height="40" fill="#1d0f1a"/>
+<path d="M0 160h320" stroke="#33182a" stroke-width="3"/>
+<circle cx="160" cy="100" r="64" fill="url(#cv-devil-halo)"/>
+<path d="M122 160V94a38 38 0 0 1 76 0v66z" fill="#0a0510" stroke="#ff5d8c" stroke-width="3"/>
+<path d="M130 160V96a30 30 0 0 1 60 0v64" fill="none" stroke="#ff5d8c" stroke-width="1.5" opacity=".35"/>
+<path d="M132 70c-9-13-6-26 2-34 2 12 9 18 13 25z" fill="#ff5d8c"/>
+<path d="M188 70c9-13 6-26-2-34-2 12-9 18-13 25z" fill="#ff5d8c"/>
+<circle cx="146" cy="102" r="9" fill="#ff5d8c" opacity=".3"/><circle cx="174" cy="102" r="9" fill="#ff5d8c" opacity=".3"/>
+<path d="M138 98l18 5-18 7z" fill="#ff8cb0"/>
+<path d="M182 98l-18 5 18 7z" fill="#ff8cb0"/>
+<g fill="#2a1322" stroke="#ff5d8c" stroke-width="1.5"><path d="M224 160l9-22 9 22zM246 160l9-22 9 22zM268 160l9-22 9 22z"/></g>
+<g transform="rotate(-8 64 76)"><rect x="38" y="62" width="52" height="26" rx="5" fill="#0f2a1a" stroke="#39d97a" stroke-width="2"/><text x="64" y="81" font-size="14" font-weight="800" fill="#39d97a" text-anchor="middle" font-family="Arial, sans-serif">EXIT</text></g>
+<path d="M58 100h26m-8-7l8 7-8 7" stroke="#39d97a" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M92 160h32l-5 11-22 2z" fill="#241420"/>
+<rect x="102" y="178" width="9" height="9" transform="rotate(24 106 182)" fill="#241420"/>
+<rect x="118" y="184" width="6" height="6" transform="rotate(-18 121 187)" fill="#241420"/>
+<path d="M104 150l4 4m0-4l-4 4" stroke="#3a2034" stroke-width="2"/>`
   }
 ];
 
 const grid = document.getElementById("games");
 const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
+// 统一封面外壳：每张封面共享同一套底色 / 主色氛围光 / 底部渐晕语法
+function coverSVG(g) {
+  const p = "cv-" + g.dir, c = g.glow;
+  return `<svg class="art" viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>` +
+    `<radialGradient id="${p}-halo"><stop offset="0" stop-color="${c}" stop-opacity=".5"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></radialGradient>` +
+    `<radialGradient id="${p}-amb" cx="50%" cy="28%" r="85%"><stop offset="0" stop-color="${c}" stop-opacity=".2"/><stop offset=".6" stop-color="${c}" stop-opacity=".05"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></radialGradient>` +
+    `<linearGradient id="${p}-vig" x1="0" y1="0" x2="0" y2="1"><stop offset=".48" stop-color="#0e0e17" stop-opacity="0"/><stop offset=".8" stop-color="#0e0e17" stop-opacity=".5"/><stop offset="1" stop-color="#101019" stop-opacity=".95"/></linearGradient>` +
+    `</defs><rect width="320" height="200" fill="#0c0c15"/>` +
+    g.cover +
+    `<rect width="320" height="200" fill="url(#${p}-amb)" style="mix-blend-mode:screen"/>` +
+    `<rect width="320" height="200" fill="url(#${p}-vig)"/></svg>`;
+}
+
 function render(filter) {
   grid.innerHTML = GAMES.map((g, i) => `
     <a class="card" style="--glow:${g.glow};--i:${i}" href="./${g.dir}/"
        data-tags="${esc(g.tags.join(","))}">
       <div class="cover">
-        <div class="pattern"></div>
-        <div class="halo"></div>
+        ${coverSVG(g)}
         <span class="num">NO.${String(i + 1).padStart(2, "0")}</span>
-        <span class="icon">${g.icon}</span>
         <div class="shine"></div>
       </div>
       <div class="card-body">

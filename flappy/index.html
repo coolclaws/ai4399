@@ -45,85 +45,185 @@
   .overlay {
     position: absolute; inset: 0; z-index: 10;
     display: flex; align-items: center; justify-content: center;
-    background: rgba(10,10,18,.45);
+    background: radial-gradient(ellipse at 50% 38%, rgba(10,10,18,.30), rgba(10,10,18,.58));
     opacity: 0; pointer-events: none;
     transition: opacity .25s;
   }
   .overlay.show { opacity: 1; pointer-events: auto; }
   .panel {
-    width: min(82%, 300px);
-    background: rgba(20,20,31,.94);
-    border: 1px solid #2a2a3d;
-    border-radius: 14px;
-    padding: 22px 20px 20px;
+    width: min(84%, 308px);
+    background: linear-gradient(165deg, rgba(32,32,50,.88), rgba(15,15,26,.93));
+    border: 1px solid rgba(255,255,255,.09);
+    border-top-color: rgba(255,255,255,.18);
+    border-radius: 20px;
+    padding: 24px 22px 22px;
     text-align: center;
-    box-shadow: 0 12px 40px rgba(0,0,0,.5);
+    -webkit-backdrop-filter: blur(14px) saturate(1.3);
+    backdrop-filter: blur(14px) saturate(1.3);
+    box-shadow:
+      0 24px 60px rgba(0,0,0,.55),
+      0 3px 10px rgba(0,0,0,.4),
+      inset 0 1px 0 rgba(255,255,255,.06);
     transform: translateY(14px);
     transition: transform .3s cubic-bezier(.2,1.4,.4,1);
   }
   .overlay.show .panel { transform: translateY(0); }
   h1 {
-    font-size: 30px; letter-spacing: 4px;
-    color: #ffcc00; margin-bottom: 4px;
-    text-shadow: 0 2px 0 rgba(0,0,0,.4);
+    font-size: 33px; font-weight: 800; letter-spacing: 5px;
+    margin-bottom: 5px;
+    background: linear-gradient(180deg, #fff0a8 5%, #ffcc00 52%, #e8a800 95%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: #ffcc00;
+    filter: drop-shadow(0 2px 1px rgba(0,0,0,.45));
   }
-  .sub { font-size: 13px; color: #8888a0; margin-bottom: 16px; }
+  .sub {
+    font-size: 12px; letter-spacing: 3px; color: #9494ac;
+    margin-bottom: 18px;
+  }
   .howto {
-    text-align: left; font-size: 13px; line-height: 1.9;
-    color: #e8e8f0;
-    background: rgba(10,10,18,.5);
-    border: 1px solid #2a2a3d;
-    border-radius: 10px;
-    padding: 10px 14px;
-    margin-bottom: 16px;
+    text-align: left; font-size: 13px; line-height: 2.0;
+    color: #d8d8e6;
+    background: rgba(255,255,255,.035);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 12px;
+    padding: 11px 15px;
+    margin-bottom: 18px;
+    box-shadow: inset 0 1px 4px rgba(0,0,0,.25);
   }
   .howto b { color: #ffcc00; font-weight: 600; }
   .btn {
     display: inline-block;
-    background: #ffcc00; color: #1a1400;
-    border: none; border-radius: 10px;
+    background: linear-gradient(180deg, #ffe066, #ffcc00 55%, #efb400);
+    color: #1a1400;
+    border: none; border-radius: 12px;
     font-family: inherit;
     font-size: 17px; font-weight: 700; letter-spacing: 2px;
-    padding: 11px 38px;
+    padding: 12px 40px;
     cursor: pointer;
-    box-shadow: 0 4px 0 #b08900;
-    transition: transform .08s, box-shadow .08s;
+    box-shadow:
+      0 4px 0 #a37e00,
+      0 10px 22px rgba(255,204,0,.22),
+      inset 0 1px 0 rgba(255,255,255,.5);
+    transition: transform .08s, box-shadow .08s, filter .15s;
   }
-  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #b08900; }
-  .bestline { font-size: 13px; color: #8888a0; margin-top: 14px; }
+  .btn:hover { filter: brightness(1.06); }
+  .btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #a37e00, 0 4px 10px rgba(255,204,0,.18), inset 0 1px 0 rgba(255,255,255,.5);
+  }
+  .bestline { font-size: 13px; color: #8888a0; margin-top: 15px; }
   .bestline span { color: #ffcc00; font-weight: 700; }
-  h2 { font-size: 20px; letter-spacing: 3px; color: #e8e8f0; margin-bottom: 14px; }
-  .scorebox {
-    display: flex; justify-content: center; gap: 26px; margin-bottom: 14px;
+  h2 {
+    font-size: 19px; font-weight: 700; letter-spacing: 5px;
+    color: #f0f0f8; margin-bottom: 4px;
   }
-  .scorebox .cell .lab { font-size: 12px; color: #8888a0; margin-bottom: 2px; }
-  .scorebox .cell .val { font-size: 34px; font-weight: 800; color: #ffcc00; line-height: 1.1; }
-  .scorebox .cell .val.dim { color: #e8e8f0; }
+  .h2bar {
+    width: 36px; height: 3px; border-radius: 2px;
+    background: linear-gradient(90deg, #ffcc00, #e8a800);
+    margin: 0 auto 14px;
+    opacity: .85;
+  }
+  .scorebox {
+    display: flex; justify-content: center; gap: 10px; margin-bottom: 14px;
+  }
+  .scorebox .cell {
+    flex: 1; max-width: 118px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 12px;
+    padding: 9px 6px 7px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,.3);
+  }
+  .scorebox .cell .lab { font-size: 11px; letter-spacing: 2px; color: #8888a0; margin-bottom: 2px; }
+  .scorebox .cell .val {
+    font-size: 32px; font-weight: 800; color: #ffcc00; line-height: 1.15;
+    text-shadow: 0 2px 6px rgba(255,204,0,.25);
+  }
+  .scorebox .cell .val.dim { color: #e8e8f0; text-shadow: none; }
   #newbest {
     display: none;
-    font-size: 11px; font-weight: 700;
-    color: #1a1400; background: #ffcc00;
-    border-radius: 99px; padding: 2px 10px;
+    font-size: 11px; font-weight: 700; letter-spacing: 1px;
+    color: #1a1400;
+    background: linear-gradient(180deg, #ffe066, #ffc400);
+    border-radius: 99px; padding: 3px 12px;
     margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(255,204,0,.4);
     animation: pulse 1s ease-in-out infinite;
   }
   #newbest.show { display: inline-block; }
   @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
   #medalbox { margin-bottom: 16px; }
   #medal {
-    width: 64px; height: 64px; border-radius: 50%;
-    margin: 0 auto 6px;
+    position: relative;
+    width: 76px; height: 76px; border-radius: 50%;
+    margin: 16px auto 8px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 30px;
-    border: 3px solid #2a2a3d;
-    background: #1b1b29;
-    color: #555570;
+    font-size: 32px;
+    border: 3px solid #2e2e46;
+    background: radial-gradient(circle at 35% 28%, #242438, #15151f 78%);
+    color: #4e4e6a;
+    box-shadow:
+      inset 0 2px 5px rgba(255,255,255,.06),
+      inset 0 -5px 9px rgba(0,0,0,.45),
+      0 5px 14px rgba(0,0,0,.45);
+    text-shadow: 0 1px 0 rgba(255,255,255,.12), 0 -1px 1px rgba(0,0,0,.4);
   }
-  #medal.bronze { background: radial-gradient(circle at 35% 30%, #e8a26a, #a05a28 70%); border-color: #c87f43; color: #5a2d0c; }
-  #medal.silver { background: radial-gradient(circle at 35% 30%, #f0f0f5, #9a9ab0 70%); border-color: #c8c8d8; color: #4a4a5e; }
-  #medal.gold   { background: radial-gradient(circle at 35% 30%, #ffe680, #d4a000 70%); border-color: #ffd84d; color: #6b4d00; }
-  #medalname { font-size: 12px; color: #8888a0; }
-  .hint { font-size: 12px; color: #8888a0; margin-top: 12px; }
+  /* 缎带（获奖时显示） */
+  #medal::before {
+    content: ''; display: none;
+    position: absolute; left: 50%; top: -19px;
+    width: 52px; height: 34px;
+    transform: translateX(-50%);
+    z-index: -1;
+    background: linear-gradient(180deg, #ff6257 0%, #d92f44 70%, #b02035 100%);
+    clip-path: polygon(0 0, 36% 0, 50% 42%, 64% 0, 100% 0, 74% 100%, 50% 64%, 26% 100%);
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,.45));
+  }
+  /* 金属高光弧（获奖时显示） */
+  #medal::after {
+    content: ''; display: none;
+    position: absolute; inset: 5px;
+    border-radius: 50%;
+    background: linear-gradient(140deg, rgba(255,255,255,.55), rgba(255,255,255,.08) 42%, rgba(255,255,255,0) 55%);
+    pointer-events: none;
+  }
+  #medal.bronze::before, #medal.silver::before, #medal.gold::before,
+  #medal.bronze::after,  #medal.silver::after,  #medal.gold::after { display: block; }
+  #medal.bronze {
+    background: radial-gradient(circle at 35% 28%, #ffd9ae, #e8a26a 36%, #b06a32 72%, #8a4a1e);
+    border-color: #d98f4f; color: #5a2d0c;
+    box-shadow:
+      inset 0 3px 6px rgba(255,255,255,.45),
+      inset 0 -5px 10px rgba(90,45,12,.55),
+      inset 0 0 0 5px rgba(255,244,230,.16),
+      0 6px 16px rgba(176,106,50,.4);
+  }
+  #medal.silver {
+    background: radial-gradient(circle at 35% 28%, #ffffff, #d8d8e8 36%, #9a9ab4 72%, #76768e);
+    border-color: #cfcfe0; color: #43435a;
+    box-shadow:
+      inset 0 3px 6px rgba(255,255,255,.6),
+      inset 0 -5px 10px rgba(70,70,95,.5),
+      inset 0 0 0 5px rgba(255,255,255,.2),
+      0 6px 16px rgba(154,154,180,.4);
+  }
+  #medal.gold {
+    background: radial-gradient(circle at 35% 28%, #fff3b0, #ffd84d 36%, #d4a000 72%, #a87c00);
+    border-color: #ffd84d; color: #6b4d00;
+    box-shadow:
+      inset 0 3px 6px rgba(255,255,255,.55),
+      inset 0 -5px 10px rgba(120,85,0,.55),
+      inset 0 0 0 5px rgba(255,250,220,.22),
+      0 6px 18px rgba(255,204,0,.45);
+    animation: medalglow 2.2s ease-in-out infinite;
+  }
+  @keyframes medalglow {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.12); }
+  }
+  #medalname { font-size: 12px; letter-spacing: 1px; color: #9a9ab2; }
+  .hint { font-size: 12px; color: #77778e; margin-top: 13px; }
 </style>
 </head>
 <body>
@@ -148,6 +248,7 @@
     <div id="overOverlay" class="overlay">
       <div class="panel">
         <h2>本 局 结 束</h2>
+        <div class="h2bar"></div>
         <div id="newbest">★ 新纪录 ★</div>
         <div class="scorebox">
           <div class="cell"><div class="lab">得分</div><div class="val" id="finalScore">0</div></div>
@@ -280,15 +381,19 @@
     var rnd = mulberry(4399);
     while (cityW < W + 160) {
       var w = 26 + rnd() * 34, h = 50 + rnd() * 110;
-      buildings.push({ x: cityW, w: w, h: h, win: rnd() > 0.4 });
+      buildings.push({ x: cityW, w: w, h: h, win: rnd() > 0.4, ant: rnd() > 0.66 });
       cityW += w + 2 + rnd() * 8;
     }
   })();
-  var clouds = [];
+  var CLOUD_FIELD = W + 160, FAR_FIELD = CLOUD_FIELD / 2;
+  var cloudsNear = [], cloudsFar = [];
   (function () {
     var rnd = mulberry(1234);
     for (var i = 0; i < 6; i++) {
-      clouds.push({ x: rnd() * (W + 160), y: 50 + rnd() * 150, s: 0.7 + rnd() * 0.8 });
+      cloudsNear.push({ x: rnd() * CLOUD_FIELD, y: 46 + rnd() * 160, s: 0.75 + rnd() * 0.65, v: i % 3 });
+    }
+    for (i = 0; i < 5; i++) {
+      cloudsFar.push({ x: rnd() * FAR_FIELD, y: 26 + rnd() * 120, s: 0.32 + rnd() * 0.3, v: (i + 1) % 3 });
     }
   })();
   var bushes = [], bushW = 0;
@@ -299,6 +404,539 @@
       bushW += 18 + rnd() * 26;
     }
   })();
+
+  /* ============ 离屏缓存（静态图形全部预渲染，每帧零渐变创建） ============ */
+  function mkC(w, h, sc) {
+    var c = document.createElement('canvas');
+    c.width = Math.ceil(w * sc); c.height = Math.ceil(h * sc);
+    var g = c.getContext('2d');
+    g.scale(sc, sc);
+    return { cv: c, g: g, w: w, h: h, sc: sc };
+  }
+  function drawStrip(o, dx, dy) { // 按逻辑尺寸贴图（裁掉 ceil 余量）
+    ctx.drawImage(o.cv, 0, 0, o.w * o.sc, o.h * o.sc, dx, dy, o.w, o.h);
+  }
+
+  /* ---- 天空（昼/暮/夜/晨 四张，随分数交叉淡化） ---- */
+  var skyTopColor = ['#48a8e8', '#3a4490', '#0a0f2c', '#4a5aa8'];
+  function buildSky(stops, deco) {
+    var o = mkC(W, GROUND_Y, 2), g = o.g;
+    var gr = g.createLinearGradient(0, 0, 0, GROUND_Y);
+    for (var i = 0; i < stops.length; i++) gr.addColorStop(stops[i][0], stops[i][1]);
+    g.fillStyle = gr;
+    g.fillRect(0, 0, W, GROUND_Y);
+    if (deco) deco(g);
+    return o;
+  }
+  function radialGlow(g, x, y, r0, r1, c) {
+    var gr = g.createRadialGradient(x, y, r0, x, y, r1);
+    gr.addColorStop(0, c); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = gr;
+    g.beginPath(); g.arc(x, y, r1, 0, 7); g.fill();
+  }
+  var skySpr = [
+    buildSky([[0, '#48a8e8'], [0.5, '#7fd0ec'], [0.82, '#b9ecf4'], [1, '#e0f7f4']], function (g) {
+      radialGlow(g, 284, 92, 8, 72, 'rgba(255,250,215,0.65)');
+      var sg = g.createRadialGradient(280, 88, 4, 284, 92, 24);
+      sg.addColorStop(0, '#fffce8'); sg.addColorStop(0.8, '#ffefa8'); sg.addColorStop(1, '#ffe488');
+      g.fillStyle = sg;
+      g.beginPath(); g.arc(284, 92, 23, 0, 7); g.fill();
+    }),
+    buildSky([[0, '#3a4490'], [0.35, '#8c5a9c'], [0.62, '#e07a5a'], [0.82, '#f7b35e'], [1, '#ffe09a']], function (g) {
+      radialGlow(g, 104, GROUND_Y - 126, 12, 130, 'rgba(255,160,80,0.5)');
+      var sg = g.createRadialGradient(100, GROUND_Y - 130, 4, 104, GROUND_Y - 126, 26);
+      sg.addColorStop(0, '#fff0c8'); sg.addColorStop(1, '#ffb86a');
+      g.fillStyle = sg;
+      g.beginPath(); g.arc(104, GROUND_Y - 126, 25, 0, 7); g.fill();
+      g.fillStyle = 'rgba(255,190,120,0.16)';
+      g.fillRect(0, GROUND_Y - 96, W, 5);
+      g.fillRect(0, GROUND_Y - 72, W, 8);
+      g.fillRect(0, GROUND_Y - 44, W, 12);
+    }),
+    buildSky([[0, '#0a0f2c'], [0.45, '#16204a'], [0.8, '#2a3a68'], [1, '#3c4e7e']], function (g) {
+      var rnd = mulberry(2025);
+      for (var i = 0; i < 56; i++) {
+        var sx = rnd() * W, sy = rnd() * (GROUND_Y - 150), sr = 0.5 + rnd() * 0.9;
+        g.fillStyle = 'rgba(235,240,255,' + (0.25 + rnd() * 0.6).toFixed(2) + ')';
+        g.beginPath(); g.arc(sx, sy, sr, 0, 7); g.fill();
+      }
+      g.strokeStyle = 'rgba(255,255,255,0.75)'; g.lineWidth = 1;
+      for (i = 0; i < 3; i++) {
+        var cx = 60 + rnd() * 240, cy = 40 + rnd() * 200;
+        g.beginPath();
+        g.moveTo(cx - 4, cy); g.lineTo(cx + 4, cy);
+        g.moveTo(cx, cy - 4); g.lineTo(cx, cy + 4);
+        g.stroke();
+      }
+      radialGlow(g, 272, 96, 10, 56, 'rgba(215,225,255,0.4)');
+      var mg = g.createRadialGradient(266, 90, 4, 272, 96, 20);
+      mg.addColorStop(0, '#fbfaf0'); mg.addColorStop(1, '#dcdcd0');
+      g.fillStyle = mg;
+      g.beginPath(); g.arc(272, 96, 19, 0, 7); g.fill();
+      g.fillStyle = 'rgba(150,158,185,0.4)';
+      g.beginPath(); g.arc(266, 92, 4.2, 0, 7); g.fill();
+      g.beginPath(); g.arc(277, 102, 3, 0, 7); g.fill();
+      g.beginPath(); g.arc(274, 88, 2, 0, 7); g.fill();
+    }),
+    buildSky([[0, '#4a5aa8'], [0.4, '#9078c0'], [0.72, '#eda0a0'], [1, '#ffd9ae']], function (g) {
+      radialGlow(g, 292, GROUND_Y - 130, 10, 110, 'rgba(255,205,160,0.45)');
+      var rnd = mulberry(606);
+      g.fillStyle = 'rgba(235,240,255,0.25)';
+      for (var i = 0; i < 14; i++) {
+        g.beginPath(); g.arc(rnd() * W, rnd() * 160, 0.5 + rnd() * 0.7, 0, 7); g.fill();
+      }
+    })
+  ];
+
+  /* ---- 体积感云朵（3 个变体，柔边多瓣） ---- */
+  function buildCloud(seed) {
+    var o = mkC(150, 80, 2), g = o.g;
+    var rnd = mulberry(seed);
+    var lobes = [{ x: 75, y: 50, r: 22 }];
+    for (var i = 0; i < 5; i++) {
+      lobes.push({
+        x: 33 + (i / 4) * 84 + (rnd() - 0.5) * 12,
+        y: 47 - Math.sin((i / 4) * Math.PI) * (13 + rnd() * 9),
+        r: 13 + rnd() * 9
+      });
+    }
+    var L, gr;
+    for (i = 0; i < lobes.length; i++) {   // 底部冷色阴影
+      L = lobes[i];
+      gr = g.createRadialGradient(L.x, L.y + 5, L.r * 0.2, L.x, L.y + 5, L.r * 1.05);
+      gr.addColorStop(0, 'rgba(150,175,225,0.45)'); gr.addColorStop(1, 'rgba(150,175,225,0)');
+      g.fillStyle = gr;
+      g.beginPath(); g.arc(L.x, L.y + 5, L.r * 1.05, 0, 7); g.fill();
+    }
+    for (i = 0; i < lobes.length; i++) {   // 主体柔边白
+      L = lobes[i];
+      gr = g.createRadialGradient(L.x - L.r * 0.25, L.y - L.r * 0.3, L.r * 0.15, L.x, L.y, L.r);
+      gr.addColorStop(0, 'rgba(255,255,255,0.98)');
+      gr.addColorStop(0.72, 'rgba(255,255,255,0.92)');
+      gr.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = gr;
+      g.beginPath(); g.arc(L.x, L.y, L.r, 0, 7); g.fill();
+    }
+    return o;
+  }
+  var cloudSpr = [buildCloud(11), buildCloud(22), buildCloud(33)];
+
+  /* ---- 远山（城市后第二层视差） ---- */
+  var hillW = Math.round(cityW * 0.6);
+  var hillSpr = (function () {
+    var o = mkC(hillW, 70, 2), g = o.g;
+    var rnd = mulberry(31415);
+    var passes = [
+      { col: '#b2d8d2', hMin: 30, hMax: 50, n: Math.max(3, Math.round(hillW / 130)) },
+      { col: '#c8e8e0', hMin: 16, hMax: 32, n: Math.max(4, Math.round(hillW / 95)) }
+    ];
+    for (var p = 0; p < 2; p++) {
+      var pa = passes[p];
+      g.fillStyle = pa.col;
+      for (var i = 0; i < pa.n; i++) {
+        var hx = rnd() * hillW;
+        var hh = pa.hMin + rnd() * (pa.hMax - pa.hMin);
+        var hr = 50 + rnd() * 55;
+        var cy = 70 - hh + hr;
+        for (var rep = -1; rep <= 1; rep++) {
+          g.beginPath(); g.arc(hx + rep * hillW, cy, hr, 0, 7); g.fill();
+        }
+      }
+      g.fillRect(0, 62, hillW, 8);
+    }
+    return o;
+  })();
+
+  /* ---- 城市剪影（昼/夜两张，夜版窗灯+天线红点） ---- */
+  function buildCity(night) {
+    var o = mkC(cityW, 186, 2), g = o.g, base = 184;
+    var rnd = mulberry(8282);
+    for (var i = 0; i < buildings.length; i++) {
+      var b = buildings[i];
+      var gr = g.createLinearGradient(0, base - b.h, 0, base);
+      if (night) { gr.addColorStop(0, '#2c3252'); gr.addColorStop(1, '#1d2136'); }
+      else { gr.addColorStop(0, '#b4dde6'); gr.addColorStop(1, '#8fc6d2'); }
+      g.fillStyle = gr;
+      g.fillRect(b.x, base - b.h, b.w, b.h + 2);
+      g.fillStyle = night ? 'rgba(0,0,0,0.3)' : 'rgba(60,110,130,0.22)';
+      g.fillRect(b.x + b.w - 3, base - b.h, 3, b.h);
+      g.fillStyle = night ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.5)';
+      g.fillRect(b.x, base - b.h, b.w, 2);
+      if (b.win) {
+        for (var wy = base - b.h + 8; wy < base - 8; wy += 14) {
+          for (var wx = b.x + 5; wx < b.x + b.w - 6; wx += 11) {
+            if (night) {
+              if (rnd() < 0.55) {
+                g.fillStyle = 'rgba(255,217,138,0.28)';
+                g.fillRect(wx - 1, wy - 1, 6, 8);
+                g.fillStyle = '#ffd98a';
+                g.fillRect(wx, wy, 4, 6);
+              } else {
+                g.fillStyle = 'rgba(255,255,255,0.06)';
+                g.fillRect(wx, wy, 4, 6);
+              }
+            } else {
+              g.fillStyle = 'rgba(255,255,255,0.55)';
+              g.fillRect(wx, wy, 4, 6);
+            }
+          }
+        }
+      }
+      if (b.ant) {
+        var ax = b.x + b.w * 0.3;
+        g.strokeStyle = night ? '#12162a' : '#7fb4c2';
+        g.lineWidth = 1.5;
+        g.beginPath();
+        g.moveTo(ax, base - b.h); g.lineTo(ax, base - b.h - 13);
+        g.moveTo(ax - 4, base - b.h - 5); g.lineTo(ax + 4, base - b.h - 5);
+        g.stroke();
+        g.fillStyle = night ? '#ff6666' : '#e8f2f5';
+        g.beginPath(); g.arc(ax, base - b.h - 14, 1.8, 0, 7); g.fill();
+      }
+    }
+    return o;
+  }
+  var cityDaySpr = buildCity(false);
+  var cityNightSpr = buildCity(true);
+
+  /* ---- 灌木带（双色层次+高光） ---- */
+  var bushSpr = (function () {
+    var o = mkC(bushW, 42, 2), g = o.g, base = 44;
+    for (var pass = 0; pass < 2; pass++) {
+      for (var i = 0; i < bushes.length; i++) {
+        var b = bushes[i];
+        var r = pass === 0 ? b.r : b.r * 0.72;
+        var col = pass === 0 ? '#5fae46' : '#86d968';
+        for (var rep = -1; rep <= 1; rep++) {
+          var x = b.x + rep * bushW + (pass === 1 ? 4 : 0);
+          if (x + r < -10 || x - r > bushW + 10) continue;
+          g.fillStyle = col;
+          g.beginPath(); g.arc(x, base, r, Math.PI, 0); g.fill();
+          if (pass === 1) {
+            g.strokeStyle = 'rgba(255,255,255,0.3)';
+            g.lineWidth = 2; g.lineCap = 'round';
+            g.beginPath(); g.arc(x, base, r * 0.7, Math.PI * 1.18, Math.PI * 1.55); g.stroke();
+          }
+        }
+        if (pass === 0 && rnd() > 0.5) { /* 保持随机流推进的均匀性 */ }
+      }
+    }
+    return o;
+  })();
+
+  /* ---- 地面（草皮+泥土纹理，26px 周期无缝滚动） ---- */
+  var groundSpr = (function () {
+    var GH = 24 + (H - GROUND_Y);     // 8 草齿区 + 16 草皮 + 88 泥土
+    var o = mkC(W + 26, GH, 2), g = o.g;
+    var gg = g.createLinearGradient(0, 8, 0, 24);
+    gg.addColorStop(0, '#9ce86f'); gg.addColorStop(0.7, '#6cc94a'); gg.addColorStop(1, '#54b03a');
+    g.fillStyle = gg;
+    g.fillRect(0, 8, W + 26, 16);
+    var x;
+    for (x = 0; x <= W + 26; x += 26) {        // 草顶圆齿
+      g.fillStyle = '#9ce86f';
+      g.beginPath(); g.arc(x + 13, 9, 5.5, Math.PI, 0); g.fill();
+      g.strokeStyle = 'rgba(255,255,255,0.3)';
+      g.lineWidth = 1.6; g.lineCap = 'round';
+      g.beginPath(); g.arc(x + 13, 9.5, 4, Math.PI * 1.15, Math.PI * 1.6); g.stroke();
+    }
+    g.strokeStyle = 'rgba(40,110,30,0.5)';     // 草叶
+    g.lineWidth = 1.2; g.lineCap = 'round';
+    for (x = 0; x <= W + 26; x += 26) {
+      g.beginPath(); g.moveTo(x + 5, 21); g.lineTo(x + 4, 14); g.stroke();
+      g.beginPath(); g.moveTo(x + 12, 22); g.lineTo(x + 13, 13); g.stroke();
+      g.beginPath(); g.moveTo(x + 20, 21); g.lineTo(x + 21, 15); g.stroke();
+    }
+    g.fillStyle = '#3f9a2e';
+    g.fillRect(0, 21, W + 26, 3);
+    var sg = g.createLinearGradient(0, 24, 0, GH);
+    sg.addColorStop(0, '#e6d28a'); sg.addColorStop(0.5, '#d6bf75'); sg.addColorStop(1, '#bda05c');
+    g.fillStyle = sg;
+    g.fillRect(0, 24, W + 26, GH - 24);
+    g.fillStyle = 'rgba(120,95,40,0.35)';
+    g.fillRect(0, 24, W + 26, 3);
+    g.fillStyle = 'rgba(176,150,82,0.45)';     // 斜纹（26 周期）
+    for (x = -40; x < W + 66; x += 26) {
+      g.beginPath();
+      g.moveTo(x, 24); g.lineTo(x + 13, 24);
+      g.lineTo(x + 13 - 18, GH); g.lineTo(x - 18, GH);
+      g.closePath(); g.fill();
+    }
+    g.fillStyle = 'rgba(150,120,60,0.3)';      // 地层线
+    g.fillRect(0, 58, W + 26, 2);
+    g.fillRect(0, 86, W + 26, 1.5);
+    function pebble(px, py, rx, ry) {
+      g.fillStyle = '#cdb573';
+      g.beginPath(); g.ellipse(px, py, rx, ry, 0.2, 0, 7); g.fill();
+      g.strokeStyle = 'rgba(110,85,35,0.4)'; g.lineWidth = 1;
+      g.stroke();
+      g.fillStyle = 'rgba(255,255,255,0.3)';
+      g.beginPath(); g.ellipse(px - rx * 0.3, py - ry * 0.35, rx * 0.4, ry * 0.35, 0.2, 0, 7); g.fill();
+    }
+    for (x = 0; x < W + 26; x += 26) {
+      pebble(x + 6, 47, 3.2, 2.2);
+      pebble(x + 19, 72, 2.6, 1.8);
+      pebble(x + 11, 98, 3.6, 2.4);
+    }
+    return o;
+  })();
+
+  /* ---- 管道（圆柱光影柱身 + 法兰管口 + 草簇） ---- */
+  var PIPE_CAP_H = 26;
+  function pipeGradStops(gr) {
+    gr.addColorStop(0, '#1f5a12');
+    gr.addColorStop(0.06, '#2f7a1c');
+    gr.addColorStop(0.16, '#5cb23a');
+    gr.addColorStop(0.27, '#a8e87e');
+    gr.addColorStop(0.34, '#d6f7b0');
+    gr.addColorStop(0.44, '#90dd62');
+    gr.addColorStop(0.62, '#58b838');
+    gr.addColorStop(0.82, '#3a8a24');
+    gr.addColorStop(1, '#235710');
+  }
+  var pipeBodySpr = (function () {
+    var o = mkC(PIPE_W, 40, 2), g = o.g;
+    var gr = g.createLinearGradient(0, 0, PIPE_W, 0);
+    pipeGradStops(gr);
+    g.fillStyle = gr;
+    g.fillRect(0, 0, PIPE_W, 40);
+    g.fillStyle = 'rgba(10,40,5,0.55)';   // 左右轮廓
+    g.fillRect(0, 0, 1.5, 40);
+    g.fillRect(PIPE_W - 1.5, 0, 1.5, 40);
+    return o;
+  })();
+  var pipeCapSpr = (function () {
+    var cw = PIPE_W + 10;
+    var o = mkC(cw, PIPE_CAP_H, 2), g = o.g;
+    var r = 3.5;
+    g.beginPath();
+    g.moveTo(r, 0.8); g.lineTo(cw - r, 0.8);
+    g.quadraticCurveTo(cw - 0.8, 0.8, cw - 0.8, r + 0.8);
+    g.lineTo(cw - 0.8, PIPE_CAP_H - r - 0.8);
+    g.quadraticCurveTo(cw - 0.8, PIPE_CAP_H - 0.8, cw - r, PIPE_CAP_H - 0.8);
+    g.lineTo(r, PIPE_CAP_H - 0.8);
+    g.quadraticCurveTo(0.8, PIPE_CAP_H - 0.8, 0.8, PIPE_CAP_H - r - 0.8);
+    g.lineTo(0.8, r + 0.8);
+    g.quadraticCurveTo(0.8, 0.8, r, 0.8);
+    g.closePath();
+    var gr = g.createLinearGradient(0, 0, cw, 0);
+    pipeGradStops(gr);
+    g.fillStyle = gr;
+    g.fill();
+    var vg = g.createLinearGradient(0, 0, 0, PIPE_CAP_H);  // 法兰立体竖向光影
+    vg.addColorStop(0, 'rgba(255,255,255,0.4)');
+    vg.addColorStop(0.22, 'rgba(255,255,255,0.12)');
+    vg.addColorStop(0.55, 'rgba(255,255,255,0)');
+    vg.addColorStop(0.85, 'rgba(0,0,0,0.14)');
+    vg.addColorStop(1, 'rgba(0,0,0,0.3)');
+    g.fillStyle = vg;
+    g.fill();
+    g.strokeStyle = '#1d4f12';
+    g.lineWidth = 1.8;
+    g.stroke();
+    return o;
+  })();
+  var tuftSpr = (function () {
+    var o = mkC(76, 24, 2), g = o.g;
+    var rnd = mulberry(424242);
+    var i, x;
+    for (i = 0; i < 7; i++) {              // 底层深色叶团
+      x = 5 + i * 11 + rnd() * 4;
+      g.fillStyle = '#3f8f2a';
+      g.beginPath(); g.arc(x, 24, 5.5 + rnd() * 3.5, Math.PI, 0); g.fill();
+    }
+    for (i = 0; i < 6; i++) {              // 亮色叶团
+      x = 10 + i * 11.5 + rnd() * 4;
+      g.fillStyle = '#62c244';
+      g.beginPath(); g.arc(x, 24, 4 + rnd() * 2.6, Math.PI, 0); g.fill();
+    }
+    g.strokeStyle = '#2f7a1f';             // 草叶
+    g.lineWidth = 1.3; g.lineCap = 'round';
+    for (i = 0; i < 5; i++) {
+      x = 9 + i * 14 + rnd() * 5;
+      g.beginPath();
+      g.moveTo(x, 23);
+      g.quadraticCurveTo(x + (rnd() - 0.5) * 5, 16, x + (rnd() - 0.5) * 7, 10 + rnd() * 4);
+      g.stroke();
+    }
+    return o;
+  })();
+
+  /* ---- 小鸟（身体精灵 + 三帧翅膀，表情实时绘制） ---- */
+  var birdBodySpr = (function () {
+    var o = mkC(68, 60, 3), g = o.g;
+    g.translate(34, 30);
+    g.lineJoin = 'round';
+    function feather(tx, ty, ang, len, col) {  // 尾羽
+      g.save();
+      g.translate(tx, ty); g.rotate(ang);
+      g.fillStyle = col; g.strokeStyle = '#8a5800'; g.lineWidth = 1.6;
+      g.beginPath();
+      g.moveTo(0, -2.6);
+      g.quadraticCurveTo(-len * 0.6, -4.5, -len, -1.8);
+      g.quadraticCurveTo(-len - 2, 0, -len, 1.8);
+      g.quadraticCurveTo(-len * 0.6, 4.5, 0, 2.6);
+      g.closePath(); g.fill(); g.stroke();
+      g.restore();
+    }
+    feather(-11, -1, -0.38, 13, '#e89a08');
+    feather(-11, 1.5, 0.3, 12, '#d98a00');
+    feather(-11, 0, -0.04, 15, '#ffb627');
+    var bg = g.createRadialGradient(-5, -7, 3, 0, 1, 18);  // 身体多层渐变
+    bg.addColorStop(0, '#fff3a8');
+    bg.addColorStop(0.4, '#ffe06a');
+    bg.addColorStop(0.75, '#ffc52e');
+    bg.addColorStop(1, '#f2a408');
+    g.fillStyle = bg;
+    g.strokeStyle = '#8a5800'; g.lineWidth = 2;
+    g.beginPath(); g.ellipse(0, 0, 14.5, 13.4, 0, 0, 7); g.fill(); g.stroke();
+    var bel = g.createRadialGradient(3, 4, 2, 4, 7, 11);   // 肚皮
+    bel.addColorStop(0, '#fffdf0'); bel.addColorStop(1, '#ffedb5');
+    g.fillStyle = bel;
+    g.beginPath(); g.ellipse(4, 6.8, 8.6, 5.8, -0.08, 0, 7); g.fill();
+    g.strokeStyle = 'rgba(200,140,30,0.4)';                // 胸口羽鳞
+    g.lineWidth = 1.2;
+    g.beginPath(); g.arc(-1, 4, 4.4, 0.3, 2.6); g.stroke();
+    g.beginPath(); g.arc(4.5, 2.5, 3.8, 0.4, 2.5); g.stroke();
+    g.fillStyle = '#ffb627';                               // 头顶呆毛
+    g.strokeStyle = '#8a5800'; g.lineWidth = 1.4;
+    g.beginPath();
+    g.moveTo(0, -12.8);
+    g.quadraticCurveTo(-2, -18.5, -5, -19.5);
+    g.quadraticCurveTo(-0.5, -17.6, 1.8, -13.4);
+    g.closePath(); g.fill(); g.stroke();
+    g.beginPath();
+    g.moveTo(2.4, -12.6);
+    g.quadraticCurveTo(3.4, -17, 7, -17.6);
+    g.quadraticCurveTo(3.6, -15.4, 4.6, -11.8);
+    g.closePath(); g.fill(); g.stroke();
+    g.strokeStyle = 'rgba(255,255,255,0.6)';               // 头部高光
+    g.lineWidth = 2.4; g.lineCap = 'round';
+    g.beginPath(); g.arc(0, -0.5, 10.6, -2.55, -1.35); g.stroke();
+    g.fillStyle = 'rgba(255,110,70,0.28)';                 // 脸颊红晕
+    g.beginPath(); g.ellipse(8.6, 1, 3, 2, 0.2, 0, 7); g.fill();
+    return o;
+  })();
+  function buildWing(baseAng) {
+    var o = mkC(48, 42, 3), g = o.g;
+    g.translate(34, 16);
+    g.rotate(baseAng);
+    g.lineJoin = 'round';
+    var cols = ['#e08c00', '#f7a81b', '#ffc445'];
+    for (var i = 0; i < 3; i++) {
+      g.save();
+      g.rotate((i - 1) * 0.18);
+      g.fillStyle = cols[i]; g.strokeStyle = '#8a5800'; g.lineWidth = 1.5;
+      var len = 15 - i * 1.8;
+      g.beginPath();
+      g.moveTo(0, -3.2);
+      g.quadraticCurveTo(-len * 0.7, -6.5, -len, -2);
+      g.quadraticCurveTo(-len - 2.5, 1.5, -len + 2, 3.5);
+      g.quadraticCurveTo(-len * 0.5, 5.5, 0, 3.2);
+      g.closePath(); g.fill(); g.stroke();
+      g.restore();
+    }
+    g.fillStyle = 'rgba(255,255,255,0.3)';
+    g.beginPath(); g.ellipse(-3, 0, 3.4, 2.2, -0.2, 0, 7); g.fill();
+    return o;
+  }
+  var wingSpr = [buildWing(0.75), buildWing(0.05), buildWing(-0.6)]; // 上/中/下
+
+  /* ============ 纯视觉状态与粒子（不触碰玩法） ============ */
+  var dayU = 0;                 // 昼夜相位 0昼 1暮 2夜 3晨（连续循环）
+  var scorePop = 0;             // 得分数字弹跳
+  var blinkT = 2.4;             // 眨眼计时
+  var floaters = [], notes = [], dust = [], feathersFx = [];
+  function tri(u, c) {
+    var d = Math.abs(u - c); d = Math.min(d, 4 - d);
+    return Math.max(0, 1 - d);
+  }
+  function dayTarget() {
+    var blk = Math.floor((score % 40) / 10);
+    var f = score % 10;
+    return blk + Math.min(Math.max((f - 6) / 4, 0), 1);
+  }
+  function fxScore() {
+    scorePop = 1;
+    floaters.push({ x: BIRD_X + 26, y: bird.y - 20, t: 0, life: 0.8 });
+    for (var i = 0; i < 3; i++) {
+      notes.push({
+        x: BIRD_X + 14 + i * 9, y: bird.y - 6 - i * 7,
+        vx: 26 + i * 14, vy: -52 - i * 16,
+        t: -i * 0.07, life: 0.9, g: (i % 2) ? '♫' : '♪'
+      });
+    }
+  }
+  function fxDeath() {
+    for (var i = 0; i < 7; i++) {
+      var a = Math.random() * 6.28;
+      feathersFx.push({
+        x: BIRD_X, y: bird.y,
+        vx: Math.cos(a) * (40 + Math.random() * 70),
+        vy: Math.sin(a) * 50 - 60 * Math.random(),
+        rot: a, vr: (Math.random() - 0.5) * 9,
+        t: 0, life: 1.1
+      });
+    }
+  }
+  function fxLand() {
+    for (var i = 0; i < 10; i++) {
+      var sp = 30 + Math.random() * 80;
+      dust.push({
+        x: BIRD_X + (Math.random() - 0.5) * 18, y: GROUND_Y - 3,
+        vx: (Math.random() - 0.5) * 2 * sp, vy: -(20 + Math.random() * 90),
+        r: 2.5 + Math.random() * 3.5,
+        t: 0, life: 0.55 + Math.random() * 0.3
+      });
+    }
+  }
+  function updateFx(dt) {
+    scorePop = Math.max(0, scorePop - dt * 3.2);
+    blinkT -= dt;
+    if (blinkT < -0.13) blinkT = 1.6 + Math.random() * 2.8;
+    var tu = dayTarget();
+    var d = (tu - dayU + 4) % 4;
+    if (d > 0.0001) dayU = (dayU + Math.min(d, dt * (d > 2 ? 2.4 : 1.4))) % 4;
+    var i, p, w;
+    w = 0;
+    for (i = 0; i < dust.length; i++) {
+      p = dust[i]; p.t += dt;
+      if (p.t < p.life) {
+        p.x += p.vx * dt; p.y += p.vy * dt;
+        p.vy += 260 * dt; p.vx *= Math.max(0, 1 - 1.6 * dt);
+        if (p.y > GROUND_Y - 1) { p.y = GROUND_Y - 1; p.vy = -p.vy * 0.25; }
+        dust[w++] = p;
+      }
+    }
+    dust.length = w;
+    w = 0;
+    for (i = 0; i < feathersFx.length; i++) {
+      p = feathersFx[i]; p.t += dt;
+      if (p.t < p.life && p.y < GROUND_Y + 10) {
+        p.x += (p.vx + Math.sin(p.t * 7) * 14) * dt;
+        p.y += p.vy * dt;
+        p.vy += 170 * dt; p.vx *= Math.max(0, 1 - 1.2 * dt);
+        p.rot += p.vr * dt;
+        feathersFx[w++] = p;
+      }
+    }
+    feathersFx.length = w;
+    w = 0;
+    for (i = 0; i < floaters.length; i++) {
+      p = floaters[i]; p.t += dt;
+      if (p.t < p.life) { p.y -= 46 * dt; floaters[w++] = p; }
+    }
+    floaters.length = w;
+    w = 0;
+    for (i = 0; i < notes.length; i++) {
+      p = notes[i]; p.t += dt;
+      if (p.t < p.life) {
+        if (p.t > 0) { p.x += p.vx * dt; p.y += p.vy * dt; }
+        notes[w++] = p;
+      }
+    }
+    notes.length = w;
+  }
 
   /* ============ 流程控制 ============ */
   function resetRound() {
@@ -341,6 +979,7 @@
     flashA = 1; shakeT = 0.3;
     bird.vy = Math.min(bird.vy, -160);   // 撞击小弹跳
     sfx.hit(); sfx.die();
+    fxDeath();
   }
   function settle() {
     state = STATE.OVER;
@@ -433,6 +1072,7 @@
       bird.y = GROUND_Y - BIRD_R;
       if (state === STATE.PLAY) { die(); return; } // die() 带小弹跳，二次落地再结算
       bird.vy = 0;
+      fxLand();
       settle();
       return;
     }
@@ -449,7 +1089,7 @@
     for (var j = 0; j < pipes.length; j++) {
       var p = pipes[j];
       if (!p.scored && p.x + PIPE_W / 2 < BIRD_X) {
-        p.scored = true; score++; sfx.score();
+        p.scored = true; score++; sfx.score(); fxScore();
       }
       if (p.x > BIRD_X + BIRD_R + 4 || p.x + PIPE_W < BIRD_X - BIRD_R - 4) continue;
       var topH = p.gapY - p.gap / 2;
@@ -472,18 +1112,25 @@
   function draw(now) {
     ctx.save();
     if (shakeT > 0) {
-      ctx.fillStyle = '#69c4e0';
+      ctx.fillStyle = skyTopColor[Math.round(dayU) % 4];
       ctx.fillRect(0, 0, W, H); // 震屏时先垫底色，防边缘残影
       ctx.translate((Math.random() - 0.5) * shakeT * 22, (Math.random() - 0.5) * shakeT * 22);
     }
     drawSky();
     drawClouds();
+    drawHills();
     drawCity();
     drawBushes();
     drawPipes();
     drawGround();
+    drawTufts();
+    drawBirdShadow();
     drawBird();
+    drawWorldFx();
     ctx.restore();
+
+    drawVeil();
+    drawTextFx();
 
     // 分数
     if (state !== STATE.READY && !(state === STATE.OVER)) {
@@ -498,63 +1145,57 @@
     }
   }
   function drawSky() {
-    var g = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
-    g.addColorStop(0, '#69c4e0');
-    g.addColorStop(0.75, '#a8e4ef');
-    g.addColorStop(1, '#cdeff3');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, W, GROUND_Y);
-  }
-  function drawClouds() {
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
-    for (var i = 0; i < clouds.length; i++) {
-      var c = clouds[i];
-      var x = ((c.x - cloudOff) % (W + 160) + (W + 160)) % (W + 160) - 80;
-      cloudShape(x, c.y, c.s);
+    var i = Math.floor(dayU) % 4, f = dayU - Math.floor(dayU);
+    ctx.drawImage(skySpr[i].cv, 0, 0, W, GROUND_Y);
+    if (f > 0.004) {
+      ctx.globalAlpha = f;
+      ctx.drawImage(skySpr[(i + 1) % 4].cv, 0, 0, W, GROUND_Y);
+      ctx.globalAlpha = 1;
     }
   }
-  function cloudShape(x, y, s) {
-    ctx.beginPath();
-    ctx.arc(x, y, 16 * s, 0, 7);
-    ctx.arc(x + 18 * s, y - 8 * s, 13 * s, 0, 7);
-    ctx.arc(x + 36 * s, y, 15 * s, 0, 7);
-    ctx.arc(x + 18 * s, y + 6 * s, 14 * s, 0, 7);
-    ctx.fill();
+  function drawClouds() {
+    var i, c, x, sw, sh, spr;
+    ctx.globalAlpha = 0.6;                       // 远层云（半速视差）
+    for (i = 0; i < cloudsFar.length; i++) {
+      c = cloudsFar[i];
+      x = ((c.x - cloudOff * 0.5) % FAR_FIELD + FAR_FIELD) % FAR_FIELD;
+      spr = cloudSpr[c.v]; sw = 150 * c.s; sh = 80 * c.s;
+      ctx.drawImage(spr.cv, x - 80, c.y, sw, sh);
+      ctx.drawImage(spr.cv, x - 80 + FAR_FIELD, c.y, sw, sh);
+    }
+    ctx.globalAlpha = 1;                         // 近层云
+    for (i = 0; i < cloudsNear.length; i++) {
+      c = cloudsNear[i];
+      x = ((c.x - cloudOff) % CLOUD_FIELD + CLOUD_FIELD) % CLOUD_FIELD - 80;
+      spr = cloudSpr[c.v]; sw = 150 * c.s; sh = 80 * c.s;
+      ctx.drawImage(spr.cv, x - sw / 2, c.y - sh / 2, sw, sh);
+    }
+  }
+  function drawHills() {
+    var off = (cityOff * 0.6) % hillW;
+    for (var x = -off; x < W; x += hillW) {
+      drawStrip(hillSpr, x, GROUND_Y - 18 - 64);
+    }
   }
   function drawCity() {
     var baseY = GROUND_Y - 18;
+    var nA = tri(dayU, 2);
     for (var rep = 0; rep < 2; rep++) {
       var off = rep * cityW - cityOff;
-      for (var i = 0; i < buildings.length; i++) {
-        var b = buildings[i];
-        var x = b.x + off;
-        if (x + b.w < -10 || x > W + 10) continue;
-        ctx.fillStyle = '#9fd4dc';
-        ctx.fillRect(x, baseY - b.h, b.w, b.h);
-        if (b.win) {
-          ctx.fillStyle = 'rgba(255,255,255,0.55)';
-          for (var wy = baseY - b.h + 8; wy < baseY - 8; wy += 14) {
-            for (var wx = x + 5; wx < x + b.w - 6; wx += 11) {
-              ctx.fillRect(wx, wy, 4, 6);
-            }
-          }
-        }
+      if (off > W || off + cityW < 0) continue;
+      drawStrip(cityDaySpr, off, baseY - 184);
+      if (nA > 0.03) {
+        ctx.globalAlpha = nA;
+        drawStrip(cityNightSpr, off, baseY - 184);
+        ctx.globalAlpha = 1;
       }
     }
   }
   function drawBushes() {
-    ctx.fillStyle = '#8fdc7a';
-    var baseY = GROUND_Y - 16; // 顶部嵌入草地后沿
     for (var rep = 0; rep < 2; rep++) {
       var off = rep * bushW - bushOff;
-      for (var i = 0; i < bushes.length; i++) {
-        var b = bushes[i];
-        var x = b.x + off;
-        if (x + b.r * 2 < -20 || x > W + 20) continue;
-        ctx.beginPath();
-        ctx.arc(x, baseY + 18, b.r, Math.PI, 0);
-        ctx.fill();
-      }
+      if (off > W || off + bushW < 0) continue;
+      drawStrip(bushSpr, off, GROUND_Y - 16 - 28);
     }
   }
   function drawPipes() {
@@ -568,145 +1209,193 @@
   }
   function pipeRect(x, y, h, isTop) {
     if (h <= 0) return;
-    var g = ctx.createLinearGradient(x, 0, x + PIPE_W, 0);
-    g.addColorStop(0, '#4ea332');
-    g.addColorStop(0.18, '#8ee06a');
-    g.addColorStop(0.45, '#5ec23a');
-    g.addColorStop(1, '#3a8f24');
-    ctx.fillStyle = g;
-    ctx.fillRect(x, y, PIPE_W, h);
-    ctx.strokeStyle = '#27611a';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x + 1, y - (isTop ? 4 : 1), PIPE_W - 2, h + 4);
-    // 管口加宽帽
-    var capH = 24;
-    var cy = isTop ? y + h - capH : y;
-    var g2 = ctx.createLinearGradient(x - 4, 0, x + PIPE_W + 4, 0);
-    g2.addColorStop(0, '#56b13a');
-    g2.addColorStop(0.2, '#9bea78');
-    g2.addColorStop(0.5, '#67cc44');
-    g2.addColorStop(1, '#3f9a28');
-    ctx.fillStyle = g2;
-    ctx.fillRect(x - 4, cy, PIPE_W + 8, capH);
-    ctx.strokeRect(x - 3, cy + 1, PIPE_W + 6, capH - 2);
+    ctx.drawImage(pipeBodySpr.cv, x, y, PIPE_W, h);
+    ctx.fillStyle = 'rgba(0,0,0,0.14)';          // 法兰投影
+    if (isTop) {
+      ctx.fillRect(x, y + h - PIPE_CAP_H - 5, PIPE_W, 5);
+      ctx.drawImage(pipeCapSpr.cv, x - 5, y + h - PIPE_CAP_H, PIPE_W + 10, PIPE_CAP_H);
+    } else {
+      ctx.fillRect(x, y + PIPE_CAP_H, PIPE_W, 5);
+      ctx.drawImage(pipeCapSpr.cv, x - 5, y, PIPE_W + 10, PIPE_CAP_H);
+    }
   }
   function drawGround() {
-    // 草皮
-    ctx.fillStyle = '#7ed957';
-    ctx.fillRect(0, GROUND_Y - 16, W, 16);
-    ctx.fillStyle = '#5cb83b';
-    ctx.fillRect(0, GROUND_Y - 3, W, 3);
-    // 泥土
-    ctx.fillStyle = '#e3d68f';
-    ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
-    // 斜纹滚动
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(0, GROUND_Y, W, H - GROUND_Y);
-    ctx.clip();
-    ctx.fillStyle = 'rgba(180,160,90,0.45)';
-    for (var x = -40 - groundOff; x < W + 40; x += 26) {
-      ctx.beginPath();
-      ctx.moveTo(x, GROUND_Y);
-      ctx.lineTo(x + 13, GROUND_Y);
-      ctx.lineTo(x + 13 - 18, H);
-      ctx.lineTo(x - 18, H);
-      ctx.fill();
-    }
-    ctx.restore();
-    // 草顶滚动小齿
-    ctx.fillStyle = '#6cc94a';
-    for (var gx = -26 - groundOff; gx < W + 26; gx += 26) {
-      ctx.beginPath();
-      ctx.arc(gx + 13, GROUND_Y - 16, 5, Math.PI, 0);
-      ctx.fill();
+    drawStrip(groundSpr, -groundOff, GROUND_Y - 24);
+  }
+  function drawTufts() {
+    for (var i = 0; i < pipes.length; i++) {     // 管底植被点缀
+      var p = pipes[i];
+      if (p.x > W + 10 || p.x + PIPE_W < -10) continue;
+      ctx.drawImage(tuftSpr.cv, p.x - 4, GROUND_Y - 26, 76, 24);
     }
   }
+  function drawBirdShadow() {
+    var d = GROUND_Y - bird.y;
+    if (d > 260) return;
+    var a = (1 - d / 260) * 0.22;
+    var r = 10 + (1 - d / 260) * 6;
+    ctx.fillStyle = 'rgba(40,80,30,' + a.toFixed(3) + ')';
+    ctx.beginPath();
+    ctx.ellipse(BIRD_X, GROUND_Y - 9, r, r * 0.26, 0, 0, 7);
+    ctx.fill();
+  }
   function drawBird() {
+    var dead = (state === STATE.DYING || state === STATE.OVER);
     ctx.save();
     ctx.translate(BIRD_X, bird.y);
     ctx.rotate(bird.rot);
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = '#7a5800';
-    // 尾羽
-    ctx.fillStyle = '#f0b429';
-    ctx.beginPath();
-    ctx.moveTo(-10, -2);
-    ctx.lineTo(-21, -7);
-    ctx.lineTo(-19, 1);
-    ctx.lineTo(-22, 6);
-    ctx.lineTo(-9, 5);
-    ctx.closePath();
-    ctx.fill(); ctx.stroke();
-    // 身体
-    var bg = ctx.createRadialGradient(-3, -5, 3, 0, 0, 16);
-    bg.addColorStop(0, '#ffe66b');
-    bg.addColorStop(1, '#fcc419');
-    ctx.fillStyle = bg;
-    ctx.beginPath();
-    ctx.arc(0, 0, 14, 0, 7);
-    ctx.fill(); ctx.stroke();
-    // 肚皮
-    ctx.fillStyle = '#fff3c2';
-    ctx.beginPath();
-    ctx.ellipse(3, 6, 8, 6, 0, 0, 7);
-    ctx.fill();
-    // 翅膀（扇动）
-    var wingAng = Math.sin(bird.wingT) * (0.55 + bird.wingBoost * 0.5) - 0.2;
-    if (state === STATE.DYING || state === STATE.OVER) wingAng = 0.5;
+    // 身体（预渲染精灵）
+    ctx.drawImage(birdBodySpr.cv, -34, -30, 68, 60);
+    // 翅膀：三帧姿态 + 余量微转
+    var s = Math.sin(bird.wingT);
+    var wi = dead ? 2 : (s > 0.35 ? 0 : (s < -0.35 ? 2 : 1));
+    var res = dead ? -0.18 : s * 0.2;
     ctx.save();
-    ctx.translate(-3, 1);
-    ctx.rotate(wingAng);
-    ctx.fillStyle = '#f59f00';
-    ctx.beginPath();
-    ctx.ellipse(-5, 0, 9, 5.5, -0.25, 0, 7);
-    ctx.fill(); ctx.stroke();
+    ctx.translate(-4, 1);
+    ctx.rotate(res);
+    ctx.drawImage(wingSpr[wi].cv, -34, -16, 48, 42);
     ctx.restore();
     // 眼睛
     ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#8a5800';
+    ctx.lineWidth = 1.6;
     ctx.beginPath();
-    ctx.arc(5.5, -5.5, 5.5, 0, 7);
-    ctx.fill();
-    ctx.strokeStyle = '#7a5800';
-    ctx.stroke();
-    ctx.fillStyle = '#222233';
-    ctx.beginPath();
-    ctx.arc(7.2, -5.5, 2.4, 0, 7);
-    ctx.fill();
-    if (state === STATE.DYING || state === STATE.OVER) {
+    ctx.ellipse(6, -6, 5.4, 5.9, 0.06, 0, 7);
+    ctx.fill(); ctx.stroke();
+    if (dead) {
       // 死亡 ×眼
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath(); ctx.arc(5.5, -5.5, 5.5, 0, 7); ctx.fill();
-      ctx.strokeStyle = '#444455'; ctx.lineWidth = 1.8;
+      ctx.strokeStyle = '#444455';
+      ctx.lineWidth = 1.8;
       ctx.beginPath();
-      ctx.moveTo(2.8, -8.2); ctx.lineTo(8.2, -2.8);
-      ctx.moveTo(8.2, -8.2); ctx.lineTo(2.8, -2.8);
+      ctx.moveTo(3.2, -8.6); ctx.lineTo(8.8, -3.2);
+      ctx.moveTo(8.8, -8.6); ctx.lineTo(3.2, -3.2);
       ctx.stroke();
-      ctx.lineWidth = 2; ctx.strokeStyle = '#7a5800';
-      ctx.beginPath(); ctx.arc(5.5, -5.5, 5.5, 0, 7); ctx.stroke();
+    } else if (blinkT < 0 && state !== STATE.DYING) {
+      // 眨眼
+      ctx.strokeStyle = '#8a5800';
+      ctx.lineWidth = 1.8;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(2.6, -5.6); ctx.quadraticCurveTo(6, -3.8, 9.4, -5.6);
+      ctx.stroke();
+    } else {
+      // 瞳孔随升降看向上下 + 双高光
+      var look = Math.max(-1, Math.min(1, bird.vy / MAX_FALL));
+      var py = -6 + look * 2.1;
+      ctx.fillStyle = '#26263a';
+      ctx.beginPath(); ctx.arc(7.4, py, 2.7, 0, 7); ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(6.6, py - 1, 1.05, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.arc(8.2, py + 0.8, 0.55, 0, 7); ctx.fill();
     }
-    // 嘴
-    ctx.fillStyle = '#ff7733';
-    ctx.strokeStyle = '#b34a12';
+    // 嘴（拍翅/死亡时张开）
+    var open = dead ? 2.4 : Math.max(0, bird.wingBoost - 0.45) * 3.2;
+    if (open > 0.7) {
+      ctx.fillStyle = '#9c2f10';
+      ctx.beginPath();
+      ctx.moveTo(10.5, 0.5 - open * 0.5);
+      ctx.lineTo(17, 2);
+      ctx.lineTo(10.5, 3.5 + open * 0.5);
+      ctx.closePath(); ctx.fill();
+    }
     ctx.lineWidth = 1.5;
+    ctx.strokeStyle = '#b34a12';
+    ctx.fillStyle = '#ff8a3d';
     ctx.beginPath();
-    ctx.moveTo(10, -1.5); ctx.lineTo(19, 0.5); ctx.lineTo(10, 2);
+    ctx.moveTo(10, -1.5 - open * 0.3);
+    ctx.lineTo(19, 0.5 - open);
+    ctx.lineTo(10, 2 - open * 0.4);
     ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#f2701f';
     ctx.beginPath();
-    ctx.moveTo(10, 2.5); ctx.lineTo(17.5, 3.5); ctx.lineTo(10, 5.5);
+    ctx.moveTo(10, 2.5 + open * 0.4);
+    ctx.lineTo(17.5, 3.5 + open);
+    ctx.lineTo(10, 5.5 + open * 0.3);
     ctx.closePath(); ctx.fill(); ctx.stroke();
     ctx.restore();
   }
+  function drawWorldFx() {
+    var i, p, a;
+    for (i = 0; i < dust.length; i++) {
+      p = dust[i]; a = 1 - p.t / p.life;
+      ctx.fillStyle = 'rgba(214,196,140,' + (a * 0.8).toFixed(3) + ')';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * (1 + p.t * 1.6), 0, 7);
+      ctx.fill();
+    }
+    for (i = 0; i < feathersFx.length; i++) {
+      p = feathersFx[i]; a = 1 - p.t / p.life;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = 'rgba(255,211,77,' + (a * 0.95).toFixed(3) + ')';
+      ctx.beginPath(); ctx.ellipse(0, 0, 5, 2.1, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(200,140,20,' + (a * 0.6).toFixed(3) + ')';
+      ctx.fillRect(-4.5, -0.4, 9, 0.8);
+      ctx.restore();
+    }
+  }
+  function drawVeil() {
+    // 昼夜色调薄纱（纯视觉）
+    var nA = tri(dayU, 2);
+    var wA = tri(dayU, 1) * 0.5 + tri(dayU, 3) * 0.3;
+    if (wA > 0.01) {
+      ctx.fillStyle = 'rgba(255,140,70,' + (wA * 0.18).toFixed(3) + ')';
+      ctx.fillRect(0, 0, W, H);
+    }
+    if (nA > 0.01) {
+      ctx.fillStyle = 'rgba(10,16,52,' + (nA * 0.34).toFixed(3) + ')';
+      ctx.fillRect(0, 0, W, H);
+    }
+  }
+  function drawTextFx() {
+    var i, p, a;
+    if (floaters.length) {
+      ctx.font = '800 21px "PingFang SC","Microsoft YaHei",system-ui,sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.lineWidth = 4;
+      ctx.lineJoin = 'round';
+      for (i = 0; i < floaters.length; i++) {
+        p = floaters[i]; a = 1 - p.t / p.life;
+        ctx.strokeStyle = 'rgba(80,50,0,' + (a * 0.85).toFixed(3) + ')';
+        ctx.fillStyle = 'rgba(255,216,77,' + a.toFixed(3) + ')';
+        ctx.strokeText('+1', p.x, p.y);
+        ctx.fillText('+1', p.x, p.y);
+      }
+    }
+    if (notes.length) {
+      ctx.font = '15px "PingFang SC","Microsoft YaHei",system-ui,sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      for (i = 0; i < notes.length; i++) {
+        p = notes[i];
+        if (p.t < 0) continue;
+        a = 1 - p.t / p.life;
+        ctx.fillStyle = 'rgba(255,255,255,' + (a * 0.95).toFixed(3) + ')';
+        ctx.fillText(p.g, p.x, p.y);
+      }
+    }
+  }
   function drawScore(s) {
+    var cx = W / 2, cy = 70;
+    ctx.save();
+    if (scorePop > 0) {
+      var k = 1 + scorePop * 0.22;
+      ctx.translate(cx, cy);
+      ctx.scale(k, k);
+      ctx.translate(-cx, -cy);
+    }
     ctx.font = '800 44px "PingFang SC","Microsoft YaHei",system-ui,sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     ctx.lineWidth = 6;
     ctx.lineJoin = 'round';
     ctx.strokeStyle = 'rgba(40,40,60,0.85)';
-    ctx.strokeText(s, W / 2, 48);
+    ctx.strokeText(s, cx, 48);
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(s, W / 2, 48);
+    ctx.fillText(s, cx, 48);
+    ctx.restore();
   }
   function drawHint(now) {
     var a = 0.65 + Math.sin(now / 280) * 0.3;
@@ -744,6 +1433,7 @@
     flashA = Math.max(0, flashA - dt * 2.6);
     shakeT = Math.max(0, shakeT - dt);
     update(dt);
+    updateFx(dt);
     draw(now);
     requestAnimationFrame(frame);
   }

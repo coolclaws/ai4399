@@ -19,33 +19,41 @@ a.back{position:fixed;top:10px;left:12px;z-index:50;color:var(--dim);text-decora
 a.back:hover{color:var(--gold)}
 #wrap{height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px}
 #game{display:none;flex-direction:row;gap:12px;align-items:flex-start}
-#hud{width:172px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:14px;display:flex;flex-direction:column;gap:7px}
-#hud h2{font-size:15px;color:var(--gold);letter-spacing:2px;text-align:center;margin-bottom:2px}
+#hud{width:178px;background:linear-gradient(180deg,#191926,#10101a);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:14px;display:flex;flex-direction:column;gap:7px;box-shadow:0 6px 20px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.04)}
+#hud h2{font-size:15px;color:var(--gold);letter-spacing:2px;text-align:center;margin-bottom:2px;text-shadow:0 0 14px rgba(255,204,0,.35)}
 .stat{display:flex;justify-content:space-between;align-items:center}
-.stat .lab{color:var(--dim)}
-.stat .val{font-variant-numeric:tabular-nums}
-.keys{display:flex;justify-content:space-around;background:rgba(0,0,0,.25);border-radius:6px;padding:5px 2px}
-.keys span{font-variant-numeric:tabular-nums;font-size:13px}
+.stat .lab{color:var(--dim);display:flex;align-items:center;gap:6px}
+.ico{width:16px;height:16px;image-rendering:pixelated;display:inline-block;flex:none}
+.stat .val{font-variant-numeric:tabular-nums;font-weight:700;letter-spacing:.5px;text-shadow:0 1px 0 rgba(0,0,0,.7)}
+.keys{display:flex;justify-content:space-around;background:rgba(0,0,0,.3);border:1px solid rgba(42,42,61,.6);border-radius:6px;padding:5px 2px}
+.keys span{font-variant-numeric:tabular-nums;font-size:13px;display:flex;align-items:center;gap:3px;font-weight:700}
 .kY{color:#ffd34d}.kB{color:#5ab0ff}.kR{color:#ff6a6a}
 #hud button{background:#1d1d2e;border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 4px;font-size:13px;cursor:pointer;font-family:inherit}
 #hud button:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
 #hud button:disabled{opacity:.35;cursor:default}
-#cv{background:#000;border:2px solid var(--border);border-radius:8px;image-rendering:pixelated;touch-action:none;display:block}
+#cv{background:#000;border:2px solid var(--border);border-radius:8px;image-rendering:pixelated;touch-action:none;display:block;box-shadow:0 8px 28px rgba(0,0,0,.55)}
 #msg{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);background:rgba(20,20,31,.92);border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:60;white-space:nowrap}
 /* 覆盖层 */
 .overlay{position:fixed;inset:0;background:rgba(5,5,10,.88);display:none;align-items:center;justify-content:center;z-index:100;flex-direction:column}
 .box{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:26px 30px;max-width:420px;width:92vw;text-align:center;max-height:86vh;overflow:auto}
-.box h1{color:var(--gold);font-size:30px;letter-spacing:10px;margin-bottom:8px}
+.box h1{color:var(--gold);font-size:30px;letter-spacing:10px;margin-bottom:8px;text-shadow:0 0 20px rgba(255,204,0,.4)}
+#startArt{display:flex;justify-content:center;align-items:flex-end;gap:12px;margin:12px 0 4px}
+#startArt img{image-rendering:pixelated;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6))}
 .box h3{color:var(--gold);font-size:18px;margin-bottom:10px}
 .box p{color:var(--dim);font-size:14px;line-height:1.8;margin:8px 0}
 .box .em{color:var(--text)}
 .box button{display:block;width:100%;margin-top:10px;background:#1d1d2e;border:1px solid var(--border);color:var(--text);padding:11px;border-radius:8px;font-size:15px;cursor:pointer;font-family:inherit}
 .box button:hover{border-color:var(--gold);color:var(--gold)}
 .box button.primary{background:#2a2410;border-color:var(--gold);color:var(--gold)}
-table.mtab{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
-table.mtab th{color:var(--dim);font-weight:normal;padding:3px 2px;border-bottom:1px solid var(--border)}
-table.mtab td{padding:4px 2px;border-bottom:1px solid rgba(42,42,61,.5);font-variant-numeric:tabular-nums}
-table.mtab td.nm{text-align:left;white-space:nowrap}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;max-height:58vh;overflow:auto;padding:2px}
+.mcard{background:#0e0e18;border:1px solid var(--border);border-radius:8px;padding:8px;display:flex;gap:9px;align-items:center;text-align:left}
+.mcard.danger{border-color:#5a2030;box-shadow:inset 0 0 14px rgba(255,42,42,.14)}
+.mcard img{width:46px;height:46px;image-rendering:pixelated;background:radial-gradient(circle at 50% 38%,#23233a,#0c0c15 75%);border-radius:6px;flex:none;padding:3px}
+.mcard .mn{font-size:13px;color:var(--text);margin-bottom:1px;font-weight:600}
+.mcard .ms{font-size:11px;color:var(--dim);line-height:1.55}
+.mcard .ms b{color:var(--text);font-weight:600}
+.mcard .md{font-size:12px;color:var(--dim)}
+.mcard .md span{font-weight:700}
 .dmgok{color:#7dd87d}.dmgbad{color:#ff6a6a}.dmgmid{color:var(--gold)}
 .shopitem{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:14px}
 .shopitem button{width:auto;margin:0;padding:6px 14px;font-size:13px}
@@ -54,7 +62,7 @@ table.mtab td.nm{text-align:left;white-space:nowrap}
 #floorfade span{color:var(--gold);font-size:34px;letter-spacing:8px}
 #dpad{display:none;margin-top:6px;grid-template-columns:repeat(3,56px);grid-template-rows:repeat(2,48px);gap:6px}
 #dpad button{background:rgba(29,29,46,.85);border:1px solid var(--border);color:var(--text);border-radius:10px;font-size:20px}
-.flybtn{display:inline-block;width:30%;margin:4px 1%;padding:10px 0;background:#1d1d2e;border:1px solid var(--border);color:var(--text);border-radius:8px;cursor:pointer;font-size:14px}
+.flybtn{display:inline-block;width:30%;margin:4px 1%;padding:10px 0;background:linear-gradient(180deg,#22223a,#16161f);border:1px solid var(--border);border-left:4px solid #555;color:var(--text);border-radius:8px;cursor:pointer;font-size:14px;font-variant-numeric:tabular-nums}
 .flybtn:hover{border-color:var(--gold);color:var(--gold)}
 @media (max-width:760px){
   #game{flex-direction:column;align-items:center;gap:6px}
@@ -73,17 +81,17 @@ table.mtab td.nm{text-align:left;white-space:nowrap}
   <div id="game">
     <div id="hud">
       <h2>魔 塔</h2>
-      <div class="stat"><span class="lab">层数</span><span class="val" id="sFl">1</span></div>
-      <div class="stat"><span class="lab">生命</span><span class="val" id="sHp" style="color:#7dd87d">1000</span></div>
-      <div class="stat"><span class="lab">攻击</span><span class="val" id="sAtk" style="color:#ff9d5c">10</span></div>
-      <div class="stat"><span class="lab">防御</span><span class="val" id="sDef" style="color:#5ab0ff">10</span></div>
-      <div class="stat"><span class="lab">金币</span><span class="val" id="sGold" style="color:var(--gold)">0</span></div>
-      <div class="keys"><span class="kY">⚷<span id="kY">0</span></span><span class="kB">⚷<span id="kB">0</span></span><span class="kR">⚷<span id="kR">0</span></span></div>
+      <div class="stat"><span class="lab"><img class="ico" id="icoFl" alt="">层数</span><span class="val" id="sFl">1</span></div>
+      <div class="stat"><span class="lab"><img class="ico" id="icoHp" alt="">生命</span><span class="val" id="sHp" style="color:#7dd87d">1000</span></div>
+      <div class="stat"><span class="lab"><img class="ico" id="icoAtk" alt="">攻击</span><span class="val" id="sAtk" style="color:#ff9d5c">10</span></div>
+      <div class="stat"><span class="lab"><img class="ico" id="icoDef" alt="">防御</span><span class="val" id="sDef" style="color:#5ab0ff">10</span></div>
+      <div class="stat"><span class="lab"><img class="ico" id="icoGold" alt="">金币</span><span class="val" id="sGold" style="color:var(--gold)">0</span></div>
+      <div class="keys"><span class="kY"><img class="ico" id="icoKy" alt=""><span id="kY">0</span></span><span class="kB"><img class="ico" id="icoKb" alt=""><span id="kB">0</span></span><span class="kR"><img class="ico" id="icoKr" alt=""><span id="kR">0</span></span></div>
       <button id="btnManual" disabled>怪物手册 (M)</button>
       <button id="btnFly" disabled>楼层传送 (T)</button>
       <button id="btnSound">音效：开</button>
       <button id="btnRestart">重新开始</button>
-      <div class="stat" style="margin-top:2px"><span class="lab">用时</span><span class="val" id="sTime">0:00</span></div>
+      <div class="stat" style="margin-top:2px"><span class="lab"><img class="ico" id="icoTime" alt="">用时</span><span class="val" id="sTime">0:00</span></div>
     </div>
     <div>
       <canvas id="cv"></canvas>
@@ -101,6 +109,7 @@ table.mtab td.nm{text-align:left;white-space:nowrap}
   <div class="box">
     <h1>魔 塔</h1>
     <p style="color:var(--gold);letter-spacing:2px">AI4399 · 数值策略爬塔</p>
+    <div id="startArt"></div>
     <p>巫王掳走了公主，囚于十六层魔塔之巅。<span class="em">拿起剑，一层层算上去。</span></p>
     <p>方向键 / WASD 移动 · 触屏点击目标格自动寻路<br>
        撞击怪物即战斗（先手在你）· 撞门用钥匙<br>
@@ -124,7 +133,7 @@ table.mtab td.nm{text-align:left;white-space:nowrap}
 <div class="overlay" id="ovManual">
   <div class="box" style="max-width:460px">
     <h3 id="manualTitle">怪物手册 · 第 1 层</h3>
-    <table class="mtab"><thead><tr><th style="text-align:left">怪物</th><th>生命</th><th>攻击</th><th>防御</th><th>金币</th><th>预计损血</th></tr></thead><tbody id="manualBody"></tbody></table>
+    <div class="mgrid" id="manualBody"></div>
     <button id="btnManualClose">关闭 (Esc)</button>
   </div>
 </div>
@@ -288,15 +297,589 @@ var SFX = {
   fly: function () { tone(440, .3, 'triangle', .09, 0, 1320); }
 };
 
-/* ================= 像素画 ================= */
-var sprites = {};
-function mkSprite(name, painter) {
-  var s = document.createElement('canvas'); s.width = 32; s.height = 32;
+/* ================= 像素画（全部预渲染精灵表，渲染时仅 drawImage） ================= */
+var sprites = {}, tintCache = {}, sprDataURL = {};
+function mkCanvas(w, h) { var s = document.createElement('canvas'); s.width = w; s.height = h; return s; }
+function mkSprite(name, painter, w, h) {
+  var s = mkCanvas(w || 32, h || 32);
   var x = s.getContext('2d'); x.imageSmoothingEnabled = false;
-  painter(x); sprites[name] = s;
+  painter(x); sprites[name] = s; return s;
 }
 function px(x, c, X, Y, w, h) { x.fillStyle = c; x.fillRect(X, Y, w || 2, h || 2); }
-function eyes(x, c, lx, rx, y) { px(x, c, lx, y, 3, 3); px(x, c, rx, y, 3, 3); }
+function shadow(x, w, y) { px(x, 'rgba(0,0,0,.32)', 16 - (w >> 1), y || 28, w, 3); }
+function poly(x, c, pts) { x.fillStyle = c; x.beginPath(); x.moveTo(pts[0][0], pts[0][1]); for (var i = 1; i < pts.length; i++) x.lineTo(pts[i][0], pts[i][1]); x.closePath(); x.fill(); }
+function mirrorSprite(src) { var s = mkCanvas(src.width, src.height); var x = s.getContext('2d'); x.imageSmoothingEnabled = false; x.translate(src.width, 0); x.scale(-1, 1); x.drawImage(src, 0, 0); return s; }
+/* 着色缓存：白色闪光剪影 / 红色警示描边 */
+function tintSprite(name, color, outline) {
+  var key = name + '|' + color + (outline ? '|o' : '');
+  if (tintCache[key]) return tintCache[key];
+  var src = sprites[name], s, x;
+  if (outline) {
+    s = mkCanvas(src.width + 2, src.height + 2); x = s.getContext('2d');
+    x.drawImage(src, 0, 1); x.drawImage(src, 2, 1); x.drawImage(src, 1, 0); x.drawImage(src, 1, 2);
+  } else {
+    s = mkCanvas(src.width, src.height); x = s.getContext('2d');
+    x.drawImage(src, 0, 0);
+  }
+  x.globalCompositeOperation = 'source-in';
+  x.fillStyle = color; x.fillRect(0, 0, s.width, s.height);
+  tintCache[key] = s; return s;
+}
+
+/* —— 楼层色调主题：1-5 石灰 / 6-10 暗蓝 / 11-15 暗红 / 16 巫王紫 —— */
+var THEMES = [
+  { fA: '#262630', fB: '#21212b', fLine: '#15151d', fHi: '#31313f',
+    wTop: '#585872', wTopHi: '#6e6e8c', wFace: '#3b3b50', wFace2: '#34344a', wDark: '#232331',
+    vig: 'rgba(5,5,12,.5)' },
+  { fA: '#1e2536', fB: '#1a202e', fLine: '#10141f', fHi: '#283149',
+    wTop: '#43527e', wTopHi: '#56689c', wFace: '#2c3655', wFace2: '#27304c', wDark: '#1a2136',
+    vig: 'rgba(3,6,16,.55)' },
+  { fA: '#2e1d23', fB: '#28181d', fLine: '#1a0d11', fHi: '#3b262e',
+    wTop: '#76414c', wTopHi: '#8e5460', wFace: '#4e2933', wFace2: '#46242e', wDark: '#2e161d',
+    vig: 'rgba(14,3,6,.55)' },
+  { fA: '#251b36', fB: '#20162e', fLine: '#140d1f', fHi: '#302345',
+    wTop: '#5f3e82', wTopHi: '#75509e', wFace: '#402b5a', wFace2: '#392650', wDark: '#271837',
+    vig: 'rgba(10,3,18,.55)' }
+];
+function themeOf(f) { return f >= 16 ? 3 : f >= 11 ? 2 : f >= 6 ? 1 : 0; }
+
+function paintFloor(x, T, v, boss) {
+  px(x, T.fLine, 0, 0, 32, 32);
+  for (var qy = 0; qy < 2; qy++) for (var qx = 0; qx < 2; qx++) {
+    var base = ((qx + qy + v) % 2) ? T.fA : T.fB;
+    px(x, base, qx * 16 + 1, qy * 16 + 1, 15, 15);
+    px(x, T.fHi, qx * 16 + 1, qy * 16 + 1, 15, 1);
+    px(x, T.fHi, qx * 16 + 1, qy * 16 + 1, 1, 15);
+  }
+  var sp = [[5, 7], [24, 21], [12, 26], [21, 9], [7, 19], [26, 5]];
+  for (var i = 0; i < 3; i++) {
+    var s2 = sp[(v * 2 + i) % 6];
+    px(x, (i % 2) ? T.fLine : T.fHi, s2[0] + v, s2[1], 2, 2);
+  }
+  if (v === 2) { px(x, T.fLine, 5, 21, 6, 1); px(x, T.fLine, 10, 22, 5, 1); }
+  if (v === 3) { px(x, T.fLine, 21, 5, 1, 6); px(x, T.fLine, 22, 10, 1, 4); }
+  if (boss && v >= 2) { /* 巫王层符文地纹 */
+    px(x, '#5d3d8c', 13, 13, 6, 1); px(x, '#5d3d8c', 13, 18, 6, 1);
+    px(x, '#5d3d8c', 13, 13, 1, 6); px(x, '#5d3d8c', 18, 13, 1, 6);
+    px(x, '#8a5ad0', 15, 15, 2, 2);
+  }
+}
+function paintWall(x, T) {
+  px(x, T.wTop, 0, 0, 32, 8);          /* 顶面 */
+  px(x, T.wTopHi, 0, 0, 32, 2);
+  px(x, T.wTopHi, 0, 0, 2, 8);
+  px(x, T.wDark, 0, 7, 32, 2);
+  for (var ry = 0; ry < 3; ry++) {     /* 立面砖 */
+    var y0 = 9 + ry * 8, off = (ry % 2) ? 8 : 0;
+    for (var bx = off - 16; bx < 32; bx += 16) {
+      px(x, ((bx / 16 + ry) % 2) ? T.wFace : T.wFace2, bx, y0, 15, 7);
+      px(x, T.wTop, bx, y0, 15, 1);
+      px(x, T.wDark, bx + 15, y0, 1, 7);
+    }
+    px(x, T.wDark, 0, y0 + 7, 32, 1);
+  }
+  px(x, 'rgba(0,0,0,.3)', 0, 30, 32, 2);
+}
+function paintStairs(x, T, up) {
+  px(x, T.fLine, 0, 0, 32, 32);
+  var i, w, xx, y;
+  if (up) {
+    px(x, '#08080f', 9, 0, 14, 5);
+    for (i = 0; i < 4; i++) {
+      w = 30 - i * 6; xx = (32 - w) >> 1; y = 24 - i * 7;
+      px(x, T.wDark, xx, y + 4, w, 3);
+      px(x, T.wTop, xx, y, w, 4);
+      px(x, T.wTopHi, xx, y, w, 1);
+    }
+    px(x, '#ffcc00', 3, 8, 2, 2); px(x, '#ffcc00', 5, 6, 2, 2); px(x, '#ffcc00', 7, 8, 2, 2);
+    px(x, '#ffcc00', 3, 13, 2, 2); px(x, '#ffcc00', 5, 11, 2, 2); px(x, '#ffcc00', 7, 13, 2, 2);
+  } else {
+    var shades = [T.wTop, T.wFace, T.wFace2, T.wDark];
+    for (i = 0; i < 4; i++) {
+      w = 30 - i * 6; xx = (32 - w) >> 1; y = 3 + i * 7;
+      px(x, shades[i], xx, y, w, 5);
+      px(x, T.wDark, xx, y + 5, w, 2);
+    }
+    px(x, '#06060c', 13, 25, 6, 6);
+    px(x, '#ffcc00', 3, 19, 2, 2); px(x, '#ffcc00', 5, 21, 2, 2); px(x, '#ffcc00', 7, 19, 2, 2);
+    px(x, '#ffcc00', 3, 24, 2, 2); px(x, '#ffcc00', 5, 26, 2, 2); px(x, '#ffcc00', 7, 24, 2, 2);
+  }
+}
+/* 主题瓦片预渲染：地板 4 变体 + 墙 + 上下楼梯 */
+var tiles = [];
+THEMES.forEach(function (T, t) {
+  var set = { floor: [] };
+  for (var v = 0; v < 4; v++) {
+    var s = mkCanvas(32, 32); paintFloor(s.getContext('2d'), T, v, t === 3);
+    set.floor.push(s);
+  }
+  var w = mkCanvas(32, 32); paintWall(w.getContext('2d'), T); set.wall = w;
+  var u = mkCanvas(32, 32); paintStairs(u.getContext('2d'), T, true); set.up = u;
+  var d = mkCanvas(32, 32); paintStairs(d.getContext('2d'), T, false); set.down = d;
+  tiles.push(set);
+});
+
+/* —— 三色门：石门框 + 镶嵌宝石门扇（动画时门扇升起） —— */
+var DOORC = {
+  Y: { base: '#a87818', dark: '#6e4d0c', hi: '#d4a82e', gem: '#ffd34d', gemHi: '#fff3c0' },
+  B: { base: '#2e6fb0', dark: '#1c4675', hi: '#5a9ad8', gem: '#5ab0ff', gemHi: '#d8ecff' },
+  R: { base: '#a83232', dark: '#6e1c1c', hi: '#d05858', gem: '#ff6a6a', gemHi: '#ffd4d4' }
+};
+Object.keys(DOORC).forEach(function (k) {
+  var L = DOORC[k];
+  mkSprite('doorF' + k, function (x) {
+    px(x, '#3c3c56', 0, 0, 32, 32);
+    px(x, '#4c4c6a', 0, 0, 32, 2); px(x, '#4c4c6a', 0, 0, 2, 32);
+    px(x, '#2a2a40', 30, 0, 2, 32); px(x, '#2a2a40', 0, 30, 32, 2);
+    px(x, '#2e2e46', 0, 11, 4, 1); px(x, '#2e2e46', 28, 11, 4, 1);
+    px(x, '#2e2e46', 0, 21, 4, 1); px(x, '#2e2e46', 28, 21, 4, 1);
+    px(x, '#08080f', 4, 4, 24, 26);
+    px(x, '#1a1a26', 12, 0, 8, 4);
+    px(x, L.gem, 13, 1, 6, 2); px(x, L.gemHi, 14, 1, 2, 1);
+  });
+  mkSprite('doorL' + k, function (x) {
+    px(x, L.dark, 0, 0, 24, 26);
+    px(x, L.base, 1, 1, 22, 24);
+    px(x, L.dark, 7, 1, 1, 24); px(x, L.dark, 15, 1, 1, 24);
+    px(x, L.hi, 1, 1, 22, 1); px(x, L.hi, 2, 2, 2, 10);
+    px(x, '#8a93ad', 1, 5, 22, 3); px(x, '#5f6880', 1, 7, 22, 1);
+    px(x, '#8a93ad', 1, 18, 22, 3); px(x, '#5f6880', 1, 20, 22, 1);
+    px(x, '#c9d1e6', 3, 5, 1, 2); px(x, '#c9d1e6', 20, 5, 1, 2);
+    px(x, '#c9d1e6', 3, 18, 1, 2); px(x, '#c9d1e6', 20, 18, 1, 2);
+    px(x, L.dark, 9, 10, 6, 7); px(x, L.gem, 10, 11, 4, 5); px(x, L.gemHi, 10, 11, 2, 2);
+  }, 24, 26);
+  mkSprite('door' + k, function (x) {
+    x.drawImage(sprites['doorF' + k], 0, 0);
+    x.drawImage(sprites['doorL' + k], 4, 4);
+  });
+});
+
+/* —— 道具 —— */
+function keyPainter(col, dark, hi) { return function (x) {
+  shadow(x, 14, 28);
+  px(x, dark, 9, 3, 12, 11); px(x, col, 11, 5, 8, 7);
+  px(x, '#10101a', 13, 7, 4, 3);
+  px(x, hi, 11, 5, 3, 2);
+  px(x, dark, 13, 14, 5, 13); px(x, col, 14, 14, 2, 12);
+  px(x, col, 17, 19, 4, 2); px(x, col, 17, 23, 5, 2);
+  px(x, hi, 14, 14, 1, 6);
+}; }
+mkSprite('keyy', keyPainter('#ffd34d', '#a8821a', '#fff3c0'));
+mkSprite('keyb', keyPainter('#5ab0ff', '#2a6aa8', '#d8ecff'));
+mkSprite('keyr', keyPainter('#ff6a6a', '#a83232', '#ffd4d4'));
+function gemPainter(dark, base, light, lighter) { return function (x) {
+  shadow(x, 16, 28);
+  poly(x, dark, [[16, 2], [29, 13], [16, 29], [3, 13]]);
+  poly(x, base, [[16, 4], [27, 13], [16, 27], [5, 13]]);
+  poly(x, light, [[16, 4], [27, 13], [16, 13]]);
+  poly(x, lighter, [[16, 4], [16, 13], [5, 13]]);
+  px(x, '#ffffff', 12, 8, 2, 2); px(x, '#ffffff', 14, 6, 1, 1);
+}; }
+mkSprite('gema', gemPainter('#7a1626', '#d03048', '#e85a6e', '#ff9aa8'));
+mkSprite('gemd', gemPainter('#1c3f75', '#2e6fb0', '#5a9ad8', '#9accff'));
+mkSprite('poth', function (x) {
+  shadow(x, 14, 28);
+  px(x, '#caa54a', 13, 2, 6, 4); px(x, '#8a6a2a', 13, 5, 6, 1);
+  px(x, '#9aa3b8', 12, 6, 8, 3);
+  px(x, '#39405c', 13, 9, 6, 3);
+  px(x, '#39405c', 9, 12, 14, 15); px(x, '#39405c', 7, 15, 18, 9);
+  px(x, '#c8243f', 10, 16, 12, 10); px(x, '#c8243f', 8, 17, 16, 6);
+  px(x, '#ff6a7e', 8, 16, 16, 2);
+  px(x, '#ff9aa8', 11, 19, 2, 4);
+  px(x, 'rgba(255,255,255,.5)', 10, 13, 2, 12);
+  px(x, '#23283c', 9, 25, 14, 2);
+});
+mkSprite('potH', function (x) {
+  shadow(x, 18, 29);
+  px(x, '#caa54a', 13, 0, 6, 4); px(x, '#8a6a2a', 13, 3, 6, 1);
+  px(x, '#9aa3b8', 11, 4, 10, 3);
+  px(x, '#2c3654', 12, 7, 8, 3);
+  px(x, '#2c3654', 7, 9, 18, 20); px(x, '#2c3654', 5, 12, 22, 13);
+  px(x, '#2456c8', 8, 12, 16, 15); px(x, '#2456c8', 6, 13, 20, 11);
+  px(x, '#6e9aec', 6, 12, 20, 2);
+  px(x, '#ffd34d', 13, 17, 6, 5); px(x, '#fff3c0', 15, 18, 2, 2);
+  px(x, 'rgba(255,255,255,.45)', 8, 10, 2, 15);
+  px(x, '#1a2240', 7, 27, 18, 2);
+});
+mkSprite('gold', function (x) {
+  shadow(x, 20, 29);
+  function coin(cx, cy) {
+    px(x, '#7a5a10', cx, cy + 1, 12, 7); px(x, '#a87b14', cx, cy, 12, 7);
+    px(x, '#ffcc00', cx + 1, cy + 1, 10, 5); px(x, '#fff2b3', cx + 2, cy + 2, 4, 2);
+    px(x, '#c9981a', cx + 5, cy + 3, 4, 2);
+  }
+  coin(7, 12); coin(16, 13); coin(3, 19); coin(17, 19); coin(10, 20);
+  px(x, '#fff', 9, 8, 2, 2); px(x, '#fff', 24, 10, 1, 1);
+});
+mkSprite('manual', function (x) {
+  shadow(x, 18, 29);
+  px(x, '#5a1c1c', 5, 3, 22, 25); px(x, '#8a2c2c', 6, 4, 20, 23);
+  px(x, '#b04040', 7, 5, 18, 3);
+  px(x, '#e8d9a0', 24, 5, 2, 21);
+  px(x, '#ffcc00', 6, 4, 3, 3); px(x, '#ffcc00', 6, 24, 3, 3);
+  px(x, '#ffcc00', 11, 11, 10, 8); px(x, '#5a1c1c', 13, 13, 6, 4); px(x, '#ff6a6a', 15, 14, 2, 2);
+  px(x, '#ffcc00', 13, 22, 6, 2);
+});
+mkSprite('fly', function (x) {
+  shadow(x, 18, 29);
+  px(x, '#1c3f75', 5, 3, 22, 25); px(x, '#2e6fb0', 6, 4, 20, 23);
+  px(x, '#5a9ad8', 7, 5, 18, 3);
+  px(x, '#d8ecff', 24, 5, 2, 21);
+  poly(x, '#eef4ff', [[10, 18], [13, 9], [15, 16], [18, 7], [20, 18], [15, 21]]);
+  px(x, '#ffd34d', 13, 23, 6, 2);
+  px(x, '#fff', 8, 7, 2, 2);
+});
+mkSprite('shop', function (x) {
+  shadow(x, 24, 29);
+  px(x, '#4a3520', 4, 14, 24, 15); px(x, '#6a4c2c', 5, 15, 22, 12);
+  px(x, '#3a2a18', 5, 21, 22, 1);
+  px(x, '#3a2a18', 3, 11, 2, 18); px(x, '#3a2a18', 27, 11, 2, 18);
+  px(x, '#a82832', 1, 3, 30, 8);
+  px(x, '#e8e8f0', 5, 3, 5, 8); px(x, '#e8e8f0', 14, 3, 5, 8); px(x, '#e8e8f0', 23, 3, 5, 8);
+  px(x, '#7a1c24', 1, 9, 30, 2);
+  px(x, '#ffcc00', 9, 17, 6, 4); px(x, '#fff2b3', 10, 18, 2, 1);
+  px(x, '#c8243f', 19, 15, 4, 6); px(x, '#caa54a', 20, 13, 2, 2);
+});
+mkSprite('oldman', function (x) {
+  shadow(x, 16, 29);
+  px(x, '#6a5a44', 9, 12, 14, 16); px(x, '#7d6c52', 11, 14, 4, 12);
+  px(x, '#e8c9a2', 12, 4, 8, 7);
+  px(x, '#e8e8f0', 11, 2, 10, 3);
+  px(x, '#e8e8f0', 12, 6, 3, 1); px(x, '#e8e8f0', 17, 6, 3, 1);
+  px(x, '#10101a', 13, 7, 2, 2); px(x, '#10101a', 17, 7, 2, 2);
+  px(x, '#e8e8f0', 12, 11, 8, 6); px(x, '#d8d8e0', 13, 17, 6, 4); px(x, '#d8d8e0', 14, 21, 4, 3);
+  px(x, '#8a6a3a', 25, 6, 2, 22);
+  px(x, 'rgba(255,211,77,.35)', 21, 0, 10, 9);
+  px(x, '#ffd34d', 23, 2, 6, 5); px(x, '#fff3c0', 24, 3, 2, 2);
+});
+mkSprite('princess', function (x) {
+  shadow(x, 16, 29);
+  px(x, '#e8b83a', 9, 4, 14, 12); px(x, '#c8981a', 9, 12, 3, 8); px(x, '#c8981a', 20, 12, 3, 8);
+  px(x, '#ffd34d', 11, 1, 10, 3);
+  px(x, '#ffd34d', 11, 0, 2, 2); px(x, '#ffd34d', 15, 0, 2, 2); px(x, '#ffd34d', 19, 0, 2, 2);
+  px(x, '#ff6a6a', 15, 1, 2, 2);
+  px(x, '#f6d2b0', 12, 6, 8, 6);
+  px(x, '#3a2a1a', 13, 8, 2, 2); px(x, '#3a2a1a', 17, 8, 2, 2);
+  px(x, '#e07a8a', 15, 11, 2, 1);
+  px(x, '#d8628e', 10, 14, 12, 8); px(x, '#e88aae', 8, 22, 16, 7); px(x, '#fff', 14, 15, 4, 6);
+  px(x, '#fff', 25, 5, 2, 2); px(x, '#fff', 5, 16, 1, 1);
+});
+
+/* —— 勇士：四向 × 两帧行走（右向为左向镜像） —— */
+function heroDown(fr) { return function (x) {
+  shadow(x, 16, 29);
+  px(x, '#a82832', 7, 13, 4, 12); px(x, '#a82832', 21, 13, 4, 12);
+  px(x, '#7a1a22', 7, 23, 4, 2); px(x, '#7a1a22', 21, 23, 4, 2);
+  px(x, '#d23434', 14, 0, 4, 3); px(x, '#ff7a5a', 15, 0, 2, 1);
+  px(x, '#97a0ba', 10, 3, 12, 5); px(x, '#cdd5e8', 11, 3, 10, 1);
+  px(x, '#5f6880', 10, 7, 12, 1);
+  px(x, '#97a0ba', 10, 8, 2, 4); px(x, '#97a0ba', 20, 8, 2, 4);
+  px(x, '#f2c9a2', 12, 8, 8, 5);
+  px(x, '#18181f', 13, 9, 2, 2); px(x, '#18181f', 17, 9, 2, 2);
+  px(x, '#7d87a3', 8, 12, 4, 4); px(x, '#aeb6cc', 8, 12, 4, 1);
+  px(x, '#7d87a3', 20, 12, 4, 4); px(x, '#aeb6cc', 20, 12, 4, 1);
+  px(x, '#3e63b0', 10, 13, 12, 9);
+  px(x, '#8f99b5', 12, 14, 8, 4); px(x, '#c2cade', 12, 14, 8, 1);
+  px(x, '#2a2a3a', 10, 21, 12, 2); px(x, '#ffcc00', 15, 21, 2, 2);
+  px(x, '#32528f', 8, 16, 3, 6); px(x, '#32528f', 21, 16, 3, 6);
+  px(x, '#f2c9a2', 8, 22, 3, 2); px(x, '#f2c9a2', 21, 22, 3, 2);
+  if (fr) {
+    px(x, '#2a4476', 10, 23, 4, 4); px(x, '#1c2c4e', 10, 26, 4, 2);
+    px(x, '#2a4476', 18, 24, 4, 4); px(x, '#1c2c4e', 18, 27, 4, 2);
+  } else {
+    px(x, '#2a4476', 11, 23, 4, 5); px(x, '#1c2c4e', 11, 27, 4, 2);
+    px(x, '#2a4476', 17, 23, 4, 5); px(x, '#1c2c4e', 17, 27, 4, 2);
+  }
+  px(x, '#e8eefc', 26, 6, 2, 13); px(x, '#fff', 26, 4, 2, 2); px(x, '#b8c2dc', 27, 8, 1, 11);
+  px(x, '#ffcc00', 24, 19, 6, 2); px(x, '#7a4a1e', 26, 21, 2, 4); px(x, '#ffcc00', 26, 25, 2, 2);
+  px(x, '#9aa6c4', 2, 13, 7, 12); px(x, '#5f6b85', 3, 14, 5, 10);
+  px(x, '#c2cade', 3, 14, 5, 1); px(x, '#ffcc00', 4, 18, 3, 3);
+}; }
+function heroUp(fr) { return function (x) {
+  shadow(x, 16, 29);
+  px(x, '#e8eefc', 7, 2, 2, 12); px(x, '#fff', 7, 1, 2, 2);
+  px(x, '#ffcc00', 5, 14, 6, 2); px(x, '#7a4a1e', 7, 16, 2, 3);
+  px(x, '#d23434', 14, 0, 4, 3);
+  px(x, '#97a0ba', 10, 3, 12, 6); px(x, '#cdd5e8', 11, 3, 10, 1);
+  px(x, '#6f7890', 11, 9, 10, 2);
+  px(x, '#7d87a3', 8, 11, 4, 4); px(x, '#7d87a3', 20, 11, 4, 4);
+  px(x, '#a82832', 9, 12, 14, 13);
+  px(x, '#7a1a22', 12, 14, 1, 10); px(x, '#7a1a22', 16, 13, 1, 11); px(x, '#7a1a22', 19, 14, 1, 10);
+  px(x, '#7a1a22', fr ? 8 : 9, 24, fr ? 16 : 14, 1);
+  if (fr) { px(x, '#1c2c4e', 10, 26, 4, 3); px(x, '#1c2c4e', 18, 25, 4, 3); }
+  else { px(x, '#1c2c4e', 11, 25, 4, 4); px(x, '#1c2c4e', 17, 25, 4, 4); }
+}; }
+function heroLeft(fr) { return function (x) {
+  shadow(x, 14, 29);
+  px(x, '#a82832', 20, 12, 5, fr ? 14 : 13); px(x, '#7a1a22', 21, 23, 4, 2);
+  px(x, '#d23434', 15, 0, 6, 2); px(x, '#d23434', 19, 1, 3, 2);
+  px(x, '#97a0ba', 10, 3, 12, 5); px(x, '#cdd5e8', 11, 3, 10, 1); px(x, '#5f6880', 10, 7, 12, 1);
+  px(x, '#97a0ba', 18, 8, 4, 4);
+  px(x, '#f2c9a2', 10, 8, 8, 5); px(x, '#18181f', 11, 9, 2, 2);
+  px(x, '#3e63b0', 10, 13, 11, 9); px(x, '#8f99b5', 11, 14, 6, 4);
+  px(x, '#2a2a3a', 10, 21, 11, 2); px(x, '#ffcc00', 13, 21, 2, 2);
+  px(x, '#7d87a3', 14, 12, 5, 4); px(x, '#aeb6cc', 14, 12, 5, 1);
+  px(x, '#e8eefc', 4, 5, 2, 13); px(x, '#fff', 4, 3, 2, 2);
+  px(x, '#ffcc00', 2, 18, 6, 2); px(x, '#7a4a1e', 4, 20, 2, 3);
+  px(x, '#f2c9a2', 6, 19, 3, 3);
+  if (fr) {
+    px(x, '#2a4476', 9, 23, 4, 4); px(x, '#1c2c4e', 8, 26, 4, 2);
+    px(x, '#2a4476', 16, 23, 4, 4); px(x, '#1c2c4e', 17, 26, 4, 2);
+  } else {
+    px(x, '#2a4476', 11, 23, 4, 5); px(x, '#1c2c4e', 11, 27, 5, 2);
+    px(x, '#2a4476', 16, 23, 4, 5); px(x, '#1c2c4e', 16, 27, 5, 2);
+  }
+}; }
+mkSprite('hero_d0', heroDown(0)); mkSprite('hero_d1', heroDown(1));
+mkSprite('hero_u0', heroUp(0)); mkSprite('hero_u1', heroUp(1));
+mkSprite('hero_l0', heroLeft(0)); mkSprite('hero_l1', heroLeft(1));
+sprites['hero_r0'] = mirrorSprite(sprites['hero_l0']);
+sprites['hero_r1'] = mirrorSprite(sprites['hero_l1']);
+
+/* —— 怪物：每种两帧 —— */
+function mk2(id, factory) { mkSprite(id + '_0', factory(0)); mkSprite(id + '_1', factory(1)); }
+function wing(x, c, pts) {
+  poly(x, c, pts);
+  poly(x, c, pts.map(function (p) { return [32 - p[0], p[1]]; }));
+}
+function slimeP(base, dark, hi, angry) { return function (fr) { return function (x) {
+  shadow(x, 22, 29);
+  var top = fr ? 13 : 9, w = fr ? 2 : 0;
+  poly(x, dark, [[5 - w, 29], [3 - w, top + 4], [9, top], [23, top], [29 + w, top + 4], [27 + w, 29]]);
+  poly(x, base, [[7 - w, 28], [5 - w, top + 5], [10, top + 2], [22, top + 2], [27 + w, top + 5], [25 + w, 28]]);
+  px(x, hi, 9, top + 4, 5, 3); px(x, hi, 8, top + 7, 2, 2); px(x, '#fff', 10, top + 5, 2, 1);
+  px(x, dark, 13, top + 11, 6, 3);
+  px(x, '#10101a', 11, top + 7, 3, 3); px(x, '#10101a', 19, top + 7, 3, 3);
+  px(x, '#fff', 12, top + 7, 1, 1); px(x, '#fff', 20, top + 7, 1, 1);
+  if (angry) {
+    px(x, '#10101a', 10, top + 5, 4, 2); px(x, '#10101a', 18, top + 5, 4, 2);
+    px(x, '#fff', 13, top + 12, 2, 2); px(x, '#fff', 17, top + 12, 2, 2);
+  } else {
+    px(x, '#10101a', 13, top + 12, 6, 2);
+  }
+}; }; }
+mk2('m0', slimeP('#3fa34d', '#1f6330', '#8fe39a', 0));
+mk2('m1', slimeP('#c13d3d', '#7a1c1c', '#f3a0a0', 1));
+function batP(base, dark, eyeC, big) { return function (fr) { return function (x) {
+  shadow(x, big ? 16 : 12, 29);
+  var s = big ? 2 : 0;
+  if (fr) wing(x, dark, [[16, 13], [2 - s, 24], [8, 17], [4 - s, 27], [13, 20]]);
+  else wing(x, dark, [[16, 16], [1 - s, 3 - s], [7, 12], [3 - s, 17], [13, 20]]);
+  px(x, base, 11, 9 - s, 10, 13 + s);
+  px(x, base, 12, 7 - s, 3, 3); px(x, base, 17, 7 - s, 3, 3);
+  px(x, dark, 13, 8 - s, 1, 2); px(x, dark, 18, 8 - s, 1, 2);
+  px(x, eyeC, 12, 13 - s, 3, 3); px(x, eyeC, 17, 13 - s, 3, 3);
+  px(x, '#10101a', 13, 14 - s, 1, 1); px(x, '#10101a', 18, 14 - s, 1, 1);
+  px(x, '#fff', 13, 18, 2, 3); px(x, '#fff', 17, 18, 2, 3);
+  px(x, dark, 13, 22 + s, 2, 3); px(x, dark, 17, 22 + s, 2, 3);
+}; }; }
+mk2('m2', batP('#7a5d9e', '#4e3a6e', '#ffd34d', 0));
+mk2('m6', batP('#43306a', '#2a1c48', '#ff5050', 1));
+function skelP(armor) { return function (fr) { return function (x) {
+  shadow(x, 16, 29);
+  var bone = '#e8e4d2', sh = '#b6b2a0';
+  px(x, bone, 11, 2, 10, 7);
+  px(x, sh, 11, 7, 10, 2);
+  px(x, '#0c0c14', 13, 4, 3, 3); px(x, '#0c0c14', 17, 4, 3, 3);
+  px(x, '#8ae8ff', 14, 5, 1, 1); px(x, '#8ae8ff', 18, 5, 1, 1);
+  px(x, '#0c0c14', 15, 7, 2, 2);
+  px(x, bone, 12, 9 + (fr ? 1 : 0), 8, 2);
+  px(x, bone, 15, 12, 2, 10);
+  px(x, bone, 11, 13, 10, 1); px(x, bone, 12, 15, 8, 1); px(x, bone, 12, 17, 8, 1); px(x, bone, 13, 19, 6, 1);
+  px(x, bone, 12, 22, 8, 2);
+  if (fr) { px(x, bone, 8, 11, 2, 8); px(x, sh, 8, 19, 2, 2); px(x, bone, 22, 14, 2, 8); px(x, sh, 22, 22, 2, 2); }
+  else { px(x, bone, 8, 14, 2, 8); px(x, sh, 8, 22, 2, 2); px(x, bone, 22, 13, 2, 8); px(x, sh, 22, 21, 2, 2); }
+  px(x, bone, 12, 24, 2, 5); px(x, bone, 18, 24, 2, 5);
+  px(x, sh, 11, 29, 4, 1); px(x, sh, 17, 29, 4, 1);
+  if (armor) {
+    px(x, '#707c8e', 10, 0, 12, 4); px(x, '#8e9aac', 10, 0, 12, 1);
+    px(x, '#cf3a3a', 13, 0, 6, 1);
+    px(x, '#707c8e', 8, 11, 4, 3); px(x, '#707c8e', 20, 11, 4, 3);
+    px(x, '#8e9aac', 2, 12, 8, 11); px(x, '#5a6678', 3, 13, 6, 9);
+    px(x, '#8e9aac', 5, 15, 2, 5); px(x, '#8e9aac', 4, 17, 4, 2);
+    px(x, '#dfe6f4', 25, fr ? 5 : 6, 2, 13); px(x, '#ffcc00', 23, 19, 6, 2); px(x, '#5a3a1a', 25, 21, 2, 4);
+  }
+}; }; }
+mk2('m3', skelP(0)); mk2('m4', skelP(1));
+function mageP(robe, robeD, orb, trim, glow, floats) { return function (fr) { return function (x) {
+  var oy = floats ? (fr ? -1 : 0) : 0;
+  shadow(x, floats ? 10 : 16, 29);
+  poly(x, robe, [[16, 1 + oy], [26, 12 + oy], [6, 12 + oy]]);
+  poly(x, robeD, [[16, 3 + oy], [23, 11 + oy], [9, 11 + oy]]);
+  px(x, '#0e0e16', 11, 8 + oy, 10, 5);
+  px(x, orb, 13, 10 + oy, 2, 2); px(x, orb, 17, 10 + oy, 2, 2);
+  px(x, robe, 9, 12 + oy, 14, 12); px(x, robe, 7, 22 + oy, 18, 6);
+  px(x, robeD, 12, 14 + oy, 2, 12); px(x, robeD, 18, 14 + oy, 2, 12);
+  px(x, trim, 7, 27 + oy, 18, 1); px(x, trim, 14, 13 + oy, 4, 1);
+  if (floats) {
+    if (fr) { px(x, glow, 1, 14 + oy, 9, 9); px(x, glow, 22, 14 + oy, 9, 9); }
+    px(x, orb, 3, 16 + oy, 5, 5); px(x, '#fff', 4, 17 + oy, 2, 2);
+    px(x, orb, 24, 16 + oy, 5, 5); px(x, '#fff', 25, 17 + oy, 2, 2);
+  } else {
+    px(x, '#8a6a3a', 26, 5 + oy, 2, 23);
+    if (fr) px(x, glow, 21, 0, 12, 10);
+    px(x, orb, 24, 1 + oy, 6, 6); px(x, '#fff', 25, 2 + oy, 2, 2);
+  }
+}; }; }
+mk2('m5', mageP('#2f6fa3', '#1d4a72', '#7ce8ff', '#9accff', 'rgba(124,232,255,.3)', 0));
+mk2('mA', mageP('#5b2a85', '#3e1c5e', '#e07aff', '#ffd34d', 'rgba(224,122,255,.35)', 1));
+function orcP(guard) { return function (fr) { return function (x) {
+  var oy = fr ? 1 : 0;
+  shadow(x, 22, 29);
+  var skin = guard ? '#3f7030' : '#4f8a3c', skinD = guard ? '#2e5424' : '#3a6a2c';
+  px(x, skin, 10, 3 + oy, 13, 10);
+  px(x, skinD, 8, 6 + oy, 2, 4); px(x, skinD, 23, 6 + oy, 2, 4);
+  px(x, '#10101a', 11, 5 + oy, 4, 1); px(x, '#10101a', 18, 5 + oy, 4, 1);
+  px(x, '#d04040', 12, 7 + oy, 2, 2); px(x, '#d04040', 19, 7 + oy, 2, 2);
+  px(x, '#0c0c14', 12, 10 + oy, 9, 2);
+  px(x, '#fff', 12, 9 + oy, 2, 3); px(x, '#fff', 19, 9 + oy, 2, 3);
+  px(x, skinD, 7, 13 + oy, 18, 11);
+  px(x, '#6a4a2a', 7, 13 + oy, 18, 2); px(x, '#6a4a2a', 14, 13 + oy, 3, 11);
+  px(x, '#ffcc00', 14, 18 + oy, 3, 2);
+  px(x, skin, 3, 14 + oy, 4, 8); px(x, skin, 25, 14 + oy, 4, 8);
+  px(x, '#7a5a32', 9, 23 + oy, 14, 3);
+  px(x, skinD, 10, 26, 5, 4); px(x, skinD, 17, 26, 5, 4);
+  if (guard) {
+    px(x, '#5f6b7c', 9, 1 + oy, 14, 6); px(x, '#7d8a9c', 9, 1 + oy, 14, 1);
+    px(x, '#d8d2c0', 6, 0 + oy, 3, 4); px(x, '#d8d2c0', 23, 0 + oy, 3, 4);
+    px(x, '#8a93a5', 1, 9 + oy, 10, 19); px(x, '#5a4a36', 2, 10 + oy, 8, 17);
+    px(x, '#8a93a5', 5, 13 + oy, 2, 8); px(x, '#8a93a5', 3, 16 + oy, 6, 2);
+    px(x, '#7a5a32', 27, 2, 2, 27); px(x, '#c8d2e4', 26, 0, 4, 4);
+  } else {
+    px(x, '#7a5a32', 27, 7 + oy, 2, 17);
+    px(x, '#b8c2d4', 23, 4 + oy, 7, 6); px(x, '#e8eef8', 23, 4 + oy, 2, 6);
+  }
+}; }; }
+mk2('m7', orcP(0)); mk2('m8', orcP(1));
+mk2('m9', function (fr) { return function (x) {
+  shadow(x, 18, 29);
+  var fl = fr ? 1 : 0;
+  poly(x, '#14141f', [[16, 10], [27 + fl, 14], [25 + fl, 29], [7 - fl, 29], [5 - fl, 14]]);
+  px(x, '#7a1626', 10, 25, 12, 4);
+  px(x, '#1c1c2c', 8, 6, 4, 8); px(x, '#1c1c2c', 20, 6, 4, 8);
+  px(x, '#ece6da', 12, 3, 8, 8);
+  px(x, '#0c0c14', 12, 2, 8, 2); px(x, '#0c0c14', 15, 4, 2, 1);
+  px(x, '#d03040', 13, 6, 2, 2); px(x, '#d03040', 17, 6, 2, 2);
+  px(x, '#fff', 13, 10, 1, 2); px(x, '#fff', 18, 10, 1, 2);
+  px(x, '#ffcc00', 15, 13, 2, 2);
+  px(x, '#ece6da', 13, 17, 6, 2);
+}; });
+mk2('mC', function (fr) { return function (x) {
+  shadow(x, 20, 29);
+  px(x, '#7a1626', 4, 12, 5, 15); px(x, '#5a0e1a', 4, 24, 5, 3);
+  px(x, '#c8c2b4', 8, 0, 3, 5); px(x, '#c8c2b4', 21, 0, 3, 5);
+  px(x, '#8a8478', 8, 4, 3, 1); px(x, '#8a8478', 21, 4, 3, 1);
+  px(x, '#23232f', 10, 2, 12, 9); px(x, '#3a3a4c', 10, 2, 12, 2);
+  px(x, fr ? '#ff8060' : '#ff3030', 12, 6, 8, 2);
+  px(x, '#fff', fr ? 13 : 18, 6, 1, 2);
+  px(x, '#3a3a4c', 5, 11, 7, 5); px(x, '#3a3a4c', 20, 11, 7, 5);
+  px(x, '#52526a', 5, 11, 7, 1);
+  px(x, '#52526a', 4, 9, 2, 3); px(x, '#52526a', 26, 9, 2, 3);
+  px(x, '#1c1c28', 9, 13, 14, 11);
+  px(x, '#3a3a4c', 11, 15, 1, 8); px(x, '#3a3a4c', 20, 15, 1, 8);
+  px(x, '#ff3030', 15, 16, 2, 2);
+  px(x, '#15151f', 9, 24, 14, 2);
+  px(x, '#23232f', 10, 26, 5, 5); px(x, '#23232f', 17, 26, 5, 5);
+  px(x, '#d8e0f0', 26, 1, 4, 19); px(x, '#8a93a5', 27, 3, 1, 15); px(x, '#fff', 26, 1, 1, 18);
+  px(x, '#ffcc00', 24, 20, 8, 2); px(x, '#5a2a2a', 27, 22, 2, 6);
+}; });
+mk2('mX', function (fr) { return function (x) {
+  shadow(x, 22, 30);
+  var oy = fr ? -1 : 0;
+  var glow = fr ? '#e09aff' : '#b06aff';
+  px(x, '#ffcc00', 10, 2 + oy, 12, 2);
+  px(x, '#ffcc00', 10, 0 + oy, 2, 4); px(x, '#ffcc00', 15, 0 + oy, 2, 4); px(x, '#ffcc00', 20, 0 + oy, 2, 4);
+  px(x, '#ff4060', 15, 2 + oy, 2, 2);
+  px(x, '#cfc2e0', 12, 4 + oy, 8, 7);
+  px(x, fr ? '#ff8aff' : '#ff66ff', 13, 6 + oy, 2, 2); px(x, fr ? '#ff8aff' : '#ff66ff', 17, 6 + oy, 2, 2);
+  px(x, '#0c0c14', 14, 9 + oy, 4, 1);
+  px(x, '#1c0e30', 5, 11 + oy, 6, 6); px(x, '#1c0e30', 21, 11 + oy, 6, 6);
+  px(x, '#3a2260', 5, 11 + oy, 6, 1); px(x, '#3a2260', 21, 11 + oy, 6, 1);
+  px(x, '#1c0e30', 8, 11 + oy, 16, 19);
+  px(x, '#301a52', 10, 13 + oy, 12, 15);
+  px(x, glow, 13, 16 + oy, 2, 1); px(x, glow, 18, 19 + oy, 2, 1);
+  px(x, glow, 14, 22 + oy, 1, 2); px(x, glow, 17, 15 + oy, 1, 2); px(x, glow, 15, 25 + oy, 2, 1);
+  px(x, 'rgba(224,122,255,.35)', 1, 14 + oy, 8, 8); px(x, 'rgba(224,122,255,.35)', 23, 14 + oy, 8, 8);
+  px(x, '#e07aff', 2, 15 + oy, 6, 6); px(x, '#fff', 4, 17 + oy, 2, 2);
+  px(x, '#e07aff', 24, 15 + oy, 6, 6); px(x, '#fff', 26, 17 + oy, 2, 2);
+}; });
+
+/* —— 火把（两帧） —— */
+mkSprite('torch0', function (x) {
+  px(x, '#4a3a26', 13, 21, 6, 3); px(x, '#6a522f', 14, 16, 4, 6);
+  px(x, '#ff7a20', 12, 9, 8, 8); px(x, '#ff9d3a', 13, 6, 6, 11);
+  px(x, '#ffd34d', 14, 9, 4, 7); px(x, '#fff2b3', 15, 12, 2, 3);
+});
+mkSprite('torch1', function (x) {
+  px(x, '#4a3a26', 13, 21, 6, 3); px(x, '#6a522f', 14, 16, 4, 6);
+  px(x, '#ff7a20', 11, 10, 8, 7); px(x, '#ff9d3a', 12, 7, 7, 10);
+  px(x, '#ffd34d', 13, 9, 4, 7); px(x, '#fff2b3', 14, 12, 2, 3);
+});
+
+/* —— HUD 16×16 图标 —— */
+mkSprite('iFloor', function (x) {
+  px(x, '#6a6a8a', 3, 4, 10, 11); px(x, '#8a8aa8', 3, 4, 10, 1);
+  px(x, '#6a6a8a', 3, 2, 2, 3); px(x, '#6a6a8a', 7, 2, 2, 3); px(x, '#6a6a8a', 11, 2, 2, 3);
+  px(x, '#ffcc00', 7, 10, 2, 5);
+}, 16, 16);
+mkSprite('iHeart', function (x) {
+  px(x, '#e0314e', 2, 3, 5, 5); px(x, '#e0314e', 9, 3, 5, 5);
+  px(x, '#e0314e', 1, 5, 14, 4); px(x, '#e0314e', 3, 9, 10, 2);
+  px(x, '#e0314e', 5, 11, 6, 2); px(x, '#e0314e', 7, 13, 2, 2);
+  px(x, '#ff9cab', 3, 4, 3, 2);
+}, 16, 16);
+mkSprite('iSword', function (x) {
+  px(x, '#dfe6f4', 7, 1, 2, 9); px(x, '#fff', 7, 1, 1, 8);
+  px(x, '#ffcc00', 4, 10, 8, 2);
+  px(x, '#7a4a1e', 7, 12, 2, 2); px(x, '#ffcc00', 6, 14, 4, 2);
+}, 16, 16);
+mkSprite('iShield', function (x) {
+  px(x, '#9ab4e8', 2, 1, 12, 8); px(x, '#9ab4e8', 3, 9, 10, 3);
+  px(x, '#9ab4e8', 5, 12, 6, 2); px(x, '#9ab4e8', 7, 14, 2, 1);
+  px(x, '#3c5da0', 3, 2, 10, 7); px(x, '#3c5da0', 4, 9, 8, 2); px(x, '#3c5da0', 6, 11, 4, 2);
+  px(x, '#ffcc00', 7, 4, 2, 6); px(x, '#ffcc00', 5, 6, 6, 2);
+}, 16, 16);
+mkSprite('iCoin', function (x) {
+  px(x, '#a87b14', 4, 1, 8, 14); px(x, '#a87b14', 1, 4, 14, 8);
+  px(x, '#ffcc00', 4, 3, 8, 10); px(x, '#ffcc00', 3, 4, 10, 8);
+  px(x, '#fff2b3', 5, 4, 3, 3);
+  px(x, '#c9981a', 7, 5, 2, 6);
+}, 16, 16);
+mkSprite('iTime', function (x) {
+  px(x, '#ffcc00', 2, 1, 12, 2); px(x, '#ffcc00', 2, 13, 12, 2);
+  px(x, '#9ab4e8', 4, 3, 1, 4); px(x, '#9ab4e8', 11, 3, 1, 4);
+  px(x, '#9ab4e8', 4, 9, 1, 4); px(x, '#9ab4e8', 11, 9, 1, 4);
+  px(x, '#ffd34d', 5, 4, 6, 1); px(x, '#ffd34d', 7, 7, 2, 2); px(x, '#ffd34d', 5, 11, 6, 2);
+}, 16, 16);
+function iKey(col) { return function (x) {
+  px(x, col, 4, 1, 8, 8); px(x, '#10101a', 6, 3, 4, 4);
+  px(x, col, 7, 9, 2, 6); px(x, col, 9, 11, 3, 2); px(x, col, 9, 14, 4, 2);
+}; }
+mkSprite('iKeyY', iKey('#ffd34d'), 16, 16);
+mkSprite('iKeyB', iKey('#5ab0ff'), 16, 16);
+mkSprite('iKeyR', iKey('#ff6a6a'), 16, 16);
+(function hudIcons() {
+  var map = { icoFl: 'iFloor', icoHp: 'iHeart', icoAtk: 'iSword', icoDef: 'iShield', icoGold: 'iCoin', icoTime: 'iTime', icoKy: 'iKeyY', icoKb: 'iKeyB', icoKr: 'iKeyR' };
+  for (var id in map) { var el = $(id); if (el) el.src = sprites[map[id]].toDataURL(); }
+  var art = $('startArt');
+  if (art) ['m2_0', 'm0_0', 'hero_d0', 'mC_0', 'mX_0'].forEach(function (n, i) {
+    var im = document.createElement('img');
+    im.src = sprites[n].toDataURL();
+    im.style.width = im.style.height = (i === 2 ? 52 : 40) + 'px';
+    art.appendChild(im);
+  });
+})();
+
+/* —— 火把位置预计算（纯装饰） —— */
+var torches = [];
+(function placeTorches() {
+  for (var f = 1; f <= FLOORS; f++) {
+    torches[f] = [];
+    for (var r = 0; r < 10; r++) for (var c = 0; c < 11; c++) {
+      if (walls[f][r][c] && !walls[f][r + 1][c] && ((r * 31 + c * 17 + f * 29) % 13 === 0)) torches[f].push({ r: r, c: c });
+    }
+  }
+})();
 function buildSprites() {
   mkSprite('floor', function (x) {
     px(x, '#1b1b29', 0, 0, 32, 32);

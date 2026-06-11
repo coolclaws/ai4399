@@ -11,62 +11,88 @@ html,body{height:100%;overflow:hidden;background:#0a0a12;color:#e8e8f0;
   touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 #game{position:fixed;inset:0;display:block}
 #vignette{position:fixed;inset:0;pointer-events:none;z-index:5;
-  background:radial-gradient(ellipse at center,transparent 55%,rgba(5,5,10,.55) 100%)}
-#back{position:fixed;top:14px;left:14px;z-index:60;color:#8888a0;text-decoration:none;
-  background:rgba(20,20,31,.6);border:1px solid #2a2a3d;padding:6px 13px;border-radius:8px;
-  font-size:14px;backdrop-filter:blur(4px);transition:color .15s,border-color .15s}
-#back:hover{color:#ffcc00;border-color:#ffcc00}
+  background:radial-gradient(ellipse at center,transparent 46%,rgba(5,8,22,.42) 82%,rgba(3,4,14,.7) 100%)}
+#back{position:fixed;top:14px;left:14px;z-index:60;color:#8a90b0;text-decoration:none;
+  background:linear-gradient(150deg,rgba(26,30,52,.6),rgba(13,15,30,.72));
+  border:1px solid rgba(150,170,230,.18);padding:6px 13px;border-radius:10px;
+  font-size:14px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:0 6px 20px rgba(0,0,0,.35);transition:color .15s,border-color .15s}
+#back:hover{color:#ffcc00;border-color:rgba(255,204,0,.6)}
 #board{position:fixed;top:14px;right:14px;z-index:20;min-width:178px;
-  background:rgba(20,20,31,.72);border:1px solid #2a2a3d;border-radius:10px;
-  padding:10px 12px;font-size:13px;backdrop-filter:blur(4px);display:none}
-#board h3{font-size:13px;color:#ffcc00;font-weight:600;margin-bottom:6px;letter-spacing:2px;text-align:center}
-#board .row{display:flex;justify-content:space-between;gap:10px;line-height:1.7;color:#c8c8d8;white-space:nowrap}
+  background:linear-gradient(160deg,rgba(26,30,54,.62),rgba(13,15,30,.78));
+  border:1px solid rgba(150,170,230,.2);border-radius:14px;
+  padding:10px 12px;font-size:13px;display:none;
+  backdrop-filter:blur(12px) saturate(1.4);-webkit-backdrop-filter:blur(12px) saturate(1.4);
+  box-shadow:0 8px 30px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.07)}
+#board h3{font-size:13px;color:#ffcc00;font-weight:600;margin-bottom:6px;letter-spacing:2px;
+  text-align:center;text-shadow:0 0 14px rgba(255,204,0,.4)}
+#board .row{display:flex;justify-content:space-between;gap:10px;line-height:1.7;color:#c8cde0;white-space:nowrap}
 #board .row .nm{overflow:hidden;text-overflow:ellipsis;max-width:110px}
-#board .row .ms{color:#8888a0}
-#board .row.me{color:#ffcc00}
+#board .row .ms{color:#8a90b0}
+#board .row.me{color:#ffcc00;text-shadow:0 0 10px rgba(255,204,0,.35)}
 #board .row.me .ms{color:#ffcc00}
-#minimap{position:fixed;left:14px;bottom:14px;z-index:20;border:1px solid #2a2a3d;border-radius:8px;
-  background:rgba(20,20,31,.72);display:none}
+#minimap{position:fixed;left:14px;bottom:14px;z-index:20;border:1px solid rgba(150,170,230,.22);border-radius:10px;
+  background:rgba(13,15,30,.5);display:none;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:0 8px 24px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.05)}
 #hud{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:20;
-  background:rgba(20,20,31,.66);border:1px solid #2a2a3d;border-radius:20px;
-  padding:6px 18px;font-size:14px;color:#c8c8d8;white-space:nowrap;display:none}
-#hud b{color:#ffcc00;font-weight:600}
+  background:linear-gradient(160deg,rgba(26,30,54,.58),rgba(13,15,30,.72));
+  border:1px solid rgba(150,170,230,.2);border-radius:20px;
+  padding:6px 18px;font-size:14px;color:#c8cde0;white-space:nowrap;display:none;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:0 8px 24px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.06)}
+#hud b{color:#ffcc00;font-weight:600;text-shadow:0 0 10px rgba(255,204,0,.35)}
 #hint{position:fixed;bottom:58px;left:50%;transform:translateX(-50%);z-index:19;
-  font-size:12px;color:#8888a0;opacity:0;transition:opacity .6s;pointer-events:none;white-space:nowrap}
+  font-size:12px;color:#8a90b0;opacity:0;transition:opacity .6s;pointer-events:none;white-space:nowrap;
+  text-shadow:0 1px 6px rgba(0,0,0,.6)}
+#killbn{position:fixed;top:60px;left:50%;transform:translate(-50%,-10px);z-index:30;
+  background:linear-gradient(150deg,rgba(34,38,64,.8),rgba(16,18,34,.85));
+  border:1px solid rgba(255,204,0,.45);color:#ffe9a3;
+  padding:7px 24px;border-radius:999px;font-size:14px;letter-spacing:1px;
+  opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:0 8px 26px rgba(0,0,0,.45),0 0 22px rgba(255,204,0,.14);white-space:nowrap}
+#killbn.show{opacity:1;transform:translate(-50%,0)}
 .overlay{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;
-  background:rgba(10,10,18,.8);backdrop-filter:blur(3px)}
+  background:rgba(7,9,20,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .overlay.show{display:flex}
-.panel{background:#14141f;border:1px solid #2a2a3d;border-radius:18px;padding:34px 44px;
-  text-align:center;max-width:min(420px,92vw);box-shadow:0 24px 70px rgba(0,0,0,.6);
+.panel{background:linear-gradient(165deg,rgba(27,31,56,.92),rgba(14,16,32,.95));
+  border:1px solid rgba(150,170,230,.22);border-radius:20px;padding:34px 44px;
+  text-align:center;max-width:min(420px,92vw);
+  box-shadow:0 24px 70px rgba(0,0,0,.6),0 0 60px rgba(70,90,200,.08),inset 0 1px 0 rgba(255,255,255,.07);
   animation:pop .35s cubic-bezier(.2,1.4,.4,1)}
 @keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
-.panel h1{font-size:30px;color:#ffcc00;margin-bottom:4px;letter-spacing:3px}
-.panel .sub{color:#8888a0;font-size:13px;margin-bottom:20px}
-.panel input{width:100%;background:#0a0a12;border:1px solid #2a2a3d;border-radius:9px;
+.panel h1{font-size:30px;color:#ffcc00;margin-bottom:4px;letter-spacing:3px;
+  text-shadow:0 0 24px rgba(255,204,0,.35)}
+.panel .sub{color:#8a90b0;font-size:13px;margin-bottom:20px}
+.panel input{width:100%;background:rgba(8,9,18,.75);border:1px solid rgba(150,170,230,.2);border-radius:10px;
   color:#e8e8f0;font-size:16px;padding:10px 14px;text-align:center;outline:none;
-  font-family:inherit;margin-bottom:14px;transition:border-color .15s}
-.panel input:focus{border-color:#ffcc00}
-.panel .ctrl{font-size:13px;color:#8888a0;line-height:2;margin-bottom:18px;text-align:left}
-.panel .ctrl b{color:#e8e8f0;background:#22222f;border:1px solid #2a2a3d;border-radius:5px;
+  font-family:inherit;margin-bottom:14px;transition:border-color .15s,box-shadow .15s}
+.panel input:focus{border-color:#ffcc00;box-shadow:0 0 0 3px rgba(255,204,0,.12)}
+.panel .ctrl{font-size:13px;color:#8a90b0;line-height:2;margin-bottom:18px;text-align:left}
+.panel .ctrl b{color:#e8e8f0;background:rgba(42,48,80,.55);border:1px solid rgba(150,170,230,.25);border-radius:6px;
   padding:1px 8px;margin-right:8px;font-weight:500;font-size:12px;display:inline-block;min-width:44px;text-align:center}
-.bigbtn{display:inline-block;background:#ffcc00;color:#0a0a12;border:none;border-radius:10px;
+.bigbtn{display:inline-block;background:linear-gradient(180deg,#ffd84d,#ffc400);color:#0a0a12;border:none;border-radius:12px;
   font-size:17px;font-weight:700;padding:12px 46px;cursor:pointer;font-family:inherit;
-  letter-spacing:4px;transition:transform .12s,box-shadow .12s}
-.bigbtn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,204,0,.3)}
+  letter-spacing:4px;box-shadow:0 4px 18px rgba(255,204,0,.22);transition:transform .12s,box-shadow .12s}
+.bigbtn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(255,204,0,.35)}
 .bigbtn:active{transform:translateY(0)}
-.best{font-size:12px;color:#8888a0;margin-top:16px}
+.best{font-size:12px;color:#8a90b0;margin-top:16px}
 .best b{color:#ffcc00}
 #dStats{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin-bottom:22px}
-#dStats .it{background:#0a0a12;border:1px solid #2a2a3d;border-radius:10px;padding:10px 6px}
+#dStats .it{background:rgba(8,9,18,.6);border:1px solid rgba(150,170,230,.16);border-radius:12px;padding:10px 6px}
 #dStats .v{font-size:21px;color:#e8e8f0;font-weight:700}
-#dStats .v.gold{color:#ffcc00}
-#dStats .k{font-size:11px;color:#8888a0;margin-top:3px}
-#newBest{display:none;color:#ffcc00;font-size:14px;margin-bottom:14px;animation:blink 1s infinite}
+#dStats .v.gold{color:#ffcc00;text-shadow:0 0 16px rgba(255,204,0,.35)}
+#dStats .k{font-size:11px;color:#8a90b0;margin-top:3px}
+#newBest{display:none;color:#ffcc00;font-size:14px;margin-bottom:14px;animation:blink 1s infinite;
+  text-shadow:0 0 14px rgba(255,204,0,.5)}
 @keyframes blink{50%{opacity:.4}}
 #touchUI{position:fixed;right:18px;bottom:24px;z-index:25;display:none;flex-direction:column;gap:14px}
-#touchUI div{width:64px;height:64px;border-radius:50%;background:rgba(20,20,31,.7);
-  border:1.5px solid #2a2a3d;color:#e8e8f0;font-size:14px;display:flex;align-items:center;
-  justify-content:center;backdrop-filter:blur(3px)}
+#touchUI div{width:64px;height:64px;border-radius:50%;
+  background:linear-gradient(160deg,rgba(28,32,56,.7),rgba(14,16,30,.75));
+  border:1.5px solid rgba(150,170,230,.25);color:#e8e8f0;font-size:14px;display:flex;align-items:center;
+  justify-content:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  box-shadow:0 6px 20px rgba(0,0,0,.35)}
 #touchUI div:active{background:rgba(255,204,0,.25);border-color:#ffcc00}
 @media (pointer:coarse){#touchUI.on{display:flex}}
 </style>
@@ -79,6 +105,7 @@ html,body{height:100%;overflow:hidden;background:#0a0a12;color:#e8e8f0;
 <canvas id="minimap" width="132" height="132"></canvas>
 <div id="hud"></div>
 <div id="hint">移动鼠标控制方向 · 空格分裂 · W 喷射质量</div>
+<div id="killbn"></div>
 <div id="touchUI"><div id="btnSplit">分裂</div><div id="btnEject">喷射</div></div>
 
 <div class="overlay show" id="startOv">
@@ -136,6 +163,131 @@ const speedOf=m=>Math.max(72,300*Math.pow(START_MASS/m,0.22));
 const esc=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtTime=s=>{s=Math.floor(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
 
+/* ---------- 美术资源：预渲染贴图 / 渐变缓存（性能红线：避免每帧新建渐变） ---------- */
+const TAU=6.28318530718;
+let bgGrad=null;
+const plank=[];                       // 远景浮游粒子（视差层）
+function rebuildArt(){
+  bgGrad=ctx.createLinearGradient(0,0,0,H);
+  bgGrad.addColorStop(0,'#0b1026');
+  bgGrad.addColorStop(0.45,'#0a0d22');
+  bgGrad.addColorStop(1,'#120a24');
+  plank.length=0;
+  const mk=(n,f,a)=>{
+    const dots=[];
+    for(let i=0;i<n;i++)dots.push({x:Math.random()*(W+200),y:Math.random()*(H+200),
+      r:rnd(0.6,2.2),p:rnd(0,TAU)});
+    plank.push({f,a,dots});
+  };
+  mk(70,0.16,0.05); mk(55,0.4,0.09);
+}
+addEventListener('resize',rebuildArt);
+rebuildArt();
+
+const sprCache=new Map();
+function cellSprite(key){             // key: 数字色相 或 'p'(玩家·金)
+  let s=sprCache.get('c'+key);
+  if(s)return s;
+  const hue=key==='p'?49:key;
+  const C=192,c2=96,R=72;
+  const oc=document.createElement('canvas');oc.width=oc.height=C;
+  const x=oc.getContext('2d');
+  let g=x.createRadialGradient(c2,c2,R*0.82,c2,c2,R*1.3);   // 外发光
+  g.addColorStop(0,'hsla('+hue+',90%,62%,.3)');
+  g.addColorStop(1,'hsla('+hue+',90%,62%,0)');
+  x.fillStyle=g;x.beginPath();x.arc(c2,c2,R*1.3,0,TAU);x.fill();
+  g=x.createRadialGradient(c2-R*0.34,c2-R*0.34,R*0.08,c2,c2,R);  // 果冻体
+  g.addColorStop(0,'hsla('+hue+',88%,'+(key==='p'?78:72)+'%,.96)');
+  g.addColorStop(0.55,'hsla('+hue+',80%,56%,.93)');
+  g.addColorStop(0.85,'hsla('+hue+',76%,44%,.95)');
+  g.addColorStop(1,'hsla('+hue+',72%,32%,.98)');
+  x.fillStyle=g;x.beginPath();x.arc(c2,c2,R,0,TAU);x.fill();
+  x.lineWidth=R*0.05;                                       // 膜边
+  x.strokeStyle='hsla('+hue+',95%,'+(key==='p'?82:76)+'%,.8)';
+  x.beginPath();x.arc(c2,c2,R*0.97,0,TAU);x.stroke();
+  x.lineWidth=R*0.09;x.strokeStyle='rgba(255,255,255,.22)'; // 左上高光弧
+  x.lineCap='round';
+  x.beginPath();x.arc(c2,c2,R*0.8,-2.6,-1.15);x.stroke();
+  g=x.createRadialGradient(c2-R*0.1,c2-R*0.12,0,c2-R*0.1,c2-R*0.12,R*0.36); // 细胞核
+  g.addColorStop(0,'hsla('+hue+',60%,88%,.42)');
+  g.addColorStop(1,'hsla('+hue+',60%,88%,0)');
+  x.fillStyle=g;x.beginPath();x.arc(c2-R*0.1,c2-R*0.12,R*0.36,0,TAU);x.fill();
+  x.fillStyle='hsla('+hue+',70%,86%,.3)';                   // 内部颗粒（烘焙）
+  for(let i=0;i<6;i++){
+    const a=i*1.05+hue*0.05, rr=R*(0.32+0.4*((i*0.37)%1));
+    x.beginPath();x.arc(c2+Math.cos(a)*rr,c2+Math.sin(a)*rr,R*(0.045+0.03*(i%3)),0,TAU);x.fill();
+  }
+  sprCache.set('c'+key,oc);
+  return oc;
+}
+function foodSprite(h){               // 发光孢子，按 15° 色相分桶
+  const hb=((Math.round(h/15)*15)%360+360)%360;
+  let s=sprCache.get('f'+hb);
+  if(s)return s;
+  const C=64,c2=32,cr=9;
+  const oc=document.createElement('canvas');oc.width=oc.height=C;
+  const x=oc.getContext('2d');
+  let g=x.createRadialGradient(c2,c2,cr*0.5,c2,c2,30);      // 光晕
+  g.addColorStop(0,'hsla('+hb+',80%,66%,.45)');
+  g.addColorStop(1,'hsla('+hb+',80%,66%,0)');
+  x.fillStyle=g;x.beginPath();x.arc(c2,c2,30,0,TAU);x.fill();
+  g=x.createRadialGradient(c2-3,c2-3,1,c2,c2,cr);           // 孢子核
+  g.addColorStop(0,'hsla('+hb+',55%,90%,.95)');
+  g.addColorStop(0.7,'hsla('+hb+',70%,64%,.9)');
+  g.addColorStop(1,'hsla('+hb+',75%,52%,.5)');
+  x.fillStyle=g;x.beginPath();x.arc(c2,c2,cr,0,TAU);x.fill();
+  sprCache.set('f'+hb,oc);
+  return oc;
+}
+function auraSprite(){                // 玩家专属光环
+  let s=sprCache.get('aura');
+  if(s)return s;
+  const C=256,c2=128;
+  const oc=document.createElement('canvas');oc.width=oc.height=C;
+  const x=oc.getContext('2d');
+  const g=x.createRadialGradient(c2,c2,76,c2,c2,126);
+  g.addColorStop(0,'rgba(255,214,90,0)');
+  g.addColorStop(0.5,'rgba(255,214,90,.14)');
+  g.addColorStop(0.74,'rgba(255,224,130,.26)');
+  g.addColorStop(1,'rgba(255,214,90,0)');
+  x.fillStyle=g;x.beginPath();x.arc(c2,c2,126,0,TAU);x.fill();
+  sprCache.set('aura',oc);
+  return oc;
+}
+const uCache=new Map();               // 大球实时膜用的单位渐变（建一次反复用）
+function uBody(key){
+  let g=uCache.get('b'+key);
+  if(g)return g;
+  const hue=key==='p'?49:key;
+  g=ctx.createRadialGradient(-0.34,-0.34,0.08,0,0,1);
+  g.addColorStop(0,'hsla('+hue+',88%,'+(key==='p'?78:72)+'%,.96)');
+  g.addColorStop(0.55,'hsla('+hue+',80%,56%,.93)');
+  g.addColorStop(0.85,'hsla('+hue+',76%,44%,.95)');
+  g.addColorStop(1,'hsla('+hue+',72%,32%,.98)');
+  uCache.set('b'+key,g);
+  return g;
+}
+function uNuc(key){
+  let g=uCache.get('n'+key);
+  if(g)return g;
+  const hue=key==='p'?49:key;
+  g=ctx.createRadialGradient(0,0,0,0,0,1);
+  g.addColorStop(0,'hsla('+hue+',60%,88%,.42)');
+  g.addColorStop(1,'hsla('+hue+',60%,88%,0)');
+  uCache.set('n'+key,g);
+  return g;
+}
+
+/* ---------- 击杀横幅 ---------- */
+const killbn=document.getElementById('killbn');
+let killbnT=null;
+function showBanner(txt){
+  killbn.textContent=txt;
+  killbn.classList.add('show');
+  clearTimeout(killbnT);
+  killbnT=setTimeout(()=>killbn.classList.remove('show'),1600);
+}
+
 /* ---------- 音效（WebAudio 合成） ---------- */
 let AC=null, lastFoodSfx=0;
 function ensureAudio(){
@@ -164,7 +316,7 @@ const sfxMerge=()=>tone(330,560,0.12,'sine',0.08);
 
 /* ---------- 状态 ---------- */
 let state='menu';                 // menu | play | dead
-let foods=[], ais=[], cells=[], ejecta=[], absorbs=[], parts=[];
+let foods=[], ais=[], cells=[], ejecta=[], absorbs=[], parts=[], rings=[];
 let cam={x:WORLD/2,y:WORLD/2,zoom:1,tz:1};
 let mouse={x:W/2,y:H/2};
 let shake=0, flashA=0, flashC='255,80,80';
@@ -195,7 +347,7 @@ function makeCell(x,y,m){
   return {x,y,m,vx:0,vy:0,mergeAt:0,drawR:0,eaten:false};
 }
 function resetGame(){
-  foods=[];ais=[];cells=[];ejecta=[];absorbs=[];parts=[];
+  foods=[];ais=[];cells=[];ejecta=[];absorbs=[];parts=[];rings=[];
   for(let i=0;i<FOOD_N;i++)spawnFood();
   for(let i=0;i<AI_N;i++)ais.push(makeAI(i));
   const px=rnd(WORLD*0.3,WORLD*0.7), py=rnd(WORLD*0.3,WORLD*0.7);
@@ -220,10 +372,6 @@ function colorOf(o){
   if(o.h===undefined)return '#ffcc00';
   return 'hsl('+o.h+',75%,60%)';
 }
-function rimOf(o){
-  if(o.h===undefined)return 'hsl(48,90%,38%)';
-  return 'hsl('+o.h+',70%,42%)';
-}
 
 /* ---------- 吞噬 ---------- */
 function totalMass(){let s=0;for(const c of cells)s+=c.m;return s;}
@@ -233,6 +381,8 @@ function consume(big,small){           // big/small: {o, p(layer?)}
   small.o.eaten=true;
   absorbAnim(small.o,big.o);
   burst(small.o.x,small.o.y,colorOf(small.o),8);
+  big.o.pulseAt=tNow;                                  // 吞噬方涨大脉冲（纯视觉）
+  rings.push({o:big.o,x:big.o.x,y:big.o.y,r0:radius(big.o.m),t:0});
   if(small.p){
     const idx=cells.indexOf(small.o);
     if(idx>=0)cells.splice(idx,1);
@@ -245,6 +395,7 @@ function consume(big,small){           // big/small: {o, p(layer?)}
       stats.kills++; sfxKill();
       shake=Math.min(12,shake+5);
       flashA=Math.max(flashA,0.16); flashC='255,204,0';
+      showBanner('吞掉了「'+(small.o.name||'?')+'」 击杀 +1');
     }
   }
 }
@@ -307,6 +458,8 @@ function updatePlayer(dt){
         a.m=tm; a.drawR=Math.max(a.drawR,b.drawR);
         cells.splice(j,1); j--; sfxMerge();
         burst(a.x,a.y,'#ffcc00',6,70);
+        a.pulseAt=tNow;                       // 水滴并合：涨大回弹+涟漪（纯视觉）
+        rings.push({o:a,x:a.x,y:a.y,r0:radius(a.m),t:0});
       }
     }else if(d<ra+rb){
       const ov=(ra+rb-d)*0.5;
@@ -329,6 +482,7 @@ function split(){
     nc.drawR=radius(c.m)*0.8;
     nc.mergeAt=tNow+15; c.mergeAt=tNow+15;
     cells.push(nc); did=true;
+    burst(nc.x,nc.y,'hsla(49,90%,70%,.9)',5,160);   // 弹射火花（纯视觉）
   }
   if(did)sfxSplit();
 }
@@ -496,6 +650,12 @@ function updateFX(dt){
     p.x+=p.vx*dt; p.y+=p.vy*dt;
     p.vx*=0.93; p.vy*=0.93;
   }
+  for(let i=rings.length-1;i>=0;i--){
+    const rg=rings[i];
+    rg.t+=dt/0.55;
+    if(rg.t>=1){rings.splice(i,1);continue;}
+    if(rg.o&&!rg.o.eaten&&!rg.o.dead){rg.x=rg.o.x;rg.y=rg.o.y;}
+  }
   shake=Math.max(0,shake-dt*26);
   flashA=Math.max(0,flashA-dt*1.6);
 }
@@ -529,38 +689,150 @@ function drawBall(o,name){
   const r=radius(o.m);
   if(o.drawR===0)o.drawR=r*0.3;            // 出生膨胀动画
   o.drawR=lerp(o.drawR,r,Math.min(1,9*lastDt));
-  const dr=o.drawR;
-  ctx.beginPath();
-  ctx.arc(o.x,o.y,dr,0,6.2832);
-  ctx.fillStyle=colorOf(o);
-  ctx.fill();
-  ctx.lineWidth=Math.max(2,dr*0.085);
-  ctx.strokeStyle=rimOf(o);
-  ctx.stroke();
-  const sr=dr*cam.zoom;             // 屏幕上的半径
-  if(name&&sr>13){
-    const fs=Math.max(12/cam.zoom,dr*0.36);
+  const dr=o.drawR, isP=o.h===undefined, key=isP?'p':o.h;
+  if(o._sd===undefined)o._sd=rnd(0,TAU);
+  // 移动方向估计（仅视觉：速度挤压形变）
+  let ang=0,sq=0;
+  if(o._px!==undefined&&lastDt>0){
+    const vx=(o.x-o._px)/lastDt, vy=(o.y-o._py)/lastDt, sp=Math.hypot(vx,vy);
+    if(sp>30){ang=Math.atan2(vy,vx); sq=Math.min(0.13,sp/2600);}
+  }
+  o._px=o.x; o._py=o.y;
+  // 分裂弹射拖尾
+  const vmag=Math.hypot(o.vx||0,o.vy||0);
+  if(vmag>260){
+    ctx.globalAlpha=Math.min(0.3,(vmag-260)/1800);
+    ctx.lineCap='round';
+    ctx.lineWidth=dr*1.3;
+    ctx.strokeStyle=colorOf(o);
+    ctx.beginPath();ctx.moveTo(o.x,o.y);ctx.lineTo(o.x-o.vx*0.06,o.y-o.vy*0.06);ctx.stroke();
+    ctx.globalAlpha=1;
+  }
+  // 吞噬/融合涨大脉冲
+  let ps=1;
+  if(o.pulseAt&&tNow-o.pulseAt<0.38){
+    const e=(tNow-o.pulseAt)/0.38;
+    ps=1+0.1*Math.sin(e*3.1416)*(1-e*0.3);
+  }
+  ctx.save();
+  ctx.translate(o.x,o.y);
+  ctx.rotate(ang); ctx.scale((1+sq)*ps,(1-sq)*ps); ctx.rotate(-ang);
+  if(isP){                                  // 玩家专属光环
+    const au=auraSprite(), ah=128*(dr*1.45/126);
+    ctx.globalAlpha=0.5+0.22*Math.sin(tNow*2.6+o._sd);
+    ctx.drawImage(au,-ah,-ah,ah*2,ah*2);
+    ctx.globalAlpha=1;
+  }
+  const sr=dr*cam.zoom;                     // 屏幕上的半径
+  if(sr>70){
+    // 大球：实时膜波动（顶点正弦扰动），渐变用单位空间缓存
+    ctx.save();
+    ctx.scale(dr,dr);
+    ctx.beginPath();
+    const N=30;
+    for(let i=0;i<=N;i++){
+      const a=i/N*TAU;
+      const w=1+0.016*Math.sin(a*5+tNow*1.8+o._sd)
+             +0.011*Math.sin(a*3-tNow*2.3+o._sd*1.7)
+             +0.007*Math.sin(a*8+tNow*1.1);
+      i?ctx.lineTo(Math.cos(a)*w,Math.sin(a)*w):ctx.moveTo(Math.cos(a)*w,Math.sin(a)*w);
+    }
+    ctx.closePath();
+    ctx.fillStyle=uBody(key); ctx.fill();
+    const hue=isP?49:o.h;
+    ctx.lineWidth=0.045;
+    ctx.strokeStyle='hsla('+hue+',95%,'+(isP?82:76)+'%,.8)';
+    ctx.stroke();
+    ctx.lineWidth=0.085; ctx.lineCap='round';
+    ctx.strokeStyle='rgba(255,255,255,.18)';
+    ctx.beginPath();ctx.arc(0,0,0.8,-2.6,-1.15);ctx.stroke();
+    // 细胞核（向移动方向轻微偏移）
+    ctx.save();
+    ctx.translate(Math.cos(ang)*sq*1.6-0.1,Math.sin(ang)*sq*1.6-0.12);
+    ctx.scale(0.36,0.36);
+    ctx.fillStyle=uNuc(key);
+    ctx.beginPath();ctx.arc(0,0,1,0,TAU);ctx.fill();
+    ctx.restore();
+    // 内部漂浮颗粒
+    ctx.fillStyle='hsla('+hue+',70%,86%,.28)';
+    for(let i=0;i<6;i++){
+      const a=o._sd+i*1.05+tNow*0.22*(i%2?1:-1);
+      const rr=0.3+0.4*((i*0.37)%1);
+      ctx.beginPath();ctx.arc(Math.cos(a)*rr,Math.sin(a)*rr,0.05+0.028*(i%3),0,TAU);ctx.fill();
+    }
+    ctx.restore();
+  }else{
+    // 中小球：预渲染果冻细胞贴图
+    const spr=cellSprite(key), s=dr/72, hh=96*s;
+    ctx.drawImage(spr,-hh,-hh,hh*2,hh*2);
+  }
+  ctx.restore();
+  if(name&&sr>13){                          // 名字字牌
+    const fs=Math.max(12/cam.zoom,dr*0.34);
     ctx.font='600 '+fs+'px "PingFang SC","Microsoft YaHei",sans-serif';
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.lineWidth=fs*0.16; ctx.strokeStyle='rgba(0,0,0,.45)';
+    ctx.lineJoin='round';
+    ctx.lineWidth=fs*0.22; ctx.strokeStyle='rgba(8,10,20,.55)';
     ctx.strokeText(name,o.x,o.y);
-    ctx.fillStyle='#fff';
+    ctx.fillStyle=isP?'#ffe9a3':'rgba(255,255,255,.96)';
     ctx.fillText(name,o.x,o.y);
     if(sr>30){
       const fs2=fs*0.62;
       ctx.font='500 '+fs2+'px "PingFang SC",sans-serif';
-      ctx.lineWidth=fs2*0.16;
+      ctx.lineWidth=fs2*0.22;
       ctx.strokeText(Math.round(o.m),o.x,o.y+fs*0.95);
-      ctx.fillStyle='rgba(255,255,255,.85)';
+      ctx.fillStyle=isP?'rgba(255,233,163,.8)':'rgba(255,255,255,.8)';
       ctx.fillText(Math.round(o.m),o.x,o.y+fs*0.95);
     }
   }
 }
+function rippleEdge(vert,base,dir,a0,a1,inten){   // 边界力场波纹
+  if(a1-a0<10)return;
+  const steps=Math.min(80,Math.max(16,Math.floor((a1-a0)/40)));
+  ctx.strokeStyle='rgba(140,225,255,'+(0.14+0.42*inten).toFixed(3)+')';
+  ctx.lineWidth=(1.4+1.8*inten)/cam.zoom;
+  ctx.beginPath();
+  for(let i=0;i<=steps;i++){
+    const t=a0+(a1-a0)*i/steps;
+    const off=dir*(8+Math.sin(t*0.02+tNow*2.6)*(4+10*inten)+Math.sin(t*0.006-tNow*1.4)*3);
+    if(vert){i?ctx.lineTo(base+off,t):ctx.moveTo(base+off,t);}
+    else{i?ctx.lineTo(t,base+off):ctx.moveTo(t,base+off);}
+  }
+  ctx.stroke();
+}
+function drawBorder(L,R,T,B){              // 发光力场膜
+  if(L>40&&T>40&&R<WORLD-40&&B<WORLD-40)return;
+  const z=cam.zoom;
+  ctx.strokeStyle='rgba(70,180,255,.05)';  ctx.lineWidth=30/z;  ctx.strokeRect(0,0,WORLD,WORLD);
+  ctx.strokeStyle='rgba(90,200,255,.14)';  ctx.lineWidth=9/z;   ctx.strokeRect(0,0,WORLD,WORLD);
+  ctx.strokeStyle='rgba(160,230,255,.5)';  ctx.lineWidth=2.2/z; ctx.strokeRect(0,0,WORLD,WORLD);
+  const px=cam.x, py=cam.y;
+  const prox=v=>clamp(1-v/340,0,1);
+  if(L<60)rippleEdge(true,0,1,Math.max(0,T),Math.min(WORLD,B),prox(px));
+  if(R>WORLD-60)rippleEdge(true,WORLD,-1,Math.max(0,T),Math.min(WORLD,B),prox(WORLD-px));
+  if(T<60)rippleEdge(false,0,1,Math.max(0,L),Math.min(WORLD,R),prox(py));
+  if(B>WORLD-60)rippleEdge(false,WORLD,-1,Math.max(0,L),Math.min(WORLD,R),prox(WORLD-py));
+}
 let lastDt=0.016;
 function draw(){
   ctx.setTransform(DPR,0,0,DPR,0,0);
-  ctx.fillStyle='#0a0a12';
+  // 深海渐变底
+  ctx.fillStyle=bgGrad;
   ctx.fillRect(0,0,W,H);
+  // 远景暗色浮游粒子（视差，屏幕空间）
+  for(const ly of plank){
+    const WW=W+200, HH=H+200;
+    const ox=-cam.x*ly.f, oy=-cam.y*ly.f;
+    ctx.fillStyle='hsla(215,70%,75%,'+ly.a+')';
+    ctx.beginPath();
+    for(const d of ly.dots){
+      const px=((d.x+ox)%WW+WW)%WW-100+Math.sin(tNow*0.3+d.p)*5;
+      const py=((d.y+oy)%HH+HH)%HH-100+Math.cos(tNow*0.23+d.p)*4;
+      ctx.moveTo(px+d.r,py);
+      ctx.arc(px,py,d.r,0,TAU);
+    }
+    ctx.fill();
+  }
   const sx=shake>0?rnd(-shake,shake):0, sy=shake>0?rnd(-shake,shake):0;
   ctx.translate(W/2+sx,H/2+sy);
   ctx.scale(cam.zoom,cam.zoom);
@@ -569,11 +841,11 @@ function draw(){
   const vw=W/cam.zoom, vh=H/cam.zoom;
   const L=cam.x-vw/2-20, R=cam.x+vw/2+20, T=cam.y-vh/2-20, B=cam.y+vh/2+20;
 
-  // 世界底色 + 网格
-  ctx.fillStyle='#0d0d17';
+  // 世界域微亮 + 细腻淡网格
+  ctx.fillStyle='rgba(58,72,140,.1)';
   ctx.fillRect(Math.max(0,L),Math.max(0,T),
     Math.min(WORLD,R)-Math.max(0,L),Math.min(WORLD,B)-Math.max(0,T));
-  ctx.strokeStyle='rgba(130,130,170,0.07)';
+  ctx.strokeStyle='rgba(130,160,230,0.05)';
   ctx.lineWidth=1/cam.zoom;
   ctx.beginPath();
   const g0x=Math.max(0,Math.floor(L/100)*100), g1x=Math.min(WORLD,R);
@@ -581,27 +853,31 @@ function draw(){
   for(let x=g0x;x<=g1x;x+=100){ctx.moveTo(x,Math.max(0,T));ctx.lineTo(x,Math.min(WORLD,B));}
   for(let y=g0y;y<=g1y;y+=100){ctx.moveTo(Math.max(0,L),y);ctx.lineTo(Math.min(WORLD,R),y);}
   ctx.stroke();
-  // 世界边界
-  ctx.strokeStyle='rgba(255,204,0,0.35)';
-  ctx.lineWidth=5/cam.zoom;
-  ctx.strokeRect(0,0,WORLD,WORLD);
+  // 世界边界：发光力场膜
+  drawBorder(L,R,T,B);
 
-  // 食物
+  // 食物：发光孢子（预渲染贴图 + 呼吸 + 漂浮微动）
   for(const f of foods){
     if(f.x<L||f.x>R||f.y<T||f.y>B)continue;
-    const pr=f.r*(1+0.13*Math.sin(tNow*2.2+f.ph));
-    ctx.beginPath();
-    ctx.arc(f.x,f.y,pr,0,6.2832);
-    ctx.fillStyle='hsl('+f.h+',78%,62%)';
-    ctx.fill();
+    const s=f.r*3.4*(1+0.1*Math.sin(tNow*2.2+f.ph));
+    const fx=f.x+Math.sin(tNow*0.8+f.ph)*1.6, fy=f.y+Math.cos(tNow*0.66+f.ph*1.3)*1.6;
+    ctx.globalAlpha=0.78+0.22*Math.sin(tNow*1.6+f.ph*1.3);
+    ctx.drawImage(foodSprite(f.h),fx-s,fy-s,s*2,s*2);
   }
-  // 喷射小球
+  ctx.globalAlpha=1;
+  // 喷射小球（光点+拖尾）
   for(const p of ejecta){
     if(p.x<L||p.x>R||p.y<T||p.y>B)continue;
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,radius(p.m)*0.72,0,6.2832);
-    ctx.fillStyle='hsl(48,90%,60%)';
-    ctx.fill();
+    const er=radius(p.m)*0.72;
+    const ev=Math.hypot(p.vx,p.vy);
+    if(ev>120){
+      ctx.globalAlpha=0.25; ctx.lineCap='round';
+      ctx.lineWidth=er*1.4; ctx.strokeStyle='hsl(48,90%,60%)';
+      ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x-p.vx*0.05,p.y-p.vy*0.05);ctx.stroke();
+      ctx.globalAlpha=1;
+    }
+    const s=er*3.2;
+    ctx.drawImage(foodSprite(48),p.x-s,p.y-s,s*2,s*2);
   }
   // 球体（小的先画）
   const balls=[];
@@ -609,20 +885,30 @@ function draw(){
   if(state!=='menu')for(const c of cells)balls.push({o:c,name:playerName});
   balls.sort((x,y)=>x.o.m-y.o.m);
   for(const b of balls)drawBall(b.o,b.name);
-  // 吸入动画
+  // 吸入动画：被吃球拉伸卷入
   for(const a of absorbs){
+    const aa=Math.atan2(a.target.y-a.y,a.target.x-a.x);
+    ctx.save();
+    ctx.translate(a.x,a.y); ctx.rotate(aa);
+    ctx.scale(1+a.t*1.6,Math.max(0.12,1-a.t*0.85));
     ctx.globalAlpha=1-a.t;
-    ctx.beginPath();
-    ctx.arc(a.x,a.y,a.r*(1-a.t),0,6.2832);
-    ctx.fillStyle=a.color;
-    ctx.fill();
-    ctx.globalAlpha=1;
+    ctx.beginPath();ctx.arc(0,0,a.r*(1-a.t*0.55),0,TAU);
+    ctx.fillStyle=a.color; ctx.fill();
+    ctx.restore();
+  }
+  ctx.globalAlpha=1;
+  // 吞噬/融合涟漪
+  for(const rg of rings){
+    ctx.globalAlpha=(1-rg.t)*0.45;
+    ctx.lineWidth=(1.5+2.5*(1-rg.t))/cam.zoom;
+    ctx.strokeStyle='rgba(170,220,255,.9)';
+    ctx.beginPath();ctx.arc(rg.x,rg.y,rg.r0*(1+rg.t*0.9),0,TAU);ctx.stroke();
   }
   // 粒子
   for(const p of parts){
     ctx.globalAlpha=1-p.t/p.life;
     ctx.beginPath();
-    ctx.arc(p.x,p.y,p.r,0,6.2832);
+    ctx.arc(p.x,p.y,p.r,0,TAU);
     ctx.fillStyle=p.color;
     ctx.fill();
   }
@@ -635,27 +921,37 @@ function draw(){
     ctx.fillRect(0,0,W,H);
   }
 }
+let mmGrad=null;
 function drawMinimap(){
   const S=132, k=S/WORLD;
   mctx.clearRect(0,0,S,S);
-  mctx.fillStyle='rgba(13,13,23,.9)';
+  if(!mmGrad){
+    mmGrad=mctx.createLinearGradient(0,0,0,S);
+    mmGrad.addColorStop(0,'rgba(18,22,44,.78)');
+    mmGrad.addColorStop(1,'rgba(10,11,26,.86)');
+  }
+  mctx.fillStyle=mmGrad;
   mctx.fillRect(0,0,S,S);
-  mctx.strokeStyle='#2a2a3d';
+  mctx.strokeStyle='rgba(150,170,230,.25)';
   mctx.strokeRect(0.5,0.5,S-1,S-1);
+  // 当前视野框
+  const vw=W/cam.zoom*k, vh=H/cam.zoom*k;
+  mctx.strokeStyle='rgba(255,204,0,.22)';
+  mctx.strokeRect(cam.x*k-vw/2,cam.y*k-vh/2,vw,vh);
   for(const a of ais){
     if(a.dead)continue;
     mctx.beginPath();
-    mctx.arc(a.x*k,a.y*k,Math.max(1.5,radius(a.m)*k*2),0,6.2832);
-    mctx.fillStyle='rgba(136,136,160,.6)';
+    mctx.arc(a.x*k,a.y*k,Math.max(1.5,radius(a.m)*k*2),0,TAU);
+    mctx.fillStyle='hsla('+a.h+',65%,62%,.6)';
     mctx.fill();
   }
   if(cells.length){
     mctx.beginPath();
-    mctx.arc(cam.x*k,cam.y*k,4,0,6.2832);
+    mctx.arc(cam.x*k,cam.y*k,4,0,TAU);
     mctx.fillStyle='#ffcc00';
     mctx.fill();
     mctx.beginPath();
-    mctx.arc(cam.x*k,cam.y*k,6.5,0,6.2832);
+    mctx.arc(cam.x*k,cam.y*k,6.5+Math.sin(tNow*4)*1.2,0,TAU);
     mctx.strokeStyle='rgba(255,204,0,.5)';
     mctx.stroke();
   }

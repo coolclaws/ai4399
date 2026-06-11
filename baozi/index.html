@@ -9,8 +9,14 @@
 html, body { height:100%; }
 body {
   background:#0a0a12;
-  background-image:radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,204,0,.05), transparent),
-                   radial-gradient(ellipse 40% 30% at 80% 100%, rgba(255,100,60,.04), transparent);
+  background-image:
+    radial-gradient(circle 3px at 12% 14%, rgba(255,190,90,.18) 0, transparent 100%),
+    radial-gradient(circle 2px at 88% 9%, rgba(255,170,70,.15) 0, transparent 100%),
+    radial-gradient(circle 2.5px at 72% 22%, rgba(255,190,90,.12) 0, transparent 100%),
+    radial-gradient(circle 2px at 28% 6%, rgba(255,190,90,.14) 0, transparent 100%),
+    radial-gradient(ellipse 70% 45% at 50% 0%, rgba(255,150,50,.08), transparent),
+    radial-gradient(ellipse 45% 32% at 82% 100%, rgba(255,100,40,.06), transparent),
+    radial-gradient(ellipse 40% 30% at 12% 92%, rgba(255,140,50,.05), transparent);
   color:#e8e8f0;
   font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
   overflow-x:hidden;
@@ -27,16 +33,17 @@ a.back:hover { color:#ffcc00; border-color:#ffcc00; opacity:1; }
 /* ===== 顶部统计栏 ===== */
 header.stats {
   position:sticky; top:0; z-index:100;
-  background:rgba(10,10,18,.88); backdrop-filter:blur(10px);
-  border-bottom:1px solid #2a2a3d;
+  background:rgba(12,9,8,.9); backdrop-filter:blur(10px);
+  border-bottom:1px solid #3a2b1a;
+  box-shadow:0 1px 0 rgba(255,180,80,.06);
   padding:10px 16px 8px; text-align:center;
 }
-header.stats h1 { font-size:15px; color:#8888a0; font-weight:600; letter-spacing:2px; margin-bottom:2px; }
+header.stats h1 { font-size:15px; color:#9a8a70; font-weight:600; letter-spacing:2px; margin-bottom:2px; }
 header.stats h1 b { color:#ffcc00; }
-.bignum { font-size:30px; font-weight:800; color:#ffcc00; line-height:1.15; text-shadow:0 0 24px rgba(255,204,0,.35); font-variant-numeric:tabular-nums; }
+.bignum { font-size:30px; font-weight:800; color:#ffcc00; line-height:1.15; text-shadow:0 0 24px rgba(255,190,60,.45), 0 1px 0 rgba(120,60,0,.6); font-variant-numeric:tabular-nums; }
 .bignum small { font-size:16px; font-weight:600; color:#e8e8f0; margin-left:3px; }
-.substats { display:flex; justify-content:center; gap:18px; font-size:12px; color:#8888a0; margin-top:2px; flex-wrap:wrap; }
-.substats b { color:#e8e8f0; font-weight:600; }
+.substats { display:flex; justify-content:center; gap:18px; font-size:12px; color:#9a8a70; margin-top:2px; flex-wrap:wrap; }
+.substats b { color:#f0e2c8; font-weight:600; }
 #buffchips { display:flex; justify-content:center; gap:8px; margin-top:4px; min-height:0; flex-wrap:wrap; }
 .chip {
   font-size:12px; color:#0a0a12; background:linear-gradient(135deg,#ffe066,#ffcc00);
@@ -56,44 +63,92 @@ main { display:flex; max-width:1060px; margin:0 auto; padding:14px; gap:14px; al
   .bignum { font-size:26px; }
 }
 
-/* ===== 点击区 ===== */
+/* ===== 点击区：夜市包子铺 ===== */
 #clickwrap {
-  background:#14141f; border:1px solid #2a2a3d; border-radius:16px;
+  background:#1b120a; border:1px solid #4a3318; border-radius:16px;
   padding:18px 10px 22px; text-align:center; position:relative; overflow:hidden;
+  box-shadow:0 8px 30px rgba(0,0,0,.5), inset 0 0 60px rgba(255,140,40,.05);
 }
+#scene { position:absolute; inset:0; z-index:0; pointer-events:none; }
+#scene svg { width:100%; height:100%; display:block; }
+.lant { transform-box:fill-box; transform-origin:50% 0; animation:lantSway 5.2s ease-in-out infinite alternate; }
+.lant.l2 { animation-duration:6.6s; animation-delay:-2.4s; }
+@keyframes lantSway { from { transform:rotate(-3deg); } to { transform:rotate(3deg); } }
+.lglow { animation:lantFlicker 3.4s ease-in-out infinite; }
+.lglow.g2 { animation-delay:-1.5s; }
+@keyframes lantFlicker { 0%,100% { opacity:.55; } 38% { opacity:.85; } 62% { opacity:.65; } }
+.flagsway { transform-box:fill-box; transform-origin:50% 0; animation:flagSway 4.8s ease-in-out infinite alternate; }
+@keyframes flagSway { from { transform:rotate(-2.6deg); } to { transform:rotate(2.4deg); } }
+.bokeh { animation:bokehDrift 7s ease-in-out infinite alternate; }
+@keyframes bokehDrift { from { transform:translateY(0); } to { transform:translateY(-7px); } }
+
 #shopsign {
-  display:inline-block; font-size:18px; font-weight:800; letter-spacing:6px; color:#ffcc00;
-  border:2px solid #5a4a20; border-radius:8px; padding:4px 18px 4px 24px;
-  background:linear-gradient(180deg,#2a2218,#1c1812);
-  box-shadow:0 2px 10px rgba(0,0,0,.5), inset 0 0 18px rgba(255,204,0,.08);
+  display:inline-block; position:relative; z-index:2;
+  font-size:18px; font-weight:800; letter-spacing:6px; color:#ffd75e;
+  text-shadow:0 1px 0 #2a1605, 0 0 14px rgba(255,190,70,.4);
+  border:2px solid #c89b3f; border-radius:8px; padding:4px 18px 4px 24px;
+  background:linear-gradient(180deg,#4a2f15,#32200c);
+  background-image:linear-gradient(180deg,rgba(255,220,140,.08),rgba(0,0,0,.18)),
+    repeating-linear-gradient(90deg, rgba(0,0,0,.1) 0 2px, transparent 2px 11px);
+  box-shadow:0 4px 14px rgba(0,0,0,.55), inset 0 0 16px rgba(255,190,70,.1);
   margin-bottom:6px;
 }
-#clickarea { position:relative; width:min(78vw,310px); height:min(78vw,310px); margin:0 auto; cursor:pointer; touch-action:manipulation; }
-#bigbaozi { width:100%; height:100%; transform-origin:50% 78%; filter:drop-shadow(0 14px 22px rgba(0,0,0,.55)); transition:transform .08s; }
-#clickarea.squish #bigbaozi { animation:squish .22s cubic-bezier(.36,1.6,.5,1); }
+#clickarea { position:relative; z-index:2; width:min(78vw,310px); height:min(78vw,310px); margin:0 auto; cursor:pointer; touch-action:manipulation; }
+#halo {
+  position:absolute; inset:4%; border-radius:50%; pointer-events:none; opacity:0; z-index:1;
+  background:radial-gradient(circle, rgba(255,205,95,.36) 0%, rgba(255,170,60,.16) 46%, transparent 70%);
+  transition:opacity 1.2s ease;
+}
+#clickarea.glow1 #halo { opacity:.55; animation:haloPulse 3s ease-in-out infinite; }
+#clickarea.glow2 #halo { opacity:.95; animation:haloPulse 2s ease-in-out infinite; }
+@keyframes haloPulse { 0%,100% { transform:scale(.95); } 50% { transform:scale(1.06); } }
+#bigbaozi { position:relative; z-index:2; width:100%; height:100%; transform-origin:50% 84%; filter:drop-shadow(0 14px 22px rgba(0,0,0,.55)); transition:transform .08s; }
+#clickarea.squish #bigbaozi { animation:squish .3s cubic-bezier(.36,1.6,.5,1); }
 @keyframes squish {
-  0% { transform:scale(1,1); }
-  30% { transform:scale(1.07,.88); }
-  65% { transform:scale(.96,1.05); }
+  0%   { transform:scale(1,1); }
+  28%  { transform:scale(1.16,.78) translateY(3%); }
+  58%  { transform:scale(.9,1.13) translateY(-2%); }
+  80%  { transform:scale(1.05,.96); }
   100% { transform:scale(1,1); }
 }
-#clickarea .float {
-  position:absolute; pointer-events:none; font-weight:800; font-size:20px; color:#ffcc00;
-  text-shadow:0 1px 6px rgba(0,0,0,.8); animation:floatUp 1s ease-out forwards; z-index:5; white-space:nowrap;
+/* 常驻蒸汽缕 */
+.wisp {
+  position:absolute; left:50%; top:13%; width:16px; height:44px; margin-left:-8px; z-index:3;
+  border-radius:50% 50% 50% 50%/60% 60% 40% 40%;
+  background:linear-gradient(180deg, rgba(255,250,240,0), rgba(255,250,240,.55) 45%, rgba(255,250,240,0));
+  filter:blur(4px); opacity:0; pointer-events:none;
+  animation:wispRise 3.4s ease-out infinite;
 }
-@keyframes floatUp { 0%{ transform:translate(-50%,0) scale(.8); opacity:1; } 100%{ transform:translate(-50%,-80px) scale(1.15); opacity:0; } }
+.wisp.w1 { margin-left:-28px; animation-delay:0s; }
+.wisp.w2 { animation-delay:1.15s; }
+.wisp.w3 { margin-left:12px; animation-delay:2.3s; animation-duration:3.8s; }
+@keyframes wispRise {
+  0%   { transform:translate(0,8px) scaleY(.6); opacity:0; }
+  20%  { opacity:.75; }
+  60%  { transform:translate(8px,-48px) scaleY(1.12); opacity:.4; }
+  100% { transform:translate(-7px,-90px) scaleY(1.3); opacity:0; }
+}
+#clickarea .float {
+  position:absolute; pointer-events:none; font-weight:900; font-size:21px; color:#ffe28a;
+  text-shadow:-1px 0 0 #5e3300, 1px 0 0 #5e3300, 0 -1px 0 #5e3300, 0 1.5px 0 #5e3300,
+    0 3px 8px rgba(0,0,0,.7), 0 0 16px rgba(255,180,60,.55);
+  animation:floatUp 1s ease-out forwards; z-index:5; white-space:nowrap;
+}
+@keyframes floatUp { 0%{ transform:translate(-50%,0) scale(.8); opacity:1; } 100%{ transform:translate(-50%,-84px) scale(1.18); opacity:0; } }
 .steam {
   position:absolute; pointer-events:none; border-radius:50%;
-  background:radial-gradient(circle, rgba(240,240,255,.5), rgba(240,240,255,0) 70%);
+  background:radial-gradient(circle, rgba(255,250,242,.55), rgba(255,250,242,0) 68%);
+  filter:blur(2px);
   animation:steamUp 2.2s ease-out forwards; z-index:4;
 }
 @keyframes steamUp {
-  0% { transform:translate(0,0) scale(.6); opacity:0; }
-  15% { opacity:.85; }
-  100% { transform:translate(var(--dx),-130px) scale(1.7); opacity:0; }
+  0%   { transform:translate(0,0) scale(.6); opacity:0; }
+  15%  { opacity:.85; }
+  55%  { transform:translate(calc(var(--dx)*.45),-66px) scale(1.25); }
+  100% { transform:translate(var(--dx),-132px) scale(1.75); opacity:0; }
 }
-#clickhint { font-size:12px; color:#8888a0; margin-top:8px; }
-#clickhint b { color:#ffcc00; }
+#clickhint { position:relative; z-index:2; font-size:12px; color:#d9c5a0; margin-top:8px; text-shadow:0 1px 3px rgba(0,0,0,.8); }
+#clickhint b { color:#ffd75e; }
 
 /* ===== 金包子 ===== */
 #golden {
@@ -103,15 +158,25 @@ main { display:flex; max-width:1060px; margin:0 auto; padding:14px; gap:14px; al
 }
 @keyframes flyby { from { left:-80px; } to { left:105vw; } }
 @keyframes bob { from { margin-top:-14px; } to { margin-top:14px; } }
+.gspark {
+  position:fixed; pointer-events:none; z-index:299; border-radius:50%;
+  background:radial-gradient(circle, #fff8e0, #ffd75e 45%, rgba(255,200,60,0) 72%);
+  animation:gsparkOut .85s ease-out forwards;
+}
+.gspark.star {
+  border-radius:0; background:none; color:#ffe28a; font-size:13px; line-height:1;
+  text-shadow:0 0 8px rgba(255,200,60,.9);
+}
+@keyframes gsparkOut { 0% { transform:scale(1) rotate(0deg); opacity:.95; } 100% { transform:scale(.15) rotate(70deg) translateY(16px); opacity:0; } }
 
 /* ===== 右侧面板 ===== */
-#panel { background:#14141f; border:1px solid #2a2a3d; border-radius:16px; overflow:hidden; }
-.tabs { display:flex; border-bottom:1px solid #2a2a3d; }
+#panel { background:#171110; border:1px solid #3a2b1a; border-radius:16px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,.4); }
+.tabs { display:flex; border-bottom:1px solid #3a2b1a; background:rgba(255,160,60,.025); }
 .tabs button {
-  flex:1; background:none; border:none; color:#8888a0; font-family:inherit; font-size:14px; font-weight:600;
+  flex:1; background:none; border:none; color:#9a8a70; font-family:inherit; font-size:14px; font-weight:600;
   padding:12px 4px; cursor:pointer; border-bottom:2px solid transparent; transition:.15s; position:relative;
 }
-.tabs button.on { color:#ffcc00; border-bottom-color:#ffcc00; background:rgba(255,204,0,.05); }
+.tabs button.on { color:#ffcc00; border-bottom-color:#ffcc00; background:rgba(255,190,60,.06); }
 .tabs button .dot {
   display:inline-block; min-width:17px; height:17px; line-height:17px; border-radius:9px;
   background:#ffcc00; color:#0a0a12; font-size:11px; font-weight:800; padding:0 4px; margin-left:4px; vertical-align:1px;
@@ -121,88 +186,123 @@ main { display:flex; max-width:1060px; margin:0 auto; padding:14px; gap:14px; al
 
 /* 购买数量 */
 .qtybar { display:flex; gap:6px; margin-bottom:8px; align-items:center; }
-.qtybar span { font-size:12px; color:#8888a0; margin-right:2px; }
+.qtybar span { font-size:12px; color:#9a8a70; margin-right:2px; }
 .qtybar button {
-  background:#1c1c2c; border:1px solid #2a2a3d; color:#8888a0; border-radius:8px;
+  background:#241a10; border:1px solid #3a2b1a; color:#9a8a70; border-radius:8px;
   font-family:inherit; font-size:12px; padding:4px 12px; cursor:pointer;
 }
-.qtybar button.on { color:#ffcc00; border-color:#ffcc00; background:rgba(255,204,0,.08); }
+.qtybar button.on { color:#ffcc00; border-color:#c89b3f; background:rgba(255,190,60,.1); }
 
 /* 建筑行 */
 .brow {
   display:flex; align-items:center; gap:10px; padding:9px 10px; margin-bottom:7px;
-  background:#191926; border:1px solid #2a2a3d; border-radius:12px; cursor:pointer; transition:.12s;
+  background:#211711; border:1px solid #38291a; border-radius:12px; cursor:pointer; transition:border-color .12s, background .12s, transform .12s;
 }
-.brow.can { border-color:#4a4a28; }
-.brow.can:hover { border-color:#ffcc00; background:#1f1f30; transform:translateX(2px); }
-.brow.cant { opacity:.55; cursor:not-allowed; }
-.brow .bicon { font-size:27px; width:40px; text-align:center; flex-shrink:0; }
+.brow.can { border-color:#6a4e26; animation:canBreathe 2.6s ease-in-out infinite; }
+.brow.can:hover { border-color:#ffcc00; background:#2a1d13; transform:translateX(2px); }
+.brow.cant { opacity:.6; cursor:not-allowed; filter:saturate(.35) brightness(.85); }
+@keyframes canBreathe {
+  0%,100% { box-shadow:0 0 0 rgba(255,170,60,0); }
+  50% { box-shadow:0 0 14px rgba(255,170,60,.22), inset 0 0 10px rgba(255,170,60,.05); }
+}
+.brow .bicon { width:44px; text-align:center; flex-shrink:0; font-size:27px; }
+.brow .bicon svg { width:38px; height:38px; display:block; margin:0 auto; }
 .brow .binfo { flex:1; min-width:0; }
-.brow .bname { font-size:14px; font-weight:700; }
-.brow .bname .cnt { color:#ffcc00; font-size:13px; margin-left:5px; }
-.brow .bsub { font-size:11.5px; color:#8888a0; margin-top:1px; }
+.brow .bname { font-size:14px; font-weight:700; color:#f0e2c8; }
+.brow .bname .cnt { color:#ffcc00; font-size:13px; margin-left:5px; display:inline-block; }
+.brow .bname .cnt.flip { animation:cntFlip .45s ease; }
+@keyframes cntFlip { 0% { transform:rotateX(90deg) translateY(-4px); opacity:0; } 60% { transform:rotateX(-20deg); } 100% { transform:rotateX(0); } }
+.brow .bsub { font-size:11.5px; color:#9a8a70; margin-top:1px; }
 .brow .bbuy { text-align:right; flex-shrink:0; }
 .brow .bcost { font-size:13.5px; font-weight:700; color:#e8e8f0; }
 .brow.can .bcost { color:#ffcc00; }
-.brow .bk { font-size:10.5px; color:#8888a0; }
-.brow.mystery { opacity:.5; cursor:default; }
+.brow .bk { font-size:10.5px; color:#9a8a70; }
+.brow.mystery { opacity:.5; cursor:default; animation:none; }
 .brow.mystery .bicon { filter:grayscale(1) brightness(.6); }
-.brow.flash { animation:buyflash .35s ease; }
-@keyframes buyflash { 0% { background:rgba(255,204,0,.25); } }
+.brow.flash { animation:buyflash .4s ease; }
+.brow.flash .bicon svg, .brow.flash .bicon { animation:iconPop .5s cubic-bezier(.34,1.9,.5,1); }
+@keyframes buyflash { 0% { background:rgba(255,190,60,.28); } }
+@keyframes iconPop { 0% { transform:scale(1); } 35% { transform:scale(1.35) rotate(-6deg); } 70% { transform:scale(.92); } 100% { transform:scale(1); } }
 
-/* 升级卡 */
+/* 升级卡：菜单牌 */
 .urow {
-  display:flex; align-items:center; gap:10px; padding:9px 10px; margin-bottom:7px;
-  background:linear-gradient(135deg,#1d1a2e,#191926); border:1px solid #3a3050; border-radius:12px; cursor:pointer; transition:.12s;
+  display:flex; align-items:center; gap:10px; padding:9px 10px 9px 20px; margin-bottom:7px; position:relative;
+  background:linear-gradient(180deg,#30220f,#261a0b);
+  background-image:linear-gradient(180deg,rgba(255,220,140,.05),rgba(0,0,0,.14)),
+    repeating-linear-gradient(90deg, rgba(0,0,0,.08) 0 2px, transparent 2px 10px);
+  border:1px solid #5a4224; border-radius:10px; cursor:pointer; transition:border-color .12s, transform .12s;
 }
-.urow.can { border-color:#6a5a28; }
+.urow::before {
+  content:''; position:absolute; left:8px; top:50%; width:4px; height:62%; transform:translateY(-50%);
+  border-radius:2px; background:linear-gradient(180deg,#c8502e,#8a2a1c);
+  box-shadow:0 0 4px rgba(0,0,0,.5);
+}
+.urow.can { border-color:#c89b3f; animation:canBreathe 2.6s ease-in-out infinite; }
 .urow.can:hover { border-color:#ffcc00; transform:translateX(2px); }
-.urow.cant { opacity:.55; cursor:not-allowed; }
+.urow.cant { opacity:.6; cursor:not-allowed; filter:saturate(.4) brightness(.85); }
 .urow .uicon { font-size:23px; width:36px; text-align:center; flex-shrink:0; }
-.urow .uname { font-size:13.5px; font-weight:700; }
-.urow .udesc { font-size:11.5px; color:#8888a0; margin-top:1px; }
+.urow .uname { font-size:13.5px; font-weight:700; color:#f0d9a8; }
+.urow .udesc { font-size:11.5px; color:#9a8a70; margin-top:1px; }
 .urow .ucost { font-size:13px; font-weight:700; color:#ffcc00; flex-shrink:0; }
-.urow.cant .ucost { color:#8888a0; }
-.empty { text-align:center; color:#8888a0; font-size:13px; padding:26px 10px; }
+.urow.cant .ucost { color:#9a8a70; }
+.empty { text-align:center; color:#9a8a70; font-size:13px; padding:26px 10px; }
 
 /* 成就 */
 .agrid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
 @media (max-width:420px) { .agrid { grid-template-columns:1fr; } }
-.acard { background:#191926; border:1px solid #2a2a3d; border-radius:10px; padding:8px 10px; }
-.acard.got { border-color:#5a4a20; background:linear-gradient(135deg,#241f12,#191926); }
-.acard .aname { font-size:13px; font-weight:700; color:#8888a0; }
+.acard { background:#1d150f; border:1px solid #38291a; border-radius:10px; padding:8px 10px; }
+.acard.got { border-color:#8a6a2a; background:linear-gradient(135deg,#2c2210,#1d150f); box-shadow:inset 0 0 12px rgba(255,190,70,.07); }
+.acard .aname { font-size:13px; font-weight:700; color:#9a8a70; }
 .acard.got .aname { color:#ffcc00; }
-.acard .adesc { font-size:11px; color:#8888a0; margin-top:2px; opacity:.8; }
+.acard .adesc { font-size:11px; color:#9a8a70; margin-top:2px; opacity:.8; }
 
 /* 底部操作 */
-.foot { display:flex; gap:8px; padding:10px; border-top:1px solid #2a2a3d; flex-wrap:wrap; }
+.foot { display:flex; gap:8px; padding:10px; border-top:1px solid #3a2b1a; flex-wrap:wrap; }
 .foot button {
-  flex:1; background:#1c1c2c; border:1px solid #2a2a3d; color:#8888a0; border-radius:8px;
+  flex:1; background:#241a10; border:1px solid #3a2b1a; color:#9a8a70; border-radius:8px;
   font-family:inherit; font-size:12px; padding:7px 4px; cursor:pointer; transition:.15s; white-space:nowrap;
 }
-.foot button:hover { color:#e8e8f0; border-color:#8888a0; }
+.foot button:hover { color:#f0e2c8; border-color:#9a8a70; }
 .foot button.danger { color:#ff7766; }
 .foot button.armed { background:#3d1a14; border-color:#ff7766; color:#ff9988; font-weight:700; }
 
 /* toast */
 #toasts { position:fixed; top:14px; right:14px; z-index:400; display:flex; flex-direction:column; gap:8px; align-items:flex-end; pointer-events:none; }
 .toast {
-  background:#14141f; border:1px solid #ffcc00; border-radius:12px; padding:10px 14px; max-width:270px;
+  background:#1d150f; border:1px solid #ffcc00; border-radius:12px; padding:10px 14px; max-width:270px;
   box-shadow:0 6px 24px rgba(0,0,0,.6), 0 0 18px rgba(255,204,0,.18);
   animation:toastIn .35s cubic-bezier(.2,1.4,.4,1), toastOut .4s ease 3.6s forwards;
 }
 .toast .tt { font-size:13px; font-weight:800; color:#ffcc00; }
 .toast .td { font-size:12px; color:#e8e8f0; margin-top:2px; }
-.toast.plain { border-color:#2a2a3d; box-shadow:0 6px 24px rgba(0,0,0,.6); }
-.toast.plain .tt { color:#e8e8f0; }
+.toast.plain { border-color:#3a2b1a; box-shadow:0 6px 24px rgba(0,0,0,.6); }
+.toast.plain .tt { color:#f0e2c8; }
+/* 成就：木牌 */
+.toast.ach {
+  position:relative;
+  background:linear-gradient(180deg,#3d2a13,#2a1c0b);
+  background-image:linear-gradient(180deg,rgba(255,220,140,.07),rgba(0,0,0,.14)),
+    repeating-linear-gradient(90deg, rgba(0,0,0,.09) 0 2px, transparent 2px 10px);
+  border:2px solid #d9a93f; border-radius:10px; padding:11px 18px;
+  box-shadow:0 8px 24px rgba(0,0,0,.6), 0 0 22px rgba(255,190,70,.3), inset 0 0 0 1px rgba(110,70,20,.9);
+  animation:plaqueIn .5s cubic-bezier(.2,1.5,.4,1), toastOut .4s ease 3.6s forwards;
+}
+.toast.ach::before, .toast.ach::after {
+  content:''; position:absolute; top:6px; width:5px; height:5px; border-radius:50%;
+  background:radial-gradient(circle at 35% 35%, #ffe9a0, #8a6420);
+}
+.toast.ach::before { left:7px; } .toast.ach::after { right:7px; }
+.toast.ach .tt { color:#ffd75e; text-shadow:0 1px 0 rgba(60,30,0,.8); }
+.toast.ach .td { color:#e8d5ae; }
+@keyframes plaqueIn { 0% { transform:translateX(70px) rotate(4deg); opacity:0; } 100% { transform:none; opacity:1; } }
 @keyframes toastIn { from { transform:translateX(60px); opacity:0; } }
 @keyframes toastOut { to { transform:translateY(-8px); opacity:0; } }
 
 /* 弹窗 */
-#modalbg { position:fixed; inset:0; background:rgba(5,5,10,.75); z-index:500; display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+#modalbg { position:fixed; inset:0; background:rgba(8,5,3,.78); z-index:500; display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
 #modalbg.show { display:flex; }
 #modal {
-  background:#14141f; border:1px solid #ffcc00; border-radius:16px; padding:24px 22px; max-width:330px; margin:16px;
+  background:#1d150f; border:1px solid #ffcc00; border-radius:16px; padding:24px 22px; max-width:330px; margin:16px;
   text-align:center; box-shadow:0 0 40px rgba(255,204,0,.2); animation:chipIn .3s ease;
 }
 #modal h3 { color:#ffcc00; font-size:17px; margin-bottom:10px; }
@@ -232,6 +332,93 @@ main { display:flex; max-width:1060px; margin:0 auto; padding:14px; gap:14px; al
 <main>
   <section id="left">
     <div id="clickwrap">
+      <div id="scene"><svg viewBox="0 0 420 460" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#1c1017"/><stop offset=".5" stop-color="#231408"/><stop offset="1" stop-color="#2c1a0c"/>
+          </linearGradient>
+          <radialGradient id="lglowg"><stop offset="0" stop-color="#ff9a3c" stop-opacity=".5"/><stop offset="1" stop-color="#ff9a3c" stop-opacity="0"/></radialGradient>
+          <linearGradient id="lbody" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ff9646"/><stop offset=".55" stop-color="#e8542e"/><stop offset="1" stop-color="#b83a1e"/>
+          </linearGradient>
+          <linearGradient id="woodg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#3c2613"/><stop offset="1" stop-color="#26150a"/>
+          </linearGradient>
+        </defs>
+        <rect width="420" height="460" fill="url(#skyg)"/>
+        <ellipse class="lglow" cx="70" cy="75" rx="125" ry="105" fill="url(#lglowg)"/>
+        <ellipse class="lglow g2" cx="352" cy="62" rx="100" ry="88" fill="url(#lglowg)"/>
+        <ellipse cx="210" cy="430" rx="250" ry="120" fill="url(#lglowg)" opacity=".28"/>
+        <g fill="#ffba66">
+          <circle class="bokeh" cx="152" cy="62" r="2.2" opacity=".35"/>
+          <circle class="bokeh" cx="252" cy="40" r="1.6" opacity=".3" style="animation-delay:-2s"/>
+          <circle class="bokeh" cx="306" cy="168" r="2" opacity=".25" style="animation-delay:-4s"/>
+          <circle class="bokeh" cx="44" cy="186" r="1.8" opacity=".3" style="animation-delay:-1s"/>
+          <circle class="bokeh" cx="202" cy="106" r="1.4" opacity=".25" style="animation-delay:-3s"/>
+        </g>
+        <!-- 灯笼一 -->
+        <g class="lant">
+          <line x1="70" y1="0" x2="70" y2="38" stroke="#5a3a1c" stroke-width="2"/>
+          <rect x="62" y="36" width="16" height="6" rx="2" fill="#d9a93f"/>
+          <ellipse cx="70" cy="62" rx="20" ry="17" fill="url(#lbody)"/>
+          <path d="M58 52 Q70 50 82 52 M55 62 Q70 59 85 62 M58 72 Q70 74 82 72" stroke="#7a2a14" stroke-width="1.2" fill="none" opacity=".6"/>
+          <text x="70" y="68" text-anchor="middle" font-size="13" fill="#ffe9b0" font-weight="bold">福</text>
+          <rect x="63" y="77" width="14" height="5" rx="2" fill="#d9a93f"/>
+          <line x1="70" y1="82" x2="70" y2="94" stroke="#d9a93f" stroke-width="1.5"/>
+          <path d="M67 94 L70 103 L73 94 Z" fill="#e8542e"/>
+        </g>
+        <!-- 灯笼二 -->
+        <g class="lant l2">
+          <line x1="352" y1="0" x2="352" y2="30" stroke="#5a3a1c" stroke-width="2"/>
+          <rect x="345" y="28" width="14" height="5" rx="2" fill="#d9a93f"/>
+          <ellipse cx="352" cy="50" rx="16" ry="14" fill="url(#lbody)"/>
+          <path d="M342 42 Q352 40 362 42 M339 50 Q352 47 365 50 M342 58 Q352 60 362 58" stroke="#7a2a14" stroke-width="1.1" fill="none" opacity=".6"/>
+          <rect x="346" y="62" width="12" height="4.5" rx="2" fill="#d9a93f"/>
+          <line x1="352" y1="66" x2="352" y2="76" stroke="#d9a93f" stroke-width="1.4"/>
+          <path d="M349.5 76 L352 84 L354.5 76 Z" fill="#e8542e"/>
+        </g>
+        <!-- 「包」字幌子 -->
+        <g>
+          <line x1="0" y1="118" x2="62" y2="112" stroke="#4a2e14" stroke-width="4" stroke-linecap="round"/>
+          <g class="flagsway">
+            <line x1="30" y1="113" x2="30" y2="124" stroke="#d9a93f" stroke-width="1.5"/>
+            <rect x="11" y="124" width="38" height="84" rx="3" fill="#8a2a1c" stroke="#d9a93f" stroke-width="1.5"/>
+            <text x="30" y="176" text-anchor="middle" font-size="27" fill="#ffd75e" font-weight="bold">包</text>
+            <line x1="20" y1="208" x2="20" y2="218" stroke="#d9a93f" stroke-width="1.4"/>
+            <line x1="40" y1="208" x2="40" y2="218" stroke="#d9a93f" stroke-width="1.4"/>
+            <circle cx="20" cy="220" r="2" fill="#d9a93f"/><circle cx="40" cy="220" r="2" fill="#d9a93f"/>
+          </g>
+        </g>
+        <!-- 蒸笼堆剪影（左） -->
+        <g fill="#241406" stroke="#3c2410" stroke-width="2">
+          <rect x="16" y="340" width="98" height="27" rx="11"/>
+          <rect x="20" y="314" width="90" height="27" rx="11"/>
+          <rect x="24" y="288" width="82" height="27" rx="11"/>
+        </g>
+        <ellipse cx="65" cy="289" rx="41" ry="8" fill="#311e0d"/>
+        <path d="M52 278 Q49 270 53 262 M70 280 Q74 271 70 262" stroke="#caa87a" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".3"/>
+        <!-- 蒸笼堆剪影（右，更高） -->
+        <g fill="#241406" stroke="#3c2410" stroke-width="2">
+          <rect x="314" y="338" width="94" height="28" rx="11"/>
+          <rect x="318" y="310" width="86" height="28" rx="11"/>
+          <rect x="322" y="282" width="78" height="28" rx="11"/>
+          <rect x="326" y="256" width="70" height="26" rx="10"/>
+        </g>
+        <ellipse cx="361" cy="257" rx="35" ry="7" fill="#311e0d"/>
+        <path d="M350 246 Q347 238 351 230 M368 248 Q372 239 368 230" stroke="#caa87a" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".3"/>
+        <!-- 木柜台 -->
+        <rect x="0" y="366" width="420" height="94" fill="url(#woodg)"/>
+        <line x1="0" y1="366" x2="420" y2="366" stroke="#6a4520" stroke-width="3"/>
+        <line x1="0" y1="369" x2="420" y2="369" stroke="#8a6230" stroke-width="1" opacity=".5"/>
+        <g stroke="#1c0f06" stroke-width="1.5" opacity=".7">
+          <line x1="0" y1="394" x2="420" y2="394"/><line x1="0" y1="422" x2="420" y2="422"/><line x1="0" y1="448" x2="420" y2="448"/>
+        </g>
+        <g stroke="#4a2e14" stroke-width="1" opacity=".45">
+          <line x1="96" y1="370" x2="96" y2="394"/><line x1="262" y1="370" x2="262" y2="394"/>
+          <line x1="180" y1="394" x2="180" y2="422"/><line x1="338" y1="394" x2="338" y2="422"/>
+          <line x1="60" y1="422" x2="60" y2="448"/><line x1="300" y1="422" x2="300" y2="448"/>
+        </g>
+      </svg></div>
       <div id="shopsign">包 子 铺</div>
       <div id="clickarea"></div>
       <div id="clickhint">点包子赚包子！攒钱雇 <b>外婆</b> 帮你蒸</div>
@@ -282,6 +469,96 @@ const BUILDINGS = [
   { id:'central',name:'中央厨房',   icon:'🏭', cost:2e7,    cps:7800,  desc:'流水线上的包子海洋' },
   { id:'robot',  name:'包子机器人', icon:'🤖', cost:3.3e8,  cps:44000, desc:'AI 捏褶，分毫不差' },
 ];
+
+/* ---------- 建筑精绘图标（纯视觉） ---------- */
+const BICONS = {
+  waipo:`<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="24" cy="10" r="5.5" fill="#c8ccd4"/>
+    <path d="M12 25 Q12 13 24 13 Q36 13 36 25 L36 28 Q30 24.5 24 24.5 Q18 24.5 12 28 Z" fill="#aab0bc"/>
+    <ellipse cx="24" cy="25.5" rx="10" ry="9.5" fill="#ffd9b3"/>
+    <g stroke="#7a5a3a" stroke-width="1.6" fill="none">
+      <circle cx="19.5" cy="24.5" r="3.3"/><circle cx="28.5" cy="24.5" r="3.3"/><path d="M22.8 24.5 h2.4"/>
+    </g>
+    <path d="M20 31 Q24 34 28 31" stroke="#b06a4a" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <ellipse cx="15.5" cy="29" rx="2.4" ry="1.5" fill="#ffac8e" opacity=".6"/>
+    <ellipse cx="32.5" cy="29" rx="2.4" ry="1.5" fill="#ffac8e" opacity=".6"/>
+    <path d="M10 46 Q12 36.5 24 36.5 Q36 36.5 38 46 Z" fill="#b8483f"/>
+    <rect x="19" y="39" width="10" height="7" rx="1.5" fill="#f5ecd8"/>
+  </svg>`,
+  zlong:`<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+    <path d="M19 12 Q16.5 8.5 19 5 M28 13 Q30.5 9 28 4" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" opacity=".5"/>
+    <rect x="8" y="30" width="32" height="13" rx="5.5" fill="#c2914f"/>
+    <rect x="8" y="16" width="32" height="13" rx="5.5" fill="#cf9d59"/>
+    <ellipse cx="24" cy="16.5" rx="16" ry="4.5" fill="#ecc488"/>
+    <ellipse cx="24" cy="16.5" rx="11" ry="3" fill="#f7e3bb"/>
+    <g stroke="#8a6230" stroke-width="1.6" opacity=".55" stroke-linecap="round">
+      <path d="M14 19 v7 M24 20 v7 M34 19 v7 M14 33 v7 M24 34 v7 M34 33 v7"/>
+    </g>
+  </svg>`,
+  xuetu:`<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="17" cy="11" r="5" fill="#f8f6f0"/><circle cx="24" cy="8" r="6" fill="#f8f6f0"/><circle cx="31" cy="11" r="5" fill="#f8f6f0"/>
+    <rect x="14" y="11" width="20" height="8" rx="2" fill="#efe9da"/>
+    <ellipse cx="24" cy="26" rx="9.5" ry="8.5" fill="#ffd9b3"/>
+    <circle cx="20.5" cy="25" r="1.4" fill="#5a3a22"/><circle cx="27.5" cy="25" r="1.4" fill="#5a3a22"/>
+    <path d="M21 30 Q24 32.5 27 30" stroke="#b06a4a" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+    <path d="M12 46 Q14 37 24 37 Q34 37 36 46 Z" fill="#e8e2d4"/>
+    <path d="M19 37.5 L24 43 L29 37.5 L24 39.5 Z" fill="#c84a3f"/>
+  </svg>`,
+  dian:`<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+    <rect x="8" y="19" width="32" height="24" rx="2" fill="#a8743f"/>
+    <path d="M6 20 L8 11 L40 11 L42 20 Z" fill="#c84a3f"/>
+    <path d="M12.6 11 L11.3 20 H16.8 L17.8 11 Z M23 11 L22.6 20 H28.2 L27.6 11 Z M33.4 11 L34.4 20 H39.6 L38.2 11 Z" fill="#f5ead2"/>
+    <rect x="11" y="22" width="26" height="5" rx="1.2" fill="#3a2818"/>
+    <circle cx="24" cy="24.5" r="1.6" fill="#ffd75e"/>
+    <rect x="20" y="30" width="8" height="13" rx="1.5" fill="#5a3a1e"/>
+    <rect x="11" y="30" width="6" height="6" rx="1" fill="#ffd75e" opacity=".85"/>
+    <rect x="31" y="30" width="6" height="6" rx="1" fill="#ffd75e" opacity=".85"/>
+  </svg>`,
+  waimai:`<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+    <rect x="27" y="9" width="14" height="13" rx="2.5" fill="#e8a93f"/>
+    <text x="34" y="19" font-size="9" text-anchor="middle" fill="#5a3a10" font-weight="bold">包</text>
+    <path d="M10 36 Q9 27 18 27 H26 L30 20 H36 V24 H32.5 L28.5 33 Q26.5 38 20 38 Z" fill="#3aa6a0"/>
+    <circle cx="14" cy="38" r="6" fill="#2a2a33"/><circle cx="14" cy="38" r="2.4" fill="#6a6a78"/>
+    <circle cx="36" cy="38" r="6" fill="#2a2a33"/><circle cx="36" cy="38" r="2.4" fill="#6a6a78"/>
+    <circle cx="10.5" cy="29.5" r="1.8" fill="#ffd75e"/>
+  </svg>`,
+  chain:`<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="21" width="12" height="23" rx="1" fill="#8a6238"/>
+    <rect x="4" y="18" width="14" height="4" rx="1" fill="#c84a3f"/>
+    <rect x="31" y="24" width="12" height="20" rx="1" fill="#8a6238"/>
+    <rect x="30" y="21" width="14" height="4" rx="1" fill="#c84a3f"/>
+    <rect x="18" y="13" width="13" height="31" rx="1" fill="#a8743f"/>
+    <rect x="17" y="9" width="15" height="5" rx="1" fill="#c84a3f"/>
+    <g fill="#ffd75e" opacity=".9">
+      <rect x="8" y="25" width="3" height="3.5"/><rect x="8" y="32" width="3" height="3.5"/>
+      <rect x="34" y="28" width="3" height="3.5"/><rect x="34" y="35" width="3" height="3.5"/>
+      <rect x="21" y="17" width="3" height="3.5"/><rect x="26" y="17" width="2.5" height="3.5"/>
+      <rect x="21" y="24" width="3" height="3.5"/><rect x="26" y="24" width="2.5" height="3.5"/>
+      <rect x="22.5" y="36" width="4" height="8"/>
+    </g>
+  </svg>`,
+  central:`<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="38" cy="6" r="2.6" fill="#fff" opacity=".4"/><circle cx="36" cy="11" r="2" fill="#fff" opacity=".3"/>
+    <rect x="34" y="12" width="6" height="13" rx="1" fill="#5e6678"/>
+    <rect x="6" y="25" width="36" height="19" rx="1.5" fill="#7a8294"/>
+    <path d="M6 25 L15 17 V25 L24 17 V25 L33 17 V25 Z" fill="#98a0b2"/>
+    <rect x="11" y="30" width="5" height="5" rx="1" fill="#ffd75e" opacity=".9"/>
+    <rect x="21" y="30" width="5" height="5" rx="1" fill="#ffd75e" opacity=".9"/>
+    <rect x="31" y="30" width="5" height="5" rx="1" fill="#ffd75e" opacity=".9"/>
+    <rect x="20" y="37" width="8" height="7" rx="1" fill="#3a4050"/>
+  </svg>`,
+  robot:`<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+    <line x1="24" y1="5" x2="24" y2="12" stroke="#8a92a4" stroke-width="2"/>
+    <circle cx="24" cy="5" r="2.5" fill="#ffd75e"/>
+    <rect x="9" y="12" width="30" height="24" rx="7" fill="#aeb6c6"/>
+    <rect x="5" y="20" width="4" height="8" rx="2" fill="#8a92a4"/>
+    <rect x="39" y="20" width="4" height="8" rx="2" fill="#8a92a4"/>
+    <rect x="13" y="17" width="22" height="12" rx="5" fill="#2a2f3d"/>
+    <circle cx="19.5" cy="23" r="2.6" fill="#ffd75e"/><circle cx="28.5" cy="23" r="2.6" fill="#ffd75e"/>
+    <path d="M16 40 Q16 37 19 37 H29 Q32 37 32 40 V44 H16 Z" fill="#8a92a4"/>
+    <circle cx="24" cy="41" r="1.8" fill="#ffb84a"/>
+  </svg>`,
+};
 
 /* 升级：t=类型 click点击倍率 / b建筑倍率 / global全局倍率 / ccps点击附加CPS百分比 / bdur金包子加成时长 */
 const UPGRADES = [
@@ -421,45 +698,67 @@ const SFX={
 /* ---------- 包子 SVG ---------- */
 function baoziSVG(gold){
   const c = gold
-    ? { hi:'#fff3b0', mid:'#ffd75e', lo:'#e0a020', line:'#b07a10', blush:'#ff9d3c', tray:'#8a6a30', tray2:'#6a5020' }
-    : { hi:'#fff8ee', mid:'#f7e8cf', lo:'#dfc9a3', line:'#c9a878', blush:'#ffb6a0', tray:'#9a7040', tray2:'#75512c' };
+    ? { hi:'#fff6c0', mid:'#ffd75e', lo:'#dd9d1c', ao:'#b8800f', line:'#b07a10', line2:'#8a5e08',
+        blush:'#ff9d3c', knot:'#ffce4a', bk1:'#e8bc56', bk2:'#c89a2e', bk3:'#a87c1c', cloth:'#fff2c4' }
+    : { hi:'#fffaf0', mid:'#f9ecd4', lo:'#e3c89c', ao:'#cda770', line:'#c9a26b', line2:'#b08850',
+        blush:'#ffab8c', knot:'#f5e6c8', bk1:'#c89a5e', bk2:'#a87a40', bk3:'#8a6230', cloth:'#f7eed8' };
+  const g=gold?'g':'n';
   return `<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <radialGradient id="bg${gold?'g':'n'}" cx="42%" cy="30%" r="80%">
-      <stop offset="0%" stop-color="${c.hi}"/><stop offset="55%" stop-color="${c.mid}"/><stop offset="100%" stop-color="${c.lo}"/>
+    <radialGradient id="bg${g}" cx="40%" cy="26%" r="85%">
+      <stop offset="0%" stop-color="${c.hi}"/><stop offset="48%" stop-color="${c.mid}"/>
+      <stop offset="82%" stop-color="${c.lo}"/><stop offset="100%" stop-color="${c.ao}"/>
     </radialGradient>
+    <linearGradient id="bk${g}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${c.bk1}"/><stop offset="60%" stop-color="${c.bk2}"/><stop offset="100%" stop-color="${c.bk3}"/>
+    </linearGradient>
   </defs>
   <!-- 蒸笼 -->
   <g>
-    <ellipse cx="110" cy="183" rx="92" ry="20" fill="${c.tray2}"/>
-    <ellipse cx="110" cy="177" rx="92" ry="20" fill="${c.tray}"/>
-    <ellipse cx="110" cy="175" rx="80" ry="15" fill="#e8d9b8" opacity="0.55"/>
-    <path d="M40 172 Q110 188 180 172" stroke="${c.tray2}" stroke-width="2.5" fill="none" opacity="0.6"/>
+    <ellipse cx="110" cy="196" rx="93" ry="13" fill="rgba(0,0,0,.35)"/>
+    <path d="M21 166 Q21 160 28 160 H192 Q199 160 199 166 V180 Q199 196 110 196 Q21 196 21 180 Z" fill="url(#bk${g})"/>
+    <g stroke="${c.bk3}" stroke-width="2.2" opacity=".5" stroke-linecap="round">
+      <path d="M44 163 v26 M66 165 v29 M88 166 v30 M110 166 v30 M132 166 v30 M154 165 v29 M176 163 v26"/>
+    </g>
+    <ellipse cx="110" cy="161" rx="89" ry="13" fill="${c.bk1}"/>
+    <ellipse cx="110" cy="160" rx="89" ry="13" fill="none" stroke="${c.bk3}" stroke-width="2" opacity=".55"/>
+    <ellipse cx="110" cy="159" rx="74" ry="9.5" fill="${c.cloth}" opacity=".92"/>
   </g>
+  <!-- 包子底部接触阴影 -->
+  <ellipse cx="110" cy="158" rx="72" ry="9" fill="${c.ao}" opacity=".45"/>
   <!-- 包子身体 -->
-  <path d="M30 160 Q30 86 78 66 Q95 50 110 50 Q125 50 142 66 Q190 86 190 160 Q190 174 110 176 Q30 174 30 160 Z" fill="url(#bg${gold?'g':'n'})"/>
-  <!-- 褶子 -->
-  <g stroke="${c.line}" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.85">
-    <path d="M110 56 Q108 78 96 96"/>
-    <path d="M110 56 Q112 78 124 96"/>
-    <path d="M104 57 Q88 76 70 92"/>
-    <path d="M116 57 Q132 76 150 92"/>
-    <path d="M97 60 Q70 76 50 100"/>
-    <path d="M123 60 Q150 76 170 100"/>
+  <path d="M36 152 Q36 82 80 60 Q93 44 110 44 Q127 44 140 60 Q184 82 184 152 Q184 164 110 166 Q36 164 36 152 Z" fill="url(#bg${g})"/>
+  <!-- 褶子（阴影线+提亮线） -->
+  <g stroke="${c.line}" stroke-width="3.2" fill="none" stroke-linecap="round" opacity=".9">
+    <path d="M110 50 Q107 76 95 96"/>
+    <path d="M110 50 Q113 76 125 96"/>
+    <path d="M103 51 Q86 72 68 90"/>
+    <path d="M117 51 Q134 72 152 90"/>
+    <path d="M96 55 Q70 74 51 100"/>
+    <path d="M124 55 Q150 74 169 100"/>
+    <path d="M90 60 Q60 80 44 112"/>
+    <path d="M130 60 Q160 80 176 112"/>
   </g>
-  <!-- 顶部收口 -->
-  <ellipse cx="110" cy="55" rx="13" ry="8" fill="${c.mid}" stroke="${c.line}" stroke-width="2.5"/>
+  <g stroke="#ffffff" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".35">
+    <path d="M107 52 Q104 76 92 95"/>
+    <path d="M100 53 Q83 73 65 90"/>
+    <path d="M93 57 Q67 75 48 99"/>
+  </g>
+  <!-- 顶部收口小旋涡 -->
+  <circle cx="110" cy="50" r="11" fill="${c.knot}" stroke="${c.line}" stroke-width="2.6"/>
+  <path d="M103 50 Q107 44 112 48 Q116 51 111 54 Q107 55 106 51" stroke="${c.line2}" stroke-width="2" fill="none" stroke-linecap="round" opacity=".8"/>
   <!-- 高光 -->
-  <ellipse cx="74" cy="86" rx="17" ry="9" fill="#ffffff" opacity="0.4" transform="rotate(-24 74 86)"/>
-  <!-- 表情 -->
-  <g stroke="#7a5a3a" stroke-width="4" stroke-linecap="round" fill="none">
-    <path d="M82 124 Q88 117 94 124"/>
-    <path d="M126 124 Q132 117 138 124"/>
-    <path d="M102 136 Q110 144 118 136"/>
+  <ellipse cx="73" cy="82" rx="19" ry="10" fill="#ffffff" opacity=".5" transform="rotate(-26 73 82)"/>
+  <circle cx="92" cy="66" r="4.5" fill="#ffffff" opacity=".55"/>
+  <!-- 表情：眯眼笑 + ω 嘴 + 腮红 -->
+  <g stroke="#7a5234" stroke-width="4.5" stroke-linecap="round" fill="none">
+    <path d="M80 120 Q87 111 94 120"/>
+    <path d="M126 120 Q133 111 140 120"/>
+    <path d="M98 134 Q104 141 110 135 Q116 141 122 134"/>
   </g>
-  <ellipse cx="72" cy="134" rx="9" ry="5.5" fill="${c.blush}" opacity="0.65"/>
-  <ellipse cx="148" cy="134" rx="9" ry="5.5" fill="${c.blush}" opacity="0.65"/>
-  ${gold?'<text x="110" y="30" font-size="22" text-anchor="middle">✨</text>':''}
+  <ellipse cx="69" cy="131" rx="10" ry="6" fill="${c.blush}" opacity=".6"/>
+  <ellipse cx="151" cy="131" rx="10" ry="6" fill="${c.blush}" opacity=".6"/>
+  ${gold?'<text x="58" y="38" font-size="20" text-anchor="middle">✨</text><text x="166" y="56" font-size="15" text-anchor="middle">✨</text>':''}
   </svg>`;
 }
 
@@ -469,14 +768,15 @@ const elBaozi=$('st-baozi'), elCps=$('st-cps'), elClick=$('st-click'), elClicks=
 const clickarea=$('clickarea'), blist=$('blist'), ulist=$('ulist'), alist=$('alist');
 
 /* ---------- 点击区 ---------- */
-clickarea.innerHTML='<div id="bigbaozi">'+baoziSVG(false)+'</div>';
+clickarea.innerHTML='<div id="halo"></div><div id="bigbaozi">'+baoziSVG(false)+'</div>'+
+  '<div class="wisp w1"></div><div class="wisp w2"></div><div class="wisp w3"></div>';
 let squishT=null;
 clickarea.addEventListener('pointerdown', e=>{
   e.preventDefault();
   const v=clickValue();
   S.baozi+=v; S.total+=v; S.clicks++;
   clickarea.classList.remove('squish'); void clickarea.offsetWidth; clickarea.classList.add('squish');
-  clearTimeout(squishT); squishT=setTimeout(()=>clickarea.classList.remove('squish'),260);
+  clearTimeout(squishT); squishT=setTimeout(()=>clickarea.classList.remove('squish'),320);
   const r=clickarea.getBoundingClientRect();
   const x=e.clientX-r.left, y=e.clientY-r.top;
   spawnFloat(x,y,'+'+fmt(v));
@@ -529,7 +829,7 @@ const brows={};
   for(const b of BUILDINGS){
     const d=document.createElement('div');
     d.className='brow'; d.id='brow-'+b.id; d.style.display='none';
-    d.innerHTML=`<div class="bicon">${b.icon}</div>
+    d.innerHTML=`<div class="bicon">${BICONS[b.id]||b.icon}</div>
       <div class="binfo"><div class="bname"><span class="nm"></span><span class="cnt"></span></div><div class="bsub"></div></div>
       <div class="bbuy"><div class="bcost"></div><div class="bk"></div></div>`;
     d.addEventListener('click',()=>buyBuilding(b,d));
@@ -545,8 +845,12 @@ function buyBuilding(b,row){
   const price=costOf(b,n,k);
   S.baozi-=price; S.counts[b.id]=n+k;
   recalc(); SFX.buy();
-  row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash');
   updateStore(); updateUpgrades(); renderStats();
+  /* 购买反馈：行闪光 + 图标弹跳 + 数量翻牌（updateStore 会重写 className，需在其后追加） */
+  void row.offsetWidth; row.classList.add('flash');
+  setTimeout(()=>row.classList.remove('flash'),520);
+  const cl=row.querySelector('.cnt');
+  if(cl){ cl.classList.remove('flip'); void cl.offsetWidth; cl.classList.add('flip'); }
 }
 function updateStore(){
   let mysteryShown=false;
@@ -569,7 +873,7 @@ function updateStore(){
     let k = qty==='max' ? Math.max(1,maxAfford(b)) : parseInt(qty);
     const price=costOf(b,n,k);
     const can=S.baozi>=price && (qty!=='max' || maxAfford(b)>=1);
-    row.className='brow '+(can?'can':'cant');
+    row.className='brow '+(can?'can':'cant')+(row.classList.contains('flash')?' flash':'');
     row.querySelector('.nm').textContent=b.name;
     row.querySelector('.cnt').textContent=n>0?'×'+n:'';
     const each=b.cps*D.bMult[b.id]*D.gMult;
@@ -626,7 +930,7 @@ function checkAch(){
     if(a.cond(S,D)){
       S.ach.push(a.id);
       markAch(a.id);
-      toast('🏆 成就达成：'+a.name,a.desc);
+      toast('🏆 成就达成：'+a.name,a.desc,'ach');
       SFX.ach();
     }
   }
@@ -668,13 +972,30 @@ function spawnGolden(){
   });
   d.addEventListener('animationend',ev=>{ if(ev.animationName==='flyby'){ d.remove(); if(goldenEl===d) goldenEl=null; } });
   document.body.appendChild(d); goldenEl=d;
+  /* 拖尾闪光（纯视觉） */
+  const trail=setInterval(()=>{
+    if(!d.isConnected){ clearInterval(trail); return; }
+    if(document.hidden) return;
+    const r=d.getBoundingClientRect();
+    for(let i=0;i<2;i++){
+      const s=document.createElement('div');
+      const star=Math.random()<0.25;
+      s.className='gspark'+(star?' star':'');
+      if(star){ s.textContent='✦'; }
+      else { const sz=4+Math.random()*7; s.style.width=s.style.height=sz+'px'; }
+      s.style.left=(r.left+r.width*0.15+Math.random()*r.width*0.4)+'px';
+      s.style.top=(r.top+r.height*0.25+Math.random()*r.height*0.5)+'px';
+      document.body.appendChild(s);
+      setTimeout(()=>s.remove(),900);
+    }
+  },95);
   scheduleGolden();
 }
 
 /* ---------- toast / 弹窗 ---------- */
-function toast(t,d,plain){
+function toast(t,d,kind){
   const el=document.createElement('div');
-  el.className='toast'+(plain?' plain':'');
+  el.className='toast'+(kind==='ach'?' ach':kind?' plain':'');
   el.innerHTML=`<div class="tt"></div><div class="td"></div>`;
   el.querySelector('.tt').textContent=t;
   el.querySelector('.td').textContent=d;
@@ -690,11 +1011,23 @@ function modal(t,b){
 $('modal-ok').addEventListener('click',()=>$('modalbg').classList.remove('show'));
 
 /* ---------- 渲染 ---------- */
+/* 大数字滚动（纯显示插值） */
+let shownBaozi=0;
+function animNum(){
+  const t=S.baozi, diff=t-shownBaozi;
+  shownBaozi += diff*0.16;
+  if(Math.abs(t-shownBaozi)<Math.max(0.5,t*1e-7)) shownBaozi=t;
+  elBaozi.textContent=fmt(shownBaozi);
+  requestAnimationFrame(animNum);
+}
 function renderStats(){
-  elBaozi.textContent=fmt(S.baozi);
   elCps.textContent=fmtCps(D.cps)+'/秒';
   elClick.textContent=fmt(clickValue());
   elClicks.textContent=fmt(S.clicks);
+  /* 幸福光晕：CPS 越高越亮（纯视觉） */
+  const tier = D.cps>=2000 ? 2 : D.cps>=50 ? 1 : 0;
+  clickarea.classList.toggle('glow1',tier===1);
+  clickarea.classList.toggle('glow2',tier===2);
   const chips=$('buffchips');
   if(Date.now()<buff.until){
     const left=Math.ceil((buff.until-Date.now())/1000);
@@ -794,6 +1127,7 @@ document.addEventListener('visibilitychange',()=>{
 load();
 recalc(); renderSound();
 updateStore(); updateUpgrades(); checkAch(); renderStats();
+shownBaozi=S.baozi; requestAnimationFrame(animNum);
 scheduleGolden();
 </script>
 </body>
