@@ -40,29 +40,74 @@ h1{font-size:40px;color:#ffcc00;letter-spacing:8px;margin-bottom:6px;text-shadow
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
 .hidden{display:none!important}
 body.touch .zone{display:block}
-@media (max-width:560px){.card{padding:24px 26px}h1{font-size:32px;letter-spacing:5px}.keys{font-size:13px}}
+/* ===== 股市骑士 ===== */
+h2{font-size:24px;color:#ffcc00;letter-spacing:3px;font-weight:800;margin-bottom:4px}
+#menu .btn{display:block;margin:9px auto 0;min-width:280px;position:relative}
+.btn.dim{background:rgba(255,255,255,.1);color:rgba(255,255,255,.85);box-shadow:none;border:1px solid rgba(255,255,255,.22)}
+.btn.dim:hover{border-color:rgba(255,204,0,.5);color:#ffcc00}
+.newTag{position:absolute;top:-9px;right:-6px;background:#ff4433;color:#fff;font-size:10px;letter-spacing:1px;padding:2px 7px;border-radius:9px;font-weight:700;box-shadow:0 2px 8px rgba(255,60,40,.5)}
+.card.wide{padding:24px 28px;width:min(920px,94vw)}
+#stockGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:10px;margin:14px 0 16px;max-height:58vh;overflow:auto;padding:4px}
+.scard{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:11px 8px 9px;cursor:pointer;transition:transform .12s,border-color .12s,background .12s,box-shadow .12s;text-align:center}
+.scard:hover{transform:translateY(-3px);border-color:rgba(255,204,0,.6);background:rgba(255,204,0,.06);box-shadow:0 10px 26px rgba(0,0,0,.4)}
+.scard:active{transform:translateY(-1px) scale(.98)}
+.scard .si{font-size:25px;line-height:1.25}
+.scard .sn{font-size:13.5px;font-weight:700;color:#fff;margin-top:2px}
+.scard .sn i{font-style:normal;color:rgba(255,255,255,.4);font-size:10.5px;margin-left:4px;letter-spacing:.5px}
+.scard .sr{font-size:15px;font-weight:700;margin-top:1px;font-variant-numeric:tabular-nums}
+.scard .sd{font-size:10.5px;margin-top:3px;letter-spacing:1.5px}
+.scard .pb{height:4px;border-radius:2px;background:rgba(255,255,255,.1);margin:7px 10px 4px;overflow:hidden}
+.scard .pb i{display:block;height:100%;border-radius:2px;background:linear-gradient(90deg,#ffcc00,#ff9a3c)}
+.scard .sb{font-size:10px;color:rgba(255,255,255,.42)}
+.up{color:#ff5347}.dn{color:#2fbf83}
+.btnGhost{display:inline-block;background:rgba(255,255,255,.07);color:rgba(255,255,255,.72);font-size:14px;padding:8px 26px;border:1px solid rgba(255,255,255,.18);border-radius:24px;cursor:pointer;font-family:inherit;letter-spacing:2px;margin-top:2px}
+.btnGhost:hover{color:#ffcc00;border-color:rgba(255,204,0,.5)}
+#shud{position:fixed;top:58px;left:16px;z-index:20;pointer-events:none;display:none;color:#fff;text-align:left;background:linear-gradient(180deg,rgba(22,16,32,.55),rgba(10,10,18,.42));border:1px solid rgba(255,204,0,.22);border-radius:14px;padding:8px 18px 9px 14px;backdrop-filter:blur(4px);box-shadow:0 6px 22px rgba(0,0,0,.35);font-variant-numeric:tabular-nums}
+#shud .r1{font-size:15px;font-weight:700}
+#shud .r1 i{font-style:normal;color:rgba(255,255,255,.45);font-size:11px;margin-left:5px;letter-spacing:.5px}
+#shud .r2{font-size:12px;color:rgba(255,235,200,.7);margin-top:3px}
+#shud .r3{font-size:12px;color:rgba(255,255,255,.5);margin-top:1px}
+#shud .r3 b{font-size:17px;margin-left:5px}
+#btnSwap{margin-left:10px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.85);box-shadow:none;border:1px solid rgba(255,255,255,.22)}
+body.stockmode #hud .box{background:transparent;border-color:transparent;box-shadow:none;backdrop-filter:none}
+@media (max-width:560px){.card{padding:24px 26px}h1{font-size:32px;letter-spacing:5px}.keys{font-size:13px}#stockGrid{grid-template-columns:repeat(2,1fr)}#menu .btn{min-width:230px}#shud{top:52px;left:10px;padding:6px 12px 7px 10px}}
 </style>
 </head>
 <body>
 <a id="back" href="../">← AI4399</a>
 <canvas id="cv"></canvas>
 <div id="hud"><div class="box"><div id="dist">0 m</div><div id="trick"></div></div></div>
-<div id="score"><b id="scoreV">0</b>最高 <span id="bestV">0</span></div>
+<div id="score"><b id="scoreV">0</b><span id="scoreSub">最高 <span id="bestV">0</span></span><span id="scoreSub2" class="hidden"></span></div>
+<div id="shud">
+  <div class="r1"><span id="shIcon">📈</span> <span id="shName"></span><i id="shSym"></i></div>
+  <div class="r2" id="shDate">—</div>
+  <div class="r3">持仓收益<b id="shPnl">+0.0%</b></div>
+</div>
 <div class="zone" id="zoneL"><span>◀ 刹车 · 后仰</span></div>
 <div class="zone" id="zoneR"><span>油门 · 前倾 ▶</span></div>
 
 <div class="panel" id="menu">
   <div class="card">
     <h1>特技摩托</h1>
-    <div class="sub">横版物理特技 · 无尽山地挑战</div>
+    <div class="sub">横版物理特技 · 在真实 K 线上骑行</div>
     <div class="keys">
       <b>↑</b> 油门　<b>↓</b> 刹车 / 倒车<br>
       <b>←</b> <b>→</b> 空中后仰 / 前倾（翻转配重）<br>
       <span style="color:rgba(255,255,255,.45)">手机：左半屏 刹车·后仰 ｜ 右半屏 油门·前倾</span><br>
       <span style="color:rgba(255,255,255,.45)">空中旋转满 360° 落地 = 空翻得分，头部着地即坠毁</span>
     </div>
-    <button class="btn" id="btnStart">开始游戏</button>
-    <div class="best">历史最高分 <em id="menuBest">0</em></div>
+    <button class="btn" id="btnStock">📈 股市骑士<span class="newTag">NEW</span></button>
+    <button class="btn dim" id="btnClassic">🏜 无尽山地</button>
+    <div class="best">山地历史最高分 <em id="menuBest">0</em></div>
+  </div>
+</div>
+
+<div class="panel hidden" id="stockSel">
+  <div class="card wide">
+    <h2>📈 股市骑士</h2>
+    <div class="sub">骑上真实历史 K 线 · 红涨绿跌 · 一路拿到收盘终点</div>
+    <div id="stockGrid"></div>
+    <button class="btnGhost" id="btnPickBack">← 返回主菜单</button>
   </div>
 </div>
 
@@ -70,18 +115,26 @@ body.touch .zone{display:block}
   <div class="card">
     <div id="overTitle">坠毁了！</div>
     <div id="overSub">骑手头部着地</div>
-    <div class="stats">
+    <div class="stats" id="statsC">
       <span>行驶距离</span><b id="ovDist">0 m</b>
       <span>空翻次数</span><b id="ovFlips">0</b>
       <span>特技得分</span><b id="ovTrick">0</b>
     </div>
-    <div class="total">本局总分<b id="ovTotal">0</b></div>
+    <div class="stats hidden" id="statsS">
+      <span id="ovDateL">骑到日期</span><b id="ovDate">—</b>
+      <span>当日收盘</span><b id="ovPrice">—</b>
+      <span>本次进度</span><b id="ovProg">0%</b>
+      <span>历史最佳</span><b id="ovBProg">0%</b>
+      <span>空翻次数</span><b id="ovFlips2">0</b>
+    </div>
+    <div class="total"><span id="totalL">本局总分</span><b id="ovTotal">0</b></div>
     <div id="newRec" class="hidden">★ 新纪录！</div>
-    <button class="btn" id="btnAgain">再来一局</button>
-    <div class="best">历史最高分 <em id="ovBest">0</em></div>
+    <div><button class="btn" id="btnAgain">再来一局</button><button class="btn hidden" id="btnSwap">换一只股票</button></div>
+    <div class="best" id="ovBestRow">历史最高分 <em id="ovBest">0</em></div>
   </div>
 </div>
 
+<script src="stocks.js"></script>
 <script>
 (()=>{
 'use strict';
@@ -263,7 +316,9 @@ addEventListener('keydown',e=>{
   keys[e.code]=true;
   initAudio();if(AC&&AC.state==='suspended')AC.resume();
   if((e.code==='Space'||e.code==='Enter'||e.code==='KeyR')&&!e.repeat){
-    if(state==='menu')startGame();
+    if(state==='menu'){
+      if($('stockSel').classList.contains('hidden')&&!$('menu').classList.contains('hidden'))startClassic();
+    }
     else if(state==='over'&&performance.now()-overAt>500)startGame();
   }
 });
@@ -279,10 +334,11 @@ function bindZone(el,set){
 }
 bindZone($('zoneL'),v=>tL=v);
 bindZone($('zoneR'),v=>tR=v);
-const inThr=()=>!!(keys.ArrowUp||keys.KeyW||keys.Space||tR);
-const inBrk=()=>!!(keys.ArrowDown||keys.KeyS||tL);
-const inBack=()=>!!(keys.ArrowLeft||keys.KeyA||tL);
-const inFwd=()=>!!(keys.ArrowRight||keys.KeyD||tR);
+let botOn=false;const botC={thr:false,brk:false,back:false,fwd:false}; // 自动驾驶（赛道可通性验证）
+const inThr=()=>botOn?botC.thr:!!(keys.ArrowUp||keys.KeyW||keys.Space||tR);
+const inBrk=()=>botOn?botC.brk:!!(keys.ArrowDown||keys.KeyS||tL);
+const inBack=()=>botOn?botC.back:!!(keys.ArrowLeft||keys.KeyA||tL);
+const inFwd=()=>botOn?botC.fwd:!!(keys.ArrowRight||keys.KeyD||tR);
 
 /* ================= 摩托刚体（verlet 三质点） ================= */
 function makePt(x,y,im){return{x,y,px:x,py:y,im};}
@@ -433,6 +489,14 @@ function addSmoke(x,y,vx,vy){
   if(parts.length>320)parts.shift();
   parts.push({x,y,vx:vx+rand(-14,14),vy:vy+rand(-10,6),life:0,max:rand(.45,.9),r:rand(1.8,3.2),col:3});
 }
+const CONF_COLS=['#ffd24a','#ff5347','#4ab3ff','#2fbf83','#ff8ad0','#f5f5ff'];
+function addConfetti(x,y){ // 冲线彩带
+  for(let i=0;i<96;i++){
+    if(parts.length>300)parts.shift();
+    parts.push({x:x+rand(-40,40),y:y+rand(-30,10),vx:rand(-340,340),vy:rand(-640,-140),
+      life:0,max:rand(1.3,2.5),r:rand(2,3.8),col:4,hue:CONF_COLS[i%6]});
+  }
+}
 function stepParts(dt){
   for(let i=parts.length-1;i>=0;i--){
     const p=parts[i];
@@ -441,7 +505,7 @@ function stepParts(dt){
     if(p.col===2)continue; // 尘环原地扩散
     p.x+=p.vx*dt;p.y+=p.vy*dt;
     p.vx*=Math.exp(-1.8*dt);
-    p.vy=p.vy*Math.exp(-1.8*dt)+(p.col===1?900:p.col===3?-36:160)*dt;
+    p.vy=p.vy*Math.exp(-1.8*dt)+(p.col===1?900:p.col===3?-36:p.col===4?430:160)*dt;
   }
   for(let i=ghosts.length-1;i>=0;i--){
     ghosts[i].a+=dt;
@@ -455,7 +519,7 @@ function stepParts(dt){
 function addPop(x,y,txt,col,size){pops.push({x,y,txt,col,size:size||22,age:0});}
 
 /* ================= 游戏状态 ================= */
-let state='menu';            // menu | play | crash | over
+let state='menu';            // menu | play | crash | finish | over
 let timeScale=1,crashT=0,overAt=0,crashReason='';
 let trickScore=0,combo=0,flipsTotal=0,meters=0;
 let trickMsg='',trickMsgT=0,stuckT=0;
@@ -465,50 +529,252 @@ let best=0;
 try{best=parseInt(localStorage.getItem('ai4399-moto-best')||'0',10)||0;}catch(e){}
 $('menuBest').textContent=best;$('bestV').textContent=best;
 
-function resetWorld(){
+/* ====== 股市骑士：状态与赛道 ====== */
+const CUP='#ff5347',CDN='#2fbf83';        // 中国惯例：红涨绿跌
+const DAYW=70;                            // 每个交易日的世界宽度 px
+const KLOG=800;                           // 对数价格 → 高度缩放（±2%≈缓坡，±5%≈陡坡跳台）
+const RUNWAY=1100;                        // 起跑平地长度
+let mode='classic';                       // classic | stock
+let stk=null;                             // 当前股市赛道
+let finishT=0,finished=false;
+function fmtP(p){return p>=1000?Math.round(p).toLocaleString('en-US'):p>=100?p.toFixed(1):p.toFixed(2);}
+function fmtDay(ed){
+  const d=new Date(ed*86400000);
+  return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0');
+}
+function pctTxt(v){return (v>=0?'+':'')+v.toFixed(1)+'%';}
+function stockBestGet(sym){try{return parseFloat(localStorage.getItem('ai4399-moto-stock-'+sym)||'0')||0;}catch(e){return 0;}}
+function stockBestSet(sym,v){try{localStorage.setItem('ai4399-moto-stock-'+sym,String(v));}catch(e){}}
+function starsOf(v){return v<1.3?['★','新手']:v<2?['★★','进阶']:v<2.7?['★★★','老手']:['★★★★','地狱'];}
+function niceStep(x){
+  const e=Math.pow(10,Math.floor(Math.log10(x))),m=x/e;
+  return (m<1.5?1:m<3.5?2:m<7.5?5:10)*e;
+}
+function buildStockWorld(st){
+  const rows=st.rows,N=rows.length,base=rows[0][4];
+  const py=p=>-Math.log(p/base)*KLOG;
+  const Y=rows.map(r=>py(r[4]));
+  const finishX=(N-1)*DAYW;
+  firstX=-RUNWAY;gy=0;
+  const endX=finishX+1300,n=Math.ceil((endX-firstX)/STEP);
+  hs=new Array(n+1);
+  for(let i=0;i<=n;i++){
+    const x=firstX+i*STEP;
+    let y;
+    if(x<=0)y=0;
+    else if(x<finishX){ // Catmull-Rom 平滑收盘价
+      const f=x/DAYW,d=Math.floor(f),t=f-d;
+      const p0=Y[Math.max(0,d-1)],p1=Y[d],p2=Y[Math.min(N-1,d+1)],p3=Y[Math.min(N-1,d+2)];
+      y=.5*((2*p1)+(-p0+p2)*t+(2*p0-5*p1+4*p2-p3)*t*t+(-p0+3*p1-3*p2+p3)*t*t*t);
+    }
+    else if(x<finishX+700)y=Y[N-1];                  // 终点平台
+    else if(x<finishX+1100)y=Y[N-1]-(x-finishX-700); // 收尾缓停坡
+    else y=Y[N-1]-400;
+    hs[i]=y;
+  }
+  // 骑行面平滑（K 线视觉不变）：缓和 V 形谷与锐利坡顶；区间向跑道延伸避免衔接台阶
+  // 半径随波动率自适应：地狱级标的锯齿磨得更圆，保证可骑
+  const R1=Math.max(4,Math.round(st.vol*2.6));
+  const si0=Math.max(1,Math.ceil((-300-firstX)/STEP)),si1=Math.min(n-1,Math.floor((finishX+650-firstX)/STEP));
+  for(let pass=0;pass<2;pass++){
+    const src=hs.slice();
+    for(let i=si0;i<=si1;i++){
+      let s=0;
+      for(let k=-R1;k<=R1;k++)s+=src[clamp(i+k,0,n)];
+      hs[i]=s/(2*R1+1);
+    }
+  }
+  // 深 V 谷垫底：宽核均值与原面取高者（填谷不削峰，峰仍是跳台）
+  const vFill=R2=>{
+    const src=hs.slice();
+    for(let i=si0;i<=si1;i++){
+      let s=0;
+      for(let k=-R2;k<=R2;k++)s+=src[clamp(i+k,0,n)];
+      s/=2*R2+1;
+      if(s<hs[i])hs[i]=s;
+    }
+  };
+  vFill(26);
+  // 难度兜底：仅对骑行面做坡度软限幅，保证极端跳空与连续大阳线可通过
+  // 下坡限幅随波动率收紧：地狱股的悬崖更缓，免高坠硬着陆
+  const MAXUP=.38*STEP,MAXDN=Math.max(.9,1.6-st.vol*.16)*STEP;
+  for(let i=1;i<=n;i++){
+    if(hs[i]<hs[i-1]-MAXUP)hs[i]=hs[i-1]-MAXUP;
+    else if(hs[i]>hs[i-1]+MAXDN)hs[i]=hs[i-1]+MAXDN;
+  }
+  vFill(22); // 二次填谷：圆滑限幅产生的坡脚折角
+  // 月份刻度
+  const months=[];let pm=-1;
+  for(let i=0;i<N;i++){
+    const d=new Date(rows[i][0]*86400000),m=d.getUTCMonth();
+    if(m!==pm){pm=m;months.push({x:i*DAYW,label:d.getUTCFullYear()+'.'+(m+1)});}
+  }
+  // 价格网格（1-2-5 阶梯）
+  let lo=1e18,hi=-1e18;
+  for(const r of rows){lo=Math.min(lo,r[3]);hi=Math.max(hi,r[2]);}
+  const stp=niceStep((hi-lo)/9),levels=[];
+  for(let p=Math.ceil(lo/stp)*stp;p<=hi;p+=stp)levels.push({p,y:py(p)});
+  // 远景指数曲线（归一化收盘）
+  const norm=[];let lmin=1e18,lmax=-1e18;
+  for(const r of rows){const l=Math.log(r[4]);lmin=Math.min(lmin,l);lmax=Math.max(lmax,l);}
+  for(let i=0;i<N;i+=4)norm.push({t:i/(N-1),v:(Math.log(rows[i][4])-lmin)/Math.max(1e-9,lmax-lmin)});
+  stk={st,N,finishX,base,py,months,levels,norm,bestProg:stockBestGet(st.sym)};
+  chCache.clear();
+}
+function dayAt(x){return clamp(Math.round(x/DAYW),0,stk.N-1);}
+function priceAt(x){
+  if(x<=0)return stk.base;
+  const f=x/DAYW,d=Math.floor(f);
+  if(d>=stk.N-1)return stk.st.rows[stk.N-1][4];
+  const t=f-d,c0=stk.st.rows[d][4],c1=stk.st.rows[d+1][4];
+  return c0*Math.pow(c1/c0,t);
+}
+
+function resetWorld(){ // 经典无尽山地
+  mode='classic';stk=null;
   hs=[0];firstX=-1400;gy=0;
   pushSeg(1900,0,'lin');     // 出发平台
   ensureTerrain(3500);
-  bike=makeBike(0);
+  spawnReset(0);
+}
+function spawnReset(sx){
+  bike=makeBike(sx);
   rag=null;helmet=null;parts.length=0;pops.length=0;
   ghosts.length=0;ghostCD=0;recFlash=0;recBeaten=false;
   trickScore=0;combo=0;flipsTotal=0;meters=0;
   trickMsg='';trickMsgT=0;stuckT=0;crashT=0;timeScale=1;shake=0;
-  camX=120;camY=groundY(0)-90;zoom=baseZoom();
+  finishT=0;finished=false;
+  camX=sx+120;camY=groundY(sx)-90;zoom=baseZoom();
 }
 function baseZoom(){return clamp(Math.min(W/1150,H/700),.5,1.05);}
-function startGame(){
+function hidePanels(){
+  $('menu').classList.add('hidden');$('over').classList.add('hidden');$('stockSel').classList.add('hidden');
+}
+function startClassic(){
   initAudio();if(AC&&AC.state==='suspended')AC.resume();
   resetWorld();
   state='play';
-  $('menu').classList.add('hidden');$('over').classList.add('hidden');
-  $('hud').style.display='block';$('score').style.display='block';
+  hidePanels();
+  $('hud').style.display='block';$('score').style.display='block';$('shud').style.display='none';
+  $('dist').style.display='block';
+  $('scoreSub').classList.remove('hidden');$('scoreSub2').classList.add('hidden');
+  document.body.classList.remove('stockmode');
+}
+function startStock(s){
+  initAudio();if(AC&&AC.state==='suspended')AC.resume();
+  mode='stock';
+  buildStockWorld(s);
+  spawnReset(-900);
+  state='play';
+  hidePanels();
+  $('hud').style.display='block';$('score').style.display='block';$('shud').style.display='block';
+  $('dist').style.display='none';
+  $('scoreSub').classList.add('hidden');$('scoreSub2').classList.remove('hidden');
+  $('shIcon').textContent=s.icon;$('shName').textContent=s.cn;$('shSym').textContent=s.sym;
+  document.body.classList.add('stockmode');
+}
+function startGame(){ // 重开当前模式
+  if(mode==='stock'&&stk)startStock(stk.st);else startClassic();
 }
 function doCrash(reason){
   if(state!=='play')return;
   state='crash';crashT=0;timeScale=.3;combo=0;crashReason=reason;
   buildRagdoll();
-  addPop(rag.head.x,rag.head.y-30,'坠毁！','#ff5544',30);
+  addPop(rag.head.x,rag.head.y-30,mode==='stock'?'爆仓！':'坠毁！','#ff5544',30);
   addDust(rag.chest.x,rag.chest.y,0,-80,14,1);
   sndCrash();shake=14;
 }
-function endRun(title,sub){
+function setOverCommon(){
   state='over';overAt=performance.now();timeScale=1;
+  $('statsC').classList.toggle('hidden',mode==='stock');
+  $('statsS').classList.toggle('hidden',mode!=='stock');
+  $('btnSwap').classList.toggle('hidden',mode!=='stock');
+  $('ovBestRow').classList.toggle('hidden',mode==='stock');
+  $('over').classList.remove('hidden');
+}
+function endRun(title,sub){ // 经典模式结算
+  if(mode==='stock'){endStock(false,title,sub);return;}
+  setOverCommon();
   const dm=Math.floor(meters),total=dm+trickScore;
   $('overTitle').textContent=title;
+  $('overTitle').style.color='#ff5544';
   $('overSub').textContent=sub;
   $('ovDist').textContent=dm+' m';
   $('ovFlips').textContent=flipsTotal;
   $('ovTrick').textContent=trickScore;
+  $('totalL').textContent='本局总分';
   $('ovTotal').textContent=total;
+  $('ovTotal').style.color='';
   const rec=total>best;
   if(rec){best=total;try{localStorage.setItem('ai4399-moto-best',String(best));}catch(e){}}
+  $('newRec').textContent='★ 新纪录！';
   $('newRec').classList.toggle('hidden',!rec);
   $('ovBest').textContent=best;$('menuBest').textContent=best;$('bestV').textContent=best;
-  $('over').classList.remove('hidden');
 }
-$('btnStart').addEventListener('click',startGame);
+function endStock(success,title,sub){ // 股市模式结算
+  setOverCommon();
+  const st=stk.st,rows=st.rows;
+  const prog=success?100:clamp(bike.maxX/stk.finishX*100,0,100);
+  const di=dayAt(success?stk.finishX:Math.max(0,bike.maxX));
+  const row=rows[di];
+  const pnl=(row[4]/rows[0][4]-1)*100;
+  const prev=stk.bestProg;
+  const rec=prog>prev;
+  if(rec){const v=Math.round(prog*10)/10;stockBestSet(st.sym,v);stk.bestProg=v;}
+  $('overTitle').textContent=success?'成功落袋！':(title||'爆仓！');
+  $('overTitle').style.color=success?'#ffcc00':'#ff5544';
+  $('overSub').textContent=success
+    ?st.icon+' '+st.cn+'：从 '+fmtDay(rows[0][0])+' 一路拿到 '+fmtDay(row[0])+'，钻石手实锤'
+    :st.icon+' '+st.cn+' · '+(sub||'')+'，下次拿稳点';
+  $('ovDateL').textContent=success?'落袋日':'爆仓日';
+  $('ovDate').textContent=fmtDay(row[0]);
+  $('ovPrice').textContent='$'+fmtP(row[4]);
+  $('ovProg').textContent=prog.toFixed(1)+'%';
+  $('ovBProg').textContent=Math.max(prev,prog).toFixed(1)+'%';
+  $('ovFlips2').textContent=flipsTotal+(trickScore?'（特技分 '+trickScore+'）':'');
+  $('totalL').textContent=success?'全程收益':'浮动收益';
+  $('ovTotal').textContent=pctTxt(pnl);
+  $('ovTotal').style.color=pnl>=0?CUP:CDN;
+  $('newRec').textContent=success?'★ 落袋为安，全图通关！':'★ 进度新纪录！';
+  $('newRec').classList.toggle('hidden',!rec);
+}
+function sndFanfare(){
+  const fs=[523,659,784,1046,1318];
+  for(let i=0;i<fs.length;i++)tone(fs[i],fs[i],.16,'square',.12,i*.09);
+  tone(262,262,.5,'triangle',.18,.36);
+}
+function showStockSel(){
+  state='menu';
+  buildCards();
+  $('menu').classList.add('hidden');$('over').classList.add('hidden');
+  $('stockSel').classList.remove('hidden');
+  $('hud').style.display='none';$('score').style.display='none';$('shud').style.display='none';
+}
+function buildCards(){
+  const grid=$('stockGrid');grid.innerHTML='';
+  for(const s of STONKS){
+    const bp=stockBestGet(s.sym),[stars,tag]=starsOf(s.vol);
+    const sc=stars.length===4?'#ff7a64':stars.length===3?'#ffb04a':'rgba(255,255,255,.5)';
+    const el=document.createElement('div');
+    el.className='scard';
+    el.innerHTML='<div class="si">'+s.icon+'</div>'
+      +'<div class="sn">'+s.cn+'<i>'+s.sym+'</i></div>'
+      +'<div class="sr '+(s.ret>=0?'up':'dn')+'">'+(s.ret>=0?'+':'')+s.ret+'%</div>'
+      +'<div class="sd" style="color:'+sc+'">'+stars+' '+tag+'</div>'
+      +'<div class="pb"><i style="width:'+clamp(bp,0,100)+'%"></i></div>'
+      +'<div class="sb">'+(bp>=100?'✅ 已通关':bp>0?'最佳 '+bp.toFixed(0)+'%':'未挑战')+'</div>';
+    el.addEventListener('click',()=>startStock(s));
+    grid.appendChild(el);
+  }
+}
+$('btnStock').addEventListener('click',showStockSel);
+$('btnClassic').addEventListener('click',startClassic);
 $('btnAgain').addEventListener('click',startGame);
+$('btnSwap').addEventListener('click',showStockSel);
+$('btnPickBack').addEventListener('click',()=>{
+  $('stockSel').classList.add('hidden');
+  $('menu').classList.remove('hidden');
+});
 
 /* ================= 摩托物理步进 ================= */
 function stepBike(dt){
@@ -554,7 +820,7 @@ function stepBike(dt){
     let vx=b.rw.x-b.rw.px,vy=b.rw.y-b.rw.py;
     let vt=vx*tx+vy*ty;
     const vn=vx*n.nx+vy*n.ny;
-    if(thr&&vt<MAXV*dt)vt=Math.min(MAXV*dt,vt+DRIVE*dt*dt);
+    if(thr&&vt<MAXV*dt)vt=Math.min(MAXV*dt,vt+(mode==='stock'?3000:DRIVE)*dt*dt); // 股市赛道大马力：长红坡可爬
     if(brk&&!thr&&vt<=80*dt)vt=Math.max(-REVMAX*dt,vt-REVA*dt*dt);
     b.lastVt=vt;
     b.rw.px=b.rw.x-(tx*vt+n.nx*vn);
@@ -642,19 +908,31 @@ function stepBike(dt){
   const mx=(b.rw.x+b.fw.x)/2;
   if(mx>b.maxX)b.maxX=mx;
   meters=Math.max(meters,b.maxX/PXM);
+  // 股市模式：冲线
+  if(mode==='stock'&&stk&&play&&!finished&&b.maxX>=stk.finishX){
+    finished=true;state='finish';finishT=0;
+    const pnl=(stk.st.rows[stk.N-1][4]/stk.base-1)*100;
+    addConfetti(b.bd.x,b.bd.y-40);
+    addPop(b.bd.x+230,b.bd.y-170,'🎉 成功落袋！','#ffe066',36);
+    addPop(b.bd.x+230,b.bd.y-120,pctTxt(pnl),pnl>=0?'#ff7a64':'#5ee8aa',30);
+    sndFanfare();
+  }
   // 受困检测：给油却动不了
   if(play){
     const spd=Math.hypot(b.bd.x-b.bd.px,b.bd.y-b.bd.py)/dt;
     if((thr||brk)&&spd<26)stuckT+=dt;else stuckT=Math.max(0,stuckT-dt*2);
-    if(stuckT>3.5)endRun('本局结束','摩托被困，动弹不得');
+    if(stuckT>3.5){
+      if(mode==='stock')endRun('套牢了！','横盘太久，原地动弹不得');
+      else endRun('本局结束','摩托被困，动弹不得');
+    }
     // 防软锁：跌出地形范围（如长距离倒车回已修剪区域）
-    if(b.bd.y-groundY(mx)>1800)endRun('本局结束','坠入了虚空');
+    if(b.bd.y-groundY(mx)>1800)endRun(mode==='stock'?'爆仓！':'本局结束','坠入了虚空');
   }
 }
 
 function physStep(dt){
   if(!bike)return;
-  ensureTerrain(camX+W/zoom+900);
+  if(mode==='classic')ensureTerrain(camX+W/zoom+900);
   stepBike(dt);
   stepRagdoll(dt);
   stepParts(dt);
@@ -1150,6 +1428,13 @@ function drawParts(){
     }else if(p.col===3){ // 排气微烟
       ctx.fillStyle='rgba(150,142,160,'+(a*.22).toFixed(3)+')';
       ctx.beginPath();ctx.arc(p.x,p.y,p.r*(1+p.life*2.4),0,TAU);ctx.fill();
+    }else if(p.col===4){ // 冲线彩带
+      ctx.save();
+      ctx.translate(p.x,p.y);ctx.rotate(p.life*9+p.x*.13);
+      ctx.globalAlpha=clamp(a*1.5,0,1);
+      ctx.fillStyle=p.hue;
+      ctx.fillRect(-p.r,-p.r*.55,p.r*2,p.r*1.1);
+      ctx.restore();ctx.globalAlpha=1;
     }else{ // 土黄尘土，腾起放大消散
       ctx.fillStyle='rgba(206,166,108,'+(a*.45).toFixed(3)+')';
       ctx.beginPath();ctx.arc(p.x,p.y,p.r*(1+p.life*1.8),0,TAU);ctx.fill();
@@ -1175,14 +1460,32 @@ function drawPops(){
   }
   ctx.globalAlpha=1;
 }
-let lastDistTxt='',lastScoreTxt='',lastTrickTxt='';
+let lastDistTxt='',lastScoreTxt='',lastTrickTxt='',lastSHDate='',lastSHPnl='',lastSub2='';
 function drawHUD(){
   if(state==='menu')return;
-  const dm=Math.floor(meters);
-  const dTxt=dm+' m';
-  if(dTxt!==lastDistTxt){$('dist').textContent=dTxt;lastDistTxt=dTxt;}
-  const sTxt=String(dm+trickScore);
-  if(sTxt!==lastScoreTxt){$('scoreV').textContent=sTxt;lastScoreTxt=sTxt;}
+  if(mode==='stock'&&stk&&bike){
+    const b=bike,x=clamp((b.rw.x+b.fw.x)/2,0,stk.finishX);
+    const di=dayAt(x),row=stk.st.rows[di];
+    const p=priceAt(x),pnl=(p/stk.base-1)*100;
+    const t1='📅 '+fmtDay(row[0])+' · $'+fmtP(p);
+    if(t1!==lastSHDate){$('shDate').textContent=t1;lastSHDate=t1;}
+    const t2=pctTxt(pnl);
+    if(t2!==lastSHPnl){
+      const el=$('shPnl');el.textContent=t2;el.style.color=pnl>=0?CUP:CDN;
+      lastSHPnl=t2;
+    }
+    const prog=clamp(b.maxX/stk.finishX*100,0,100);
+    const sTxt=prog.toFixed(1)+'%';
+    if(sTxt!==lastScoreTxt){$('scoreV').textContent=sTxt;lastScoreTxt=sTxt;}
+    const sub='空翻 '+flipsTotal+' ｜ 最佳 '+stk.bestProg.toFixed(0)+'%';
+    if(sub!==lastSub2){$('scoreSub2').textContent=sub;lastSub2=sub;}
+  }else{
+    const dm=Math.floor(meters);
+    const dTxt=dm+' m';
+    if(dTxt!==lastDistTxt){$('dist').textContent=dTxt;lastDistTxt=dTxt;}
+    const sTxt=String(dm+trickScore);
+    if(sTxt!==lastScoreTxt){$('scoreV').textContent=sTxt;lastScoreTxt=sTxt;}
+  }
   let t='';
   if(state==='play'&&bike){
     if(bike.air>.18&&Math.abs(bike.airRot)>.7)
@@ -1233,10 +1536,232 @@ function drawForeground(){ // 前景草丛 / 仙人掌 / 岩石掠影
     ctx.restore();
   }
 }
+/* ================= 股市骑士：场景渲染 ================= */
+const chCache=new Map();           // 蜡烛区块离屏缓存（LRU）
+const CHW=1536,CHS=1.25;           // 区块世界宽 / 离屏超采样
+function candleChunk(j){
+  let e=chCache.get(j);
+  if(e){chCache.delete(j);chCache.set(j,e);return e;} // 刷新 LRU 顺序
+  const rows=stk.st.rows,N=stk.N;
+  const d0=Math.max(0,Math.floor(j*CHW/DAYW)-1),d1=Math.min(N-1,Math.ceil((j+1)*CHW/DAYW)+1);
+  let y0=1e9,y1=-1e9;
+  for(let i=d0;i<=d1;i++){y0=Math.min(y0,stk.py(rows[i][2]));y1=Math.max(y1,stk.py(rows[i][3]));}
+  y0-=30;y1+=400;
+  const c=mkCanvas(Math.ceil(CHW*CHS),Math.ceil((y1-y0)*CHS)),g=c.getContext('2d');
+  g.scale(CHS,CHS);g.translate(-j*CHW,-y0);
+  const bw=DAYW*.56;
+  for(let i=d0;i<=d1;i++){
+    const r=rows[i],x=i*DAYW;
+    const yO=stk.py(r[1]),yH=stk.py(r[2]),yL=stk.py(r[3]),yC=stk.py(r[4]);
+    const up=r[4]>=r[1];
+    const bt=Math.min(yO,yC),bb=Math.max(yO,yC,bt+2);
+    // 楼宇光柱：从实体下方升起渐隐
+    const lg=g.createLinearGradient(0,bb,0,bb+360);
+    lg.addColorStop(0,up?'rgba(255,83,71,.26)':'rgba(47,191,131,.26)');
+    lg.addColorStop(1,'rgba(0,0,0,0)');
+    g.fillStyle=lg;g.fillRect(x-bw/2,bb,bw,360);
+    // 影线
+    g.strokeStyle=up?'rgba(255,125,108,.55)':'rgba(98,222,168,.55)';
+    g.lineWidth=2.4;
+    g.beginPath();g.moveTo(x,yH);g.lineTo(x,yL);g.stroke();
+    // 实体（红涨绿跌，半透明）
+    g.fillStyle=up?'rgba(255,83,71,.4)':'rgba(47,191,131,.4)';
+    g.fillRect(x-bw/2,bt,bw,bb-bt);
+    g.strokeStyle=up?'rgba(255,153,135,.65)':'rgba(125,232,182,.65)';
+    g.lineWidth=1.5;g.strokeRect(x-bw/2,bt,bw,bb-bt);
+    // 顶缘高光
+    g.fillStyle=up?'rgba(255,196,178,.5)':'rgba(176,255,216,.5)';
+    g.fillRect(x-bw/2,bt,bw,1.6);
+  }
+  e={c,y0,h:y1-y0};
+  chCache.set(j,e);
+  if(chCache.size>8){const k=chCache.keys().next().value;chCache.delete(k);}
+  return e;
+}
+function drawCandles(wl,wr){
+  const maxJ=Math.floor((stk.finishX+DAYW)/CHW);
+  const j0=Math.max(0,Math.floor(wl/CHW)),j1=Math.min(maxJ,Math.floor(wr/CHW));
+  for(let j=j0;j<=j1;j++){
+    const e=candleChunk(j);
+    ctx.drawImage(e.c,j*CHW,e.y0,CHW,e.h);
+  }
+}
+function drawGridWorld(wl,wr){ // 价格水平网格线（世界空间）
+  const vt=camY-H*.6/zoom-60,vb=camY+H*.5/zoom+60;
+  ctx.strokeStyle='rgba(140,190,255,.1)';
+  ctx.lineWidth=1.2/zoom;
+  ctx.beginPath();
+  for(const L of stk.levels){
+    if(L.y<vt||L.y>vb)continue;
+    ctx.moveTo(wl,L.y);ctx.lineTo(wr,L.y);
+  }
+  ctx.stroke();
+}
+function drawGates(){ // 起跑拱门 / 终点旗 / 领奖台（世界空间）
+  const st=stk.st;
+  ctx.textAlign='center';
+  // —— 起跑拱门 ——
+  const ax=-650,ay=groundY(ax);
+  ctx.fillStyle='#3a2c44';
+  ctx.fillRect(ax-96,ay-150,10,150);ctx.fillRect(ax+86,ay-150,10,150);
+  ctx.fillStyle='rgba(20,14,30,.85)';
+  ctx.fillRect(ax-104,ay-188,208,42);
+  ctx.strokeStyle='rgba(255,204,0,.8)';ctx.lineWidth=2;
+  ctx.strokeRect(ax-104,ay-188,208,42);
+  ctx.fillStyle='#ffcc00';ctx.font='700 19px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText(st.icon+' '+st.cn+' · 开盘',ax,ay-160);
+  ctx.fillStyle='rgba(255,204,0,.5)';
+  ctx.fillRect(ax-96,ay-146,10,4);ctx.fillRect(ax+86,ay-146,10,4);
+  // —— 终点 ——
+  const fx=stk.finishX,fy=groundY(fx);
+  for(let i=0;i<8;i++){ // 地面格纹终点带
+    ctx.fillStyle=i%2?'#15151d':'#e8e8f0';
+    ctx.fillRect(fx-56+i*14,fy-2.5,14,5);
+  }
+  ctx.fillStyle='#d8d8e6';ctx.fillRect(fx-2.5,fy-192,5,192); // 旗杆
+  for(let r2=0;r2<3;r2++)for(let c2=0;c2<4;c2++){            // 格子旗
+    ctx.fillStyle=(r2+c2)%2?'#15151d':'#f5f5f5';
+    ctx.fillRect(fx+2.5+c2*13,fy-188+r2*13,13,13);
+  }
+  ctx.fillStyle='rgba(20,14,30,.85)';
+  ctx.fillRect(fx-74,fy-240,148,36);
+  ctx.strokeStyle='rgba(255,204,0,.8)';ctx.lineWidth=2;
+  ctx.strokeRect(fx-74,fy-240,148,36);
+  ctx.fillStyle='#ffcc00';
+  ctx.fillText('收盘 · 落袋',fx,fy-215);
+  // —— 领奖台 ——
+  const px2=fx+300,py2=groundY(px2);
+  const ph=[52,78,38],pc=['#c9ccda','#ffcc00','#c98a4b'],ord=[-60,0,60],lb=['2','1','3'];
+  for(let i=0;i<3;i++){
+    ctx.fillStyle=pc[i];
+    ctx.fillRect(px2+ord[i]-27,py2-ph[i],54,ph[i]);
+    ctx.fillStyle='rgba(255,255,255,.18)';
+    ctx.fillRect(px2+ord[i]-27,py2-ph[i],54,5);
+    ctx.fillStyle='rgba(20,10,0,.6)';ctx.font='700 22px sans-serif';
+    ctx.fillText(lb[i],px2+ord[i],py2-ph[i]+30);
+  }
+  ctx.textAlign='start';
+}
+function drawIdxProj(){ // 远景：若隐若现的巨幅指数曲线投影（屏幕空间，慢视差）
+  const n=stk.norm,M=n.length,par=.15;
+  const x0=W*.3-camX*par,wSpan=stk.finishX*par;
+  ctx.beginPath();
+  for(let i=0;i<M;i++){
+    const sx=x0+n[i].t*wSpan;
+    if(sx<-50||sx>W+50)continue;
+    const sy=H*.54-n[i].v*H*.26;
+    ctx.lineTo(sx,sy);
+  }
+  ctx.strokeStyle='rgba(255,214,150,.06)';ctx.lineWidth=4;ctx.stroke();
+  ctx.strokeStyle='rgba(255,230,180,.1)';ctx.lineWidth=1.4;ctx.stroke();
+}
+function drawStockScreen(ox,oy){ // 屏幕层：价格标签 / 月份刻度 / 趋势氛围
+  ctx.font='11px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.textAlign='right';
+  for(const L of stk.levels){
+    const sy=(L.y-camY)*zoom+oy;
+    if(sy<52||sy>H-52)continue;
+    ctx.fillStyle='rgba(150,196,255,.16)';
+    ctx.fillRect(W-46,sy-.5,34,1);
+    ctx.fillStyle='rgba(150,196,255,.42)';
+    ctx.fillText('$'+fmtP(L.p),W-12,sy-4);
+  }
+  ctx.textAlign='center';
+  for(const m of stk.months){
+    const sx=(m.x-camX)*zoom+ox;
+    if(sx<34||sx>W-34)continue;
+    ctx.fillStyle='rgba(255,225,180,.3)';
+    ctx.fillRect(sx-.5,H-32,1,9);
+    ctx.fillStyle='rgba(255,225,180,.42)';
+    ctx.fillText(m.label,sx,H-12);
+  }
+  ctx.textAlign='start';
+  // 近期趋势氛围色：连涨暖红 / 连跌冷绿（克制）
+  if(bike&&(state==='play'||state==='finish')){
+    const x=(bike.rw.x+bike.fw.x)/2;
+    if(x>DAYW*4){
+      const di=dayAt(x),rows=stk.st.rows;
+      const r=rows[di][4]/rows[Math.max(0,di-4)][4]-1;
+      const a=clamp(Math.abs(r)*1.1,0,.085);
+      if(a>.01){
+        ctx.fillStyle=(r>=0?'rgba(255,84,52,':'rgba(46,200,140,')+a.toFixed(3)+')';
+        ctx.fillRect(0,0,W,H);
+      }
+    }
+  }
+}
+/* ===== 自动驾驶 bot：验证 14 只股票全部可通关 ===== */
+function botThink(){
+  const b=bike;
+  botC.thr=true;botC.brk=false;botC.back=false;botC.fwd=false;
+  if(!b)return;
+  if(b.air>.04){ // 空中：弹道预测落点 + PD 对齐落点坡度
+    let px0=b.bd.x,py0=b.bd.y,vx=(b.bd.x-b.bd.px)/DT,vy=(b.bd.y-b.bd.py)/DT,lx=px0+60,tta=2.2;
+    for(let s=0;s<44;s++){
+      px0+=vx*.05;py0+=vy*.05;vy+=G*.05;
+      lx=px0;
+      if(py0>=groundY(px0)-26){tta=s*.05;break;}
+    }
+    if(tta>.18){ // 小跳不折腾，长滞空才调姿
+      const ta=Math.atan2(groundY(lx+45)-groundY(lx-45),90);
+      const da=wrapA(ta-b.angle);
+      const want=clamp(da*2.5,-4,4);
+      if(b.omega<want-.3)botC.fwd=true;
+      else if(b.omega>want+.3)botC.back=true;
+      if(b.air>.12&&Math.abs(da)>2.6)botC.thr=false; // 姿态全乱时专心调姿
+    }
+  }else{ // 地面
+    const sl=Math.atan2(groundY(b.bd.x+60)-groundY(b.bd.x-60),120);
+    const slA=Math.atan2(groundY(b.bd.x+95)-groundY(b.bd.x),95);
+    const desc=sl>.18;                              // 已在下坡
+    if(!desc&&!b.cF&&slA>.12)botC.thr=false;        // 越坡顶前轮离地：松油防栽头
+    if(wrapA(b.angle-sl)<-.8)botC.thr=false;        // 车头仰过头，松油
+    const vx0=(b.bd.x-b.bd.px)/DT;
+    const g0=groundY(b.bd.x),g1=groundY(b.bd.x+170),g2=groundY(b.bd.x+340);
+    const climbAhead=groundY(b.bd.x+330)-g0<-55;    // 前方大爬坡：放开限速攒动能
+    if(!climbAhead&&vx0>560)botC.thr=false;         // 巡航限速：稳比快重要
+    if(!climbAhead&&vx0>720)botC.brk=true;
+    if(vx0>900)botC.thr=false;
+    if(desc){                                       // 陡降：控速滑行，低速持油稳车头
+      const v2=Math.hypot(b.bd.x-b.bd.px,b.bd.y-b.bd.py)/DT;
+      if(v2>380){botC.thr=false;botC.brk=true;}
+      else{botC.thr=true;botC.brk=false;}
+    }
+    // V 谷 / 悬崖预判：提前刹车控速
+    if(vx0>420&&g1-g0>45&&g1-g2>32){botC.thr=false;botC.brk=true;}      // V 谷
+    if(vx0>340&&g1-g0>85){botC.thr=false;botC.brk=true;}                // 大悬崖：贴崖缓降
+  }
+}
+window.__botRun=function(sym,maxSec){
+  const st=STONKS.find(s=>s.sym===sym);
+  if(!st)return{sym,result:'no-such-sym'};
+  startStock(st);
+  botOn=true;
+  maxSec=maxSec||900;
+  let t=0,res='timeout';
+  while(t<maxSec){
+    botThink();
+    physStep(DT);t+=DT;
+    if(state==='finish'){res='finish';break;}
+    if(state!=='play'){res=state;break;}
+  }
+  const prog=Math.round(clamp(bike.maxX/stk.finishX*100,0,100)*10)/10;
+  botOn=false;
+  return{sym,result:res,prog,sec:Math.round(t),reason:crashReason,day:dayAt(Math.max(0,bike.maxX)),x:Math.round(bike.maxX)};
+};
+window.__botAll=function(){return STONKS.map(s=>window.__botRun(s.sym));};
+window.__tick=function(sec){ // 后台标签 rAF 暂停时手动推进（验收用）
+  let t=0;
+  while(t<sec){advance(1/60);t+=1/60;}
+  render(performance.now());
+  return{state,x:bike?Math.round(bike.bd.x):0};
+};
+
 function render(t){
   ctx.setTransform(DPR,0,0,DPR,0,0);
   ensureGrads();
   drawBG(t);
+  if(mode==='stock'&&stk)drawIdxProj();
   if(!bike)return;
   const ox=W*.42,oy=H*.55;
   const shx=shake>.4?rand(-shake,shake):0,shy=shake>.4?rand(-shake,shake):0;
@@ -1244,13 +1769,23 @@ function render(t){
   ctx.translate(ox+shx,oy+shy);
   ctx.scale(zoom,zoom);
   ctx.translate(-camX,-camY);
+  let wl=0,wr=0;
+  if(mode==='stock'&&stk){
+    wl=camX-ox/zoom-60;wr=camX+(W-ox)/zoom+60;
+    drawGridWorld(wl,wr);
+  }
   drawTerrain(ox,oy);
+  if(mode==='stock'&&stk){
+    drawCandles(wl,wr);
+    drawGates();
+  }
   drawParts();
   drawBike();
   drawRagdoll();
   drawPops();
   ctx.restore();
   drawForeground();
+  if(mode==='stock'&&stk)drawStockScreen(ox,oy);
   // 破纪录：地平线闪光
   if(recFlash>0){
     const a=Math.min(1,recFlash);
@@ -1274,7 +1809,7 @@ let lastT=0,acc=0;
 function advance(dt){ // 推进游戏时间线（真实秒）
   if(trickMsgT>0)trickMsgT-=dt;
   if(recFlash>0)recFlash=Math.max(0,recFlash-dt*.55);
-  if(state==='play'&&best>0&&!recBeaten&&Math.floor(meters)+trickScore>best){
+  if(state==='play'&&mode==='classic'&&best>0&&!recBeaten&&Math.floor(meters)+trickScore>best){
     recBeaten=true;recFlash=1.6;
     if(bike)addPop((bike.rw.x+bike.fw.x)/2,bike.bd.y-80,'★ 破纪录！','#ffe066',26);
     sndTrick(3);
@@ -1282,14 +1817,21 @@ function advance(dt){ // 推进游戏时间线（真实秒）
   if(state==='crash'){ // 坠毁慢镜头（用真实时间推进）
     crashT+=dt;
     if(crashT>1.1)timeScale=Math.min(1,timeScale+dt*1.6);
-    if(crashT>2.3)endRun('坠毁了！',crashReason);
+    if(crashT>2.3){
+      if(mode==='stock')endStock(false,'爆仓！',crashReason);
+      else endRun('坠毁了！',crashReason);
+    }
+  }
+  if(state==='finish'){ // 冲线庆祝：滑行 + 彩带，然后结算
+    finishT+=dt;
+    if(finishT>2.6)endStock(true);
   }
   acc+=dt*timeScale;
   let n=0;
   while(acc>=DT&&n<30){physStep(DT);acc-=DT;n++;}
   if(n>=30)acc=0;
   stepCam(dt);
-  pruneTerrain(camX-2600);
+  if(mode==='classic')pruneTerrain(camX-2600);
 }
 function frame(t){
   requestAnimationFrame(frame);
