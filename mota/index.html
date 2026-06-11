@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>魔塔 · AI4399</title>
+<style>
+:root{
+  --bg:#0a0a12; --panel:#14141f; --border:#2a2a3d; --text:#e8e8f0; --dim:#8888a0; --gold:#ffcc00;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  overflow:hidden; user-select:none; -webkit-user-select:none;
+}
+a.back{position:fixed;top:10px;left:12px;z-index:50;color:var(--dim);text-decoration:none;font-size:14px;background:rgba(20,20,31,.6);padding:4px 10px;border-radius:6px;border:1px solid var(--border)}
+a.back:hover{color:var(--gold)}
+#wrap{height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px}
+#game{display:none;flex-direction:row;gap:12px;align-items:flex-start}
+#hud{width:172px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:14px;display:flex;flex-direction:column;gap:7px}
+#hud h2{font-size:15px;color:var(--gold);letter-spacing:2px;text-align:center;margin-bottom:2px}
+.stat{display:flex;justify-content:space-between;align-items:center}
+.stat .lab{color:var(--dim)}
+.stat .val{font-variant-numeric:tabular-nums}
+.keys{display:flex;justify-content:space-around;background:rgba(0,0,0,.25);border-radius:6px;padding:5px 2px}
+.keys span{font-variant-numeric:tabular-nums;font-size:13px}
+.kY{color:#ffd34d}.kB{color:#5ab0ff}.kR{color:#ff6a6a}
+#hud button{background:#1d1d2e;border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 4px;font-size:13px;cursor:pointer;font-family:inherit}
+#hud button:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+#hud button:disabled{opacity:.35;cursor:default}
+#cv{background:#000;border:2px solid var(--border);border-radius:8px;image-rendering:pixelated;touch-action:none;display:block}
+#msg{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);background:rgba(20,20,31,.92);border:1px solid var(--border);padding:6px 16px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:60;white-space:nowrap}
+/* 覆盖层 */
+.overlay{position:fixed;inset:0;background:rgba(5,5,10,.88);display:none;align-items:center;justify-content:center;z-index:100;flex-direction:column}
+.box{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:26px 30px;max-width:420px;width:92vw;text-align:center;max-height:86vh;overflow:auto}
+.box h1{color:var(--gold);font-size:30px;letter-spacing:10px;margin-bottom:8px}
+.box h3{color:var(--gold);font-size:18px;margin-bottom:10px}
+.box p{color:var(--dim);font-size:14px;line-height:1.8;margin:8px 0}
+.box .em{color:var(--text)}
+.box button{display:block;width:100%;margin-top:10px;background:#1d1d2e;border:1px solid var(--border);color:var(--text);padding:11px;border-radius:8px;font-size:15px;cursor:pointer;font-family:inherit}
+.box button:hover{border-color:var(--gold);color:var(--gold)}
+.box button.primary{background:#2a2410;border-color:var(--gold);color:var(--gold)}
+table.mtab{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+table.mtab th{color:var(--dim);font-weight:normal;padding:3px 2px;border-bottom:1px solid var(--border)}
+table.mtab td{padding:4px 2px;border-bottom:1px solid rgba(42,42,61,.5);font-variant-numeric:tabular-nums}
+table.mtab td.nm{text-align:left;white-space:nowrap}
+.dmgok{color:#7dd87d}.dmgbad{color:#ff6a6a}.dmgmid{color:var(--gold)}
+.shopitem{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:14px}
+.shopitem button{width:auto;margin:0;padding:6px 14px;font-size:13px}
+.shopitem.sold{opacity:.4}
+#floorfade{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:90;opacity:0;pointer-events:none;transition:opacity .3s}
+#floorfade span{color:var(--gold);font-size:34px;letter-spacing:8px}
+#dpad{display:none;margin-top:6px;grid-template-columns:repeat(3,56px);grid-template-rows:repeat(2,48px);gap:6px}
+#dpad button{background:rgba(29,29,46,.85);border:1px solid var(--border);color:var(--text);border-radius:10px;font-size:20px}
+.flybtn{display:inline-block;width:30%;margin:4px 1%;padding:10px 0;background:#1d1d2e;border:1px solid var(--border);color:var(--text);border-radius:8px;cursor:pointer;font-size:14px}
+.flybtn:hover{border-color:var(--gold);color:var(--gold)}
+@media (max-width:760px){
+  #game{flex-direction:column;align-items:center;gap:6px}
+  #hud{width:94vw;flex-direction:row;flex-wrap:wrap;gap:4px 10px;padding:8px;font-size:12px;justify-content:center}
+  #hud h2{display:none}
+  .stat{gap:5px}
+  .keys{padding:3px 6px;gap:8px}
+  #hud button{padding:5px 8px;font-size:12px}
+  #dpad{display:grid}
+}
+</style>
+</head>
+<body>
+<a class="back" href="../">← AI4399</a>
+<div id="wrap">
+  <div id="game">
+    <div id="hud">
+      <h2>魔 塔</h2>
+      <div class="stat"><span class="lab">层数</span><span class="val" id="sFl">1</span></div>
+      <div class="stat"><span class="lab">生命</span><span class="val" id="sHp" style="color:#7dd87d">1000</span></div>
+      <div class="stat"><span class="lab">攻击</span><span class="val" id="sAtk" style="color:#ff9d5c">10</span></div>
+      <div class="stat"><span class="lab">防御</span><span class="val" id="sDef" style="color:#5ab0ff">10</span></div>
+      <div class="stat"><span class="lab">金币</span><span class="val" id="sGold" style="color:var(--gold)">0</span></div>
+      <div class="keys"><span class="kY">⚷<span id="kY">0</span></span><span class="kB">⚷<span id="kB">0</span></span><span class="kR">⚷<span id="kR">0</span></span></div>
+      <button id="btnManual" disabled>怪物手册 (M)</button>
+      <button id="btnFly" disabled>楼层传送 (T)</button>
+      <button id="btnSound">音效：开</button>
+      <button id="btnRestart">重新开始</button>
+      <div class="stat" style="margin-top:2px"><span class="lab">用时</span><span class="val" id="sTime">0:00</span></div>
+    </div>
+    <div>
+      <canvas id="cv"></canvas>
+      <div id="dpad">
+        <span></span><button data-d="0,-1">▲</button><span></span>
+        <button data-d="-1,0">◀</button><button data-d="0,1">▼</button><button data-d="1,0">▶</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="msg"></div>
+<div id="floorfade"><span id="floortext">第 1 层</span></div>
+
+<div class="overlay" id="ovStart" style="display:flex">
+  <div class="box">
+    <h1>魔 塔</h1>
+    <p style="color:var(--gold);letter-spacing:2px">AI4399 · 数值策略爬塔</p>
+    <p>巫王掳走了公主，囚于十六层魔塔之巅。<span class="em">拿起剑，一层层算上去。</span></p>
+    <p>方向键 / WASD 移动 · 触屏点击目标格自动寻路<br>
+       撞击怪物即战斗（先手在你）· 撞门用钥匙<br>
+       <span class="em">M</span> 怪物手册 · <span class="em">T</span> 楼层传送 · 每步自动存档</p>
+    <p style="font-size:12px">勇士先攻：每回合你造成 攻-怪防，怪物反击 怪攻-你防。<br>攻不破的怪显示 ??? ——血量、钥匙与金币都很紧，三思而后战。</p>
+    <button class="primary" id="btnNew">开始新游戏</button>
+    <button id="btnContinue" style="display:none">继续上次冒险</button>
+    <p id="bestLine" style="font-size:12px"></p>
+  </div>
+</div>
+
+<div class="overlay" id="ovEnd">
+  <div class="box">
+    <h3 id="endTitle">通关！</h3>
+    <p id="endText"></p>
+    <button class="primary" id="btnEndRestart">重新开始</button>
+    <button id="btnEndLoad" style="display:none">读取存档（回到战前）</button>
+  </div>
+</div>
+
+<div class="overlay" id="ovManual">
+  <div class="box" style="max-width:460px">
+    <h3 id="manualTitle">怪物手册 · 第 1 层</h3>
+    <table class="mtab"><thead><tr><th style="text-align:left">怪物</th><th>生命</th><th>攻击</th><th>防御</th><th>金币</th><th>预计损血</th></tr></thead><tbody id="manualBody"></tbody></table>
+    <button id="btnManualClose">关闭 (Esc)</button>
+  </div>
+</div>
+
+<div class="overlay" id="ovShop">
+  <div class="box" style="max-width:380px">
+    <h3>地下商店</h3>
+    <p>「金币换力量，童叟无欺。」 持有金币：<span class="em" id="shopGold">0</span></p>
+    <div id="shopList"></div>
+    <button id="btnShopClose">离开 (Esc)</button>
+  </div>
+</div>
+
+<div class="overlay" id="ovFly">
+  <div class="box" style="max-width:380px">
+    <h3>楼层传送</h3>
+    <p>羽翼之书可带你飞往到过的楼层。</p>
+    <div id="flyList"></div>
+    <button id="btnFlyClose">取消 (Esc)</button>
+  </div>
+</div>
+
+<div class="overlay" id="ovDialog">
+  <div class="box" style="max-width:380px">
+    <h3 id="dlgTitle">老人</h3>
+    <p id="dlgText"></p>
+    <button class="primary" id="btnDlgOk">收下</button>
+  </div>
+</div>
+
+<div class="overlay" id="ovConfirm">
+  <div class="box" style="max-width:340px">
+    <h3>重新开始？</h3>
+    <p id="confirmText">这会清除当前进度与存档。</p>
+    <button id="btnConfirmYes">确认清除并重开</button>
+    <button class="primary" id="btnConfirmNo">取消</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ================= 数据（由 /tmp 求解器验证平衡） ================= */
+var MOTA = {
+  hero: { hp: 1000, atk: 10, def: 10, gold: 0 },
+  potionS: 150, potionL: 400, goldPile: 40,
+  gemVal: [0, 2,2,2,2, 3,3,3,3, 4,4,4,4, 5,5,5,5],
+  monsters: {
+    '0': { name: '绿史莱姆', hp: 35,  atk: 15,  def: 1,   gold: 2 },
+    '1': { name: '红史莱姆', hp: 45,  atk: 19,  def: 3,   gold: 3 },
+    '2': { name: '小蝙蝠',   hp: 35,  atk: 30,  def: 5,   gold: 5 },
+    '3': { name: '骷髅人',   hp: 45,  atk: 32,  def: 6,   gold: 8 },
+    '4': { name: '骷髅士兵', hp: 50,  atk: 42,  def: 14,  gold: 12 },
+    '5': { name: '初级法师', hp: 55,  atk: 50,  def: 12,  gold: 14 },
+    '6': { name: '大蝙蝠',   hp: 65,  atk: 58,  def: 22,  gold: 18 },
+    '7': { name: '兽人',     hp: 120, atk: 64,  def: 32,  gold: 26 },
+    '8': { name: '兽人卫兵', hp: 150, atk: 84,  def: 40,  gold: 30 },
+    '9': { name: '吸血鬼',   hp: 200, atk: 96,  def: 45,  gold: 42 },
+    'A': { name: '黑暗巫师', hp: 240, atk: 108, def: 52,  gold: 52 },
+    'C': { name: '魔王剑士', hp: 300, atk: 130, def: 72,  gold: 75 },
+    'X': { name: '巫王',     hp: 1400,atk: 170, def: 105, gold: 0  }
+  },
+  oldmen: {
+    5:  { name: '老者·铸剑师', item: '铁剑', stat: 'atk', val: 20, line: '此剑随我五十年，今赠予勇者。（攻击+20）' },
+    7:  { name: '老者·守塔人', item: '铁盾', stat: 'def', val: 20, line: '巫王的爪牙越来越凶，拿上它。（防御+20）' },
+    12: { name: '老者·隐士',   item: '银盾', stat: 'def', val: 25, line: '月银所铸，可挡魔王剑士一击。（防御+25）' },
+    13: { name: '老者·剑圣',   item: '银剑', stat: 'atk', val: 30, line: '能否斩开巫王的黑暗，看你了。（攻击+30）' }
+  },
+  shops: {
+    3:  [ { cost: 30,  stat: 'hp',  val: 400 },  { cost: 40,  stat: 'atk', val: 4 },  { cost: 40,  stat: 'def', val: 4 },
+          { cost: 80,  stat: 'hp',  val: 400 },  { cost: 100, stat: 'atk', val: 4 },  { cost: 100, stat: 'def', val: 4 },
+          { cost: 60,  stat: 'ky',  val: 1 } ],
+    11: [ { cost: 200, stat: 'hp',  val: 1000 }, { cost: 280, stat: 'atk', val: 8 },  { cost: 280, stat: 'def', val: 8 },
+          { cost: 450, stat: 'hp',  val: 1000 }, { cost: 600, stat: 'atk', val: 8 },  { cost: 600, stat: 'def', val: 8 },
+          { cost: 130, stat: 'ky',  val: 1 },    { cost: 320, stat: 'kb',  val: 1 } ]
+  },
+  floors: [
+null,
+['###########','#h#y#>#$#h#','#.#.#.#.#.#','#.#.#.#.#.#','#0#.#2#.#0#','#.#.#.#.#.#','#a#.#.#.#d#','#.#.#.#.#.#','#Y#y#.#1#Y#','#....@....#','###########'],
+['###########','#<#.2$#..h#','#.#.###.#.#','#.#.#mY.#.#','#.#.#####.#','#..0#>#1..#','###.#.#.###','#y..#.#..y#','#.###.###.#','#..3..Y..$#','###########'],
+['###########','#<...#a.#b#','#....#...Y#','#....1....#','#y..h#....#','##2#####Y##','#$1..#...d#','#....3....#','#.##.#.####','#S..h#y.2>#','###########'],
+['###########','#a..3.4..y#','#####.#####','#dh.B.2..h#','#####.#####','#<..2.Y..r#','#####.#####','#y..5.3..b#','#####.#####','#$..4.B..>#','###########'],
+['###########','#<...4...h#','#.#######.#','#.#h...d#.#','#.#.###.#5#','#.#.#G#.#.#','#.#.#B#.#.#','#.#3.>.4#.#','#.###6###.#','#bY.5...a.#','###########'],
+['###########','#<...#.7$$#','#....Y..###','#....##...#','#...h#H5..#','##4#####Y##','#.a..#....#','#..d.6...y#','#....#.##.#','#$...#y#.>#','###########'],
+['###########','#H#a#.#d#h#','#.#.#.#.#.#','#G#.#>#.#.#','#6#5#.#5#7#','#.#.#.#.#.#','#.#.#4#.#.#','#.#.#.#.#.#','#R#y#.#y#Y#','#.$..<..$.#','###########'],
+['###########','#a.h#H#y.d#','##7##.##8##','#y..#.#...#','##B##.##6##','#....<....#','##7##.##Y##','#...#.#...#','##.##.##8##','#$.h#.#b.>#','###########'],
+['###########','#<..y...7H#','#######Y###','#$8.....8a#','###9#######','#H8.....9d#','#######B###','#a8..h..7h#','###8#######','#y7..$...>#','###########'],
+['###########','#<...#a.#f#','#....#...Y#','#.h..9....#','#....#..H.#','##Y#####9##','#y...#..#r#','#..d.A...9#','#.$..#....#','#h.b.#...>#','###########'],
+['###########','#H#a#<#d#H#','#.#.#.#.#.#','#.#.#.#.#.#','#9#A#.#A#9#','#.#.#.#.#.#','#.#.#S#.#.#','#.#.#A#.#.#','#Y#y#.#$#8#','#.b..>..$.#','###########'],
+['###########','#<...A...H#','#.#######Y#','#.#a...d#.#','#.#.###.#9#','#.#.#G#.#.#','#.#.#R#.#.#','#.#9.H.A#.#','#.###C###.#','#y..A...>.#','###########'],
+['###########','#<...#a..H#','#....B....#','#....#....#','#...h#...d#','##A#####Y##','#H...#....#','#....C...y#','#.##C#..###','#$.#>#..RG#','###########'],
+['###########','#<....C..H#','#####B#####','#rC.....Aa#','###C#######','#HA.....9d#','#######Y###','#d9.....AH#','#####C#####','#yA..$...>#','###########'],
+['###########','#Had#H#..h#','#$H.#.#...#','#...#.#..a#','##R##.##C##','#<.A...9.h#','##C##.##A##','#...#.#..b#','#...#C#...#','#d.$#>#..H#','###########'],
+['###########','####.P.####','####...####','#H#h#X#h#H#','#.#.#.#.#.#','#C#.#.#.#C#','#Y#.#.#.#Y#','#.#.#B#.#.#','#.#.#.#.#.#','#....<....#','###########']
+  ]
+};
+
+/* ================= 基础 ================= */
+var W = 11, FLOORS = 16, SAVE_KEY = 'ai4399-mota-save', BEST_KEY = 'ai4399-mota-best';
+var cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+var TILE = 44, DPR = Math.min(2, window.devicePixelRatio || 1);
+function $(id) { return document.getElementById(id); }
+function fmtTime(ms) { var s = Math.floor(ms / 1000); var m = Math.floor(s / 60); s %= 60; return m + ':' + (s < 10 ? '0' : '') + s; }
+
+// 解析楼层：walls + 实体
+var walls = [], floorEnts = [], stairUp = {}, stairDown = {}, startPos = null;
+(function parse() {
+  for (var f = 1; f <= FLOORS; f++) {
+    walls[f] = []; floorEnts[f] = {};
+    for (var r = 0; r < 11; r++) {
+      walls[f][r] = [];
+      for (var c = 0; c < 11; c++) {
+        var ch = MOTA.floors[f][r][c];
+        walls[f][r][c] = (ch === '#');
+        if (ch === '#' || ch === '.') continue;
+        if (ch === '@') { startPos = { f: f, r: r, c: c }; continue; }
+        if (ch === '>') { stairUp[f] = { r: r, c: c }; continue; }
+        if (ch === '<') { stairDown[f] = { r: r, c: c }; continue; }
+        floorEnts[f][r + ',' + c] = ch;
+      }
+    }
+  }
+})();
+function entChar(f, r, c) {
+  var key = r + ',' + c;
+  if (G && G.consumed[f + ',' + key]) return null;
+  return floorEnts[f][key] || null;
+}
+function isMonster(ch) { return !!MOTA.monsters[ch]; }
+function isDoor(ch) { return ch === 'Y' || ch === 'B' || ch === 'R'; }
+function isItem(ch) { return 'ybrad hH$mf'.indexOf(ch) >= 0 && ch !== ' '; }
+function fightDmg(atk, def, m) {
+  if (atk <= m.def) return -1;
+  var hits = Math.ceil(m.hp / (atk - m.def));
+  return (hits - 1) * Math.max(0, m.atk - def);
+}
+
+/* ================= 音效 ================= */
+var AC = null, soundOn = true;
+function ac() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (AC && AC.state === 'suspended') AC.resume(); return AC; }
+function tone(freq, dur, type, vol, when, slide) {
+  if (!soundOn || !ac()) return;
+  var t = AC.currentTime + (when || 0);
+  var o = AC.createOscillator(), g = AC.createGain();
+  o.type = type || 'square'; o.frequency.setValueAtTime(freq, t);
+  if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
+  g.gain.setValueAtTime(vol || .08, t);
+  g.gain.exponentialRampToValueAtTime(.001, t + dur);
+  o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + dur + .02);
+}
+var SFX = {
+  pickup: function () { tone(880, .09, 'square', .06); tone(1320, .12, 'square', .05, .07); },
+  key: function () { tone(660, .08, 'triangle', .09); tone(990, .1, 'triangle', .07, .06); },
+  door: function () { tone(180, .12, 'square', .09); tone(320, .14, 'square', .06, .08); },
+  bump: function () { tone(120, .05, 'square', .05); },
+  hit: function (i) { tone(220 - i * 8, .05, 'sawtooth', .07, i * .05); },
+  win: function () { [523, 659, 784, 1047].forEach(function (f, i) { tone(f, .22, 'triangle', .1, i * .13); }); },
+  die: function () { tone(300, .5, 'sawtooth', .12, 0, 60); },
+  stairs: function () { tone(330, .18, 'triangle', .08, 0, 660); },
+  buy: function () { tone(1047, .07, 'square', .07); tone(1568, .1, 'square', .05, .06); },
+  error: function () { tone(160, .14, 'square', .08, 0, 110); },
+  fly: function () { tone(440, .3, 'triangle', .09, 0, 1320); }
+};
+
+/* ================= 像素画 ================= */
+var sprites = {};
+function mkSprite(name, painter) {
+  var s = document.createElement('canvas'); s.width = 32; s.height = 32;
+  var x = s.getContext('2d'); x.imageSmoothingEnabled = false;
+  painter(x); sprites[name] = s;
+}
+function px(x, c, X, Y, w, h) { x.fillStyle = c; x.fillRect(X, Y, w || 2, h || 2); }
+function eyes(x, c, lx, rx, y) { px(x, c, lx, y, 3, 3); px(x, c, rx, y, 3, 3); }
+function buildSprites() {
+  mkSprite('floor', function (x) {
+    px(x, '#1b1b29', 0, 0, 32, 32);
+    px(x, '#202032', 0, 0, 16, 16); px(x, '#202032', 16, 16, 16, 16);
+    px(x, '#16161f', 4, 6); px(x, '#16161f', 24, 20); px(x, '#23233a', 12, 26);
+  });
+  mkSprite('wall', function (x) {
+    px(x, '#2e2e45', 0, 0, 32, 32);
+    x.fillStyle = '#222236';
+    for (var ry = 0; ry < 4; ry++) for (var rx = 0; rx < 2; rx++) {
+      var off = (ry % 2) ? 8 : 0;
+      x.fillRect(rx * 16 + off - 16, ry * 8, 15, 7); x.fillRect(rx * 16 + off, ry * 8, 15, 7); x.fillRect(rx * 16 + off + 16, ry * 8, 15, 7);
+    }
+    px(x, '#3a3a58', 0, 0, 32, 1);
+  });
+  mkSprite('stairUp', function (x) {
+    px(x, '#1b1b29', 0, 0, 32, 32);
+    px(x, '#55557d', 2, 24, 28, 6); px(x, '#666694', 6, 17, 24, 6); px(x, '#7777ab', 10, 10, 20, 6); px(x, '#8888c2', 14, 3, 16, 6);
+    px(x, '#ffcc00', 4, 6, 2, 10); px(x, '#ffcc00', 2, 9, 2, 3); px(x, '#ffcc00', 6, 9, 2, 3); px(x, '#ffcc00', 1, 11, 2, 2); px(x, '#ffcc00', 7, 11, 2, 2);
+  });
+  mkSprite('stairDown', function (x) {
+    px(x, '#1b1b29', 0, 0, 32, 32);
+    px(x, '#55557d', 2, 2, 28, 6); px(x, '#49496b', 6, 9, 24, 6); px(x, '#3d3d59', 10, 16, 20, 6); px(x, '#313147', 14, 23, 16, 6);
+    px(x, '#ffcc00', 4, 16, 2, 10); px(x, '#ffcc00', 2, 22, 2, 3); px(x, '#ffcc00', 6, 22, 2, 3); px(x, '#ffcc00', 1, 21, 2, 2); px(x, '#ffcc00', 7, 21, 2, 2);
+  });
+  function door(col, dark) { return function (x) {
+    px(x, '#1b1b29', 0, 0, 32, 32);
+    px(x, dark, 3, 2, 26, 30); px(x, col, 5, 4, 22, 28);
+    px(x, dark, 5, 4, 22, 3); px(x, 'rgba(255,255,255,.25)', 7, 6, 4, 22);
+    px(x, '#10101a', 21, 16, 4, 5); px(x, '#ffe9a0', 22, 17, 2, 2);
+  }; }
+  mkSprite('doorY', door('#c9a227', '#7a5f12'));
+  mkSprite('doorB', door('#3e7fc1', '#1f4671'));
+  mkSprite('doorR', door('#c14444', '#6e1f1f'));
+  function keyspr(col) { return function (x) {
+    px(x, col, 8, 6, 8, 8); px(x, '#1b1b29', 10, 8, 4, 4);
+    px(x, col, 11, 14, 3, 14); px(x, col, 14, 22, 5, 3); px(x, col, 14, 26, 7, 3);
+  }; }
+  mkSprite('keyy', keyspr('#ffd34d')); mkSprite('keyb', keyspr('#5ab0ff')); mkSprite('keyr', keyspr('#ff6a6a'));
+  function gem(col, hi) { return function (x) {
+    x.fillStyle = col; x.beginPath(); x.moveTo(16, 3); x.lineTo(28, 14); x.lineTo(16, 29); x.lineTo(4, 14); x.closePath(); x.fill();
+    x.fillStyle = hi; x.beginPath(); x.moveTo(16, 6); x.lineTo(23, 13); x.lineTo(16, 13); x.closePath(); x.fill();
+  }; }
+  mkSprite('gema', gem('#e04545', '#ff9d9d')); mkSprite('gemd', gem('#3e7fc1', '#9dcaff'));
+  mkSprite('poth', function (x) {
+    px(x, '#cfd6e6', 13, 3, 6, 4); px(x, '#8a93ad', 12, 6, 8, 2);
+    px(x, '#b8455c', 9, 8, 14, 18); px(x, '#e06a83', 11, 10, 4, 12); px(x, '#8c2f44', 9, 22, 14, 4);
+  });
+  mkSprite('potH', function (x) {
+    px(x, '#cfd6e6', 13, 1, 6, 4); px(x, '#8a93ad', 11, 5, 10, 2);
+    px(x, '#3a62c4', 6, 7, 20, 22); px(x, '#6e92ec', 9, 10, 5, 14); px(x, '#27avoid', 0,0,0,0);
+    px(x, '#274287', 6, 25, 20, 4); px(x, '#ffd34d', 13, 14, 6, 6);
+  });
+  mkSprite('gold', function (x) {
+    function coin(cx, cy) { px(x, '#a87b14', cx, cy, 12, 8); px(x, '#ffcc00', cx + 1, cy + 1, 10, 5); px(x, '#fff2b3', cx + 3, cy + 2, 3, 2); }
+    coin(4, 18); coin(16, 18); coin(10, 10); coin(13, 22);
+  });
+  mkSprite('manual', function (x) {
+    px(x, '#7a3030', 5, 4, 22, 25); px(x, '#a04545', 7, 6, 18, 21);
+    px(x, '#e8d9a0', 10, 9, 12, 2); px(x, '#e8d9a0', 10, 13, 12, 2); px(x, '#e8d9a0', 10, 17, 8, 2);
+    px(x, '#ffcc00', 13, 22, 6, 4);
+  });
+  mkSprite('fly', function (x) {
+    px(x, '#2c3c66', 6, 6, 20, 22); px(x, '#41598f', 8, 8, 16, 18);
+    x.fillStyle = '#dfe8ff'; x.beginPath(); x.moveTo(16, 10); x.lineTo(24, 14); x.lineTo(18, 16); x.lineTo(22, 22); x.lineTo(13, 19); x.lineTo(10, 24); x.lineTo(11, 15); x.closePath(); x.fill();
+  });
+  mkSprite('shop', function (x) {
+    px(x, '#5c4019', 3, 10, 26, 20); px(x, '#7a5622', 5, 12, 22, 16);
+    px(x, '#c14444', 2, 4, 28, 7); px(x, '#e8e8f0', 2, 4, 4, 7); px(x, '#e8e8f0', 10, 4, 4, 7); px(x, '#e8e8f0', 18, 4, 4, 7); px(x, '#e8e8f0', 26, 4, 4, 7);
+    px(x, '#ffcc00', 12, 16, 8, 8); px(x, '#7a5622', 14, 18, 4, 4);
+  });
+  mkSprite('oldman', function (x) {
+    px(x, '#d9c9a8', 11, 4, 10, 8);
+    px(x, '#e8e8f0', 9, 10, 14, 8); px(x, '#e8e8f0', 12, 18, 8, 3);
+    px(x, '#6b6b8a', 8, 14, 16, 14); px(x, '#8a8aad', 10, 16, 4, 10);
+    eyes(x, '#10101a', 12, 18, 7);
+    px(x, '#9a7b3a', 24, 6, 3, 22); px(x, '#ffcc00', 23, 3, 5, 4);
+  });
+  mkSprite('princess', function (x) {
+    px(x, '#ffd34d', 10, 2, 12, 4); px(x, '#ffe9a0', 12, 1, 2, 2); px(x, '#ffe9a0', 18, 1, 2, 2);
+    px(x, '#f3c8a8', 11, 6, 10, 8); eyes(x, '#3a2a1a', 12, 17, 9);
+    px(x, '#e58bb5', 8, 14, 16, 12); px(x, '#f5aecf', 6, 24, 20, 6); px(x, '#fff', 14, 16, 4, 6);
+  });
+  mkSprite('hero', function (x) {
+    px(x, '#8a93ad', 10, 2, 12, 6); px(x, '#c4ccdf', 11, 3, 10, 2); px(x, '#cf3a3a', 14, 0, 4, 3);
+    px(x, '#f3c8a8', 11, 8, 10, 6); eyes(x, '#10101a', 12, 17, 10);
+    px(x, '#3e63b0', 8, 14, 16, 12); px(x, '#2a4476', 8, 24, 6, 6); px(x, '#2a4476', 18, 24, 6, 6);
+    px(x, '#c4ccdf', 25, 6, 3, 16); px(x, '#8a6a1a', 24, 22, 5, 4); px(x, '#5b6residual', 0,0,0,0);
+    px(x, '#7d87a3', 2, 14, 5, 10);
+  });
+  // 怪物
+  function slime(col, hi) { return function (x) {
+    x.fillStyle = col; x.beginPath(); x.moveTo(4, 28); x.quadraticCurveTo(2, 12, 16, 9); x.quadraticCurveTo(30, 12, 28, 28); x.closePath(); x.fill();
+    px(x, hi, 8, 14, 5, 4); eyes(x, '#10101a', 11, 19, 18); px(x, '#10101a', 13, 24, 6, 2);
+  }; }
+  mkSprite('m0', slime('#3fa34d', '#8fe39a'));
+  mkSprite('m1', slime('#c14444', '#f3a0a0'));
+  function bat(col, big) { return function (x) {
+    var s = big ? 1 : 0;
+    x.fillStyle = col;
+    x.beginPath(); x.moveTo(16, 14); x.lineTo(2, 6 - s * 3); x.lineTo(6, 16); x.lineTo(2, 24); x.lineTo(14, 22); x.closePath(); x.fill();
+    x.beginPath(); x.moveTo(16, 14); x.lineTo(30, 6 - s * 3); x.lineTo(26, 16); x.lineTo(30, 24); x.lineTo(18, 22); x.closePath(); x.fill();
+    px(x, col, 11, 10 - s * 2, 10, 14 + s * 4);
+    eyes(x, '#ffcc00', 12, 17, 13); px(x, '#fff', 13, 22, 2, 3); px(x, '#fff', 17, 22, 2, 3);
+  }; }
+  mkSprite('m2', bat('#7a5d9e', 0)); mkSprite('m6', bat('#4a3270', 1));
+  function skel(armor) { return function (x) {
+    px(x, '#e3e3d5', 10, 3, 12, 10); px(x, '#10101a', 12, 6, 3, 3); px(x, '#10101a', 17, 6, 3, 3); px(x, '#10101a', 13, 10, 6, 2);
+    if (armor) { px(x, '#6b7a8a', 9, 1, 14, 4); px(x, '#6b7a8a', 7, 13, 18, 4); }
+    px(x, '#cfcfc0', 14, 13, 4, 4);
+    px(x, '#e3e3d5', 9, 17, 14, 3); px(x, '#e3e3d5', 11, 21, 10, 2); px(x, '#e3e3d5', 13, 24, 6, 2);
+    px(x, '#e3e3d5', 9, 26, 4, 5); px(x, '#e3e3d5', 19, 26, 4, 5);
+    if (armor) { px(x, '#c4ccdf', 25, 4, 3, 18); px(x, '#8a6a1a', 24, 20, 5, 3); }
+  }; }
+  mkSprite('m3', skel(0)); mkSprite('m4', skel(1));
+  function mage(robe, orb) { return function (x) {
+    x.fillStyle = robe; x.beginPath(); x.moveTo(16, 0); x.lineTo(26, 10); x.lineTo(6, 10); x.closePath(); x.fill();
+    px(x, '#f3c8a8', 12, 10, 8, 5); eyes(x, '#10101a', 13, 17, 11);
+    px(x, robe, 8, 15, 16, 14); px(x, robe, 6, 26, 20, 4);
+    px(x, '#9a7b3a', 26, 8, 3, 20); px(x, orb, 24, 3, 7, 6);
+  }; }
+  mkSprite('m5', mage('#2f6fa3', '#9dffff'));
+  mkSprite('mA', mage('#5b2a7a', '#e07aff'));
+  function orc(col, guard) { return function (x) {
+    px(x, col, 9, 3, 14, 11); px(x, '#10101a', 11, 6, 3, 3); px(x, '#10101a', 18, 6, 3, 3);
+    px(x, '#fff', 11, 11, 3, 3); px(x, '#fff', 18, 11, 3, 3);
+    if (guard) px(x, '#6b7a8a', 8, 1, 16, 4);
+    px(x, guard ? '#5a6a7a' : col, 7, 14, 18, 13); px(x, '#3a4a3a', 7, 27, 7, 4); px(x, '#3a4a3a', 18, 27, 7, 4);
+    px(x, '#9a7b3a', 26, 10, 3, 14); px(x, '#c4ccdf', 23, 4, 9, 7);
+    if (guard) px(x, '#8a4a1a', 1, 12, 6, 12);
+  }; }
+  mkSprite('m7', orc('#4a7a3a', 0)); mkSprite('m8', orc('#3a5a30', 1));
+  mkSprite('m9', function (x) {
+    px(x, '#1a1a2e', 6, 12, 20, 18); px(x, '#5b1a2a', 8, 14, 4, 14);
+    px(x, '#e8e3da', 11, 3, 10, 10); eyes(x, '#cf3a3a', 12, 17, 6);
+    px(x, '#fff', 13, 11, 2, 3); px(x, '#fff', 17, 11, 2, 3);
+    px(x, '#10101a', 9, 1, 14, 4);
+  });
+  mkSprite('mC', function (x) {
+    px(x, '#2a2a3d', 9, 2, 14, 12); px(x, '#cf3a3a', 14, 0, 4, 4);
+    eyes(x, '#ff6a6a', 11, 18, 7); px(x, '#1a1a28', 7, 14, 18, 14);
+    px(x, '#3d3d59', 9, 16, 4, 10);
+    px(x, '#dfe8ff', 26, 2, 4, 22); px(x, '#8a6a1a', 24, 22, 8, 4); px(x, '#3a4a5a', 7, 28, 7, 3); px(x, '#3a4a5a', 18, 28, 7, 3);
+  });
+  mkSprite('mX', function (x) {
+    px(x, '#ffcc00', 9, 0, 14, 3); px(x, '#ffcc00', 9, 0, 3, 6); px(x, '#ffcc00', 14, 0, 3, 6); px(x, '#ffcc00', 20, 0, 3, 6);
+    px(x, '#1a0a2e', 8, 5, 16, 25); px(x, '#2e1a4a', 10, 7, 12, 20);
+    px(x, '#d9c9e8', 12, 6, 8, 6); eyes(x, '#e07aff', 12, 18, 8);
+    px(x, '#10101a', 13, 14, 6, 2);
+    px(x, '#9a7b3a', 26, 4, 3, 26); px(x, '#e07aff', 23, 0, 8, 8); px(x, 'rgba(224,122,255,.4)', 21, -2, 12, 12);
+    px(x, '#1a0a2e', 4, 8, 5, 18);
+  });
+}
+buildSprites();
+var entSprite = { 'Y': 'doorY', 'B': 'doorB', 'R': 'doorR', 'y': 'keyy', 'b': 'keyb', 'r': 'keyr', 'a': 'gema', 'd': 'gemd', 'h': 'poth', 'H': 'potH', '$': 'gold', 'm': 'manual', 'f': 'fly', 'S': 'shop', 'G': 'oldman', 'P': 'princess', '0': 'm0', '1': 'm1', '2': 'm2', '3': 'm3', '4': 'm4', '5': 'm5', '6': 'm6', '7': 'm7', '8': 'm8', '9': 'm9', 'A': 'mA', 'C': 'mC', 'X': 'mX' };
+
+/* ================= 游戏状态 ================= */
+var G = null;            // 当前游戏状态
+var anim = { moving: false, fx: 0, fy: 0, tx: 0, ty: 0, t: 0, dur: 90 };
+var floats = [];         // 飘字 {x,y,txt,col,t}
+var doorAnims = [];      // 开门动画 {f,r,c,ch,t}
+var shake = 0, playing = false, lastTick = 0, hpShow = 0;
+var pendingLethal = null; // 致死战斗确认 {key, until}
+var walkQueue = [];      // 自动寻路队列
+var moveBuf = [];        // 键盘输入缓冲
+
+function newGame() {
+  G = {
+    f: startPos.f, r: startPos.r, c: startPos.c,
+    hp: MOTA.hero.hp, atk: MOTA.hero.atk, def: MOTA.hero.def, gold: MOTA.hero.gold,
+    ky: 0, kb: 0, kr: 0, manual: false, fly: false,
+    consumed: {}, bought: { 3: [], 11: [] }, visited: { 1: true },
+    time: 0, dead: false, won: false
+  };
+  hpShow = G.hp;
+}
+function saveGame() {
+  if (!G || G.dead || G.won) return;
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(G)); } catch (e) {}
+}
+function loadGame() {
+  try {
+    var d = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (!d || typeof d.f !== 'number' || !d.consumed) return false;
+    G = d; G.dead = false; G.won = false; hpShow = G.hp;
+    return true;
+  } catch (e) { return false; }
+}
+function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
+
+/* ================= 移动 & 交互 ================= */
+function passable(f, r, c) {
+  if (r < 0 || r > 10 || c < 0 || c > 10 || walls[f][r][c]) return false;
+  var ch = entChar(f, r, c);
+  if (!ch) return true;
+  return isItem(ch); // 物品可踩，门/怪/NPC/公主阻挡
+}
+function tryStep(dr, dc) {
+  if (!playing || anim.moving) { if (anim.moving && moveBuf.length < 1) moveBuf.push([dr, dc]); return; }
+  var nr = G.r + dr, nc = G.c + dc;
+  if (nr < 0 || nr > 10 || nc < 0 || nc > 10 || walls[G.f][nr][nc]) { SFX.bump(); return; }
+  var ch = entChar(G.f, nr, nc);
+  if (ch && !isItem(ch)) { walkQueue = []; interact(ch, nr, nc); return; }
+  // 移动
+  anim.moving = true; anim.fx = G.c; anim.fy = G.r; anim.tx = nc; anim.ty = nr; anim.t = 0;
+  G.r = nr; G.c = nc;
+}
+function arrive() {
+  var ch = entChar(G.f, G.r, G.c);
+  if (ch) pickup(ch, G.r, G.c);
+  // 楼梯
+  var su = stairUp[G.f], sd = stairDown[G.f];
+  if (su && su.r === G.r && su.c === G.c && G.f < FLOORS) { gotoFloor(G.f + 1, 'down'); return; }
+  if (sd && sd.r === G.r && sd.c === G.c && G.f > 1) { gotoFloor(G.f - 1, 'up'); return; }
+  saveGame();
+  if (moveBuf.length) { var m = moveBuf.shift(); tryStep(m[0], m[1]); }
+  else if (walkQueue.length) { var s = walkQueue.shift(); tryStep(s[0], s[1]); }
+}
+function gotoFloor(nf, fromDir) {
+  walkQueue = []; moveBuf = [];
+  var pos = (fromDir === 'down') ? stairDown[nf] : stairUp[nf];
+  if (!pos) pos = stairDown[nf] || stairUp[nf] || startPos;
+  G.f = nf; G.r = pos.r; G.c = pos.c;
+  G.visited[nf] = true;
+  SFX.stairs();
+  floorFade(nf);
+  saveGame();
+}
+var fadeTimer = null;
+function floorFade(n) {
+  var el = $('floorfade'); $('floortext').textContent = '第 ' + n + ' 层';
+  el.style.opacity = 1;
+  if (fadeTimer) clearTimeout(fadeTimer);
+  fadeTimer = setTimeout(function () { el.style.opacity = 0; }, 650);
+}
+function addFloat(txt, col, r, c) { floats.push({ txt: txt, col: col, r: r, c: c, t: 0 }); }
+function consume(r, c) { G.consumed[G.f + ',' + r + ',' + c] = true; }
+
+function pickup(ch, r, c) {
+  var gv = MOTA.gemVal[G.f];
+  switch (ch) {
+    case 'y': G.ky++; addFloat('黄钥匙+1', '#ffd34d', r, c); SFX.key(); break;
+    case 'b': G.kb++; addFloat('蓝钥匙+1', '#5ab0ff', r, c); SFX.key(); break;
+    case 'r': G.kr++; addFloat('红钥匙+1', '#ff6a6a', r, c); SFX.key(); break;
+    case 'a': G.atk += gv; addFloat('攻击+' + gv, '#ff9d5c', r, c); SFX.pickup(); break;
+    case 'd': G.def += gv; addFloat('防御+' + gv, '#5ab0ff', r, c); SFX.pickup(); break;
+    case 'h': G.hp += MOTA.potionS; addFloat('生命+' + MOTA.potionS, '#7dd87d', r, c); SFX.pickup(); break;
+    case 'H': G.hp += MOTA.potionL; addFloat('生命+' + MOTA.potionL, '#7dd87d', r, c); SFX.pickup(); break;
+    case '$': G.gold += MOTA.goldPile; addFloat('金币+' + MOTA.goldPile, '#ffcc00', r, c); SFX.pickup(); break;
+    case 'm': G.manual = true; addFloat('获得怪物手册！', '#ffcc00', r, c); SFX.pickup(); msg('获得怪物手册：按 M 查看本层怪物与预计损血'); break;
+    case 'f': G.fly = true; addFloat('获得羽翼之书！', '#ffcc00', r, c); SFX.pickup(); msg('获得楼层传送：按 T 飞往到过的楼层'); break;
+  }
+  consume(r, c); updateHud();
+}
+function interact(ch, r, c) {
+  if (isDoor(ch)) {
+    var need = ch === 'Y' ? 'ky' : ch === 'B' ? 'kb' : 'kr';
+    var nm = ch === 'Y' ? '黄' : ch === 'B' ? '蓝' : '红';
+    if (G[need] > 0) {
+      G[need]--; consume(r, c);
+      doorAnims.push({ f: G.f, r: r, c: c, ch: ch, t: 0 });
+      SFX.door(); updateHud(); saveGame();
+    } else { msg('需要' + nm + '钥匙'); SFX.error(); }
+    return;
+  }
+  if (isMonster(ch)) { battle(ch, r, c); return; }
+  if (ch === 'S') { openShop(); return; }
+  if (ch === 'G') { oldman(r, c); return; }
+  if (ch === 'P') { winGame(); return; }
+}
+function battle(ch, r, c) {
+  var m = MOTA.monsters[ch];
+  var dmg = fightDmg(G.atk, G.def, m);
+  if (dmg < 0) { msg(m.name + '：??? —— 攻击穿不透它的防御！'); SFX.error(); return; }
+  var key = G.f + ',' + r + ',' + c;
+  if (dmg >= G.hp && (!pendingLethal || pendingLethal.key !== key || Date.now() > pendingLethal.until)) {
+    pendingLethal = { key: key, until: Date.now() + 2000 };
+    msg('警告：预计损血 ' + dmg + ' ≥ 生命！再撞一次拼命'); SFX.error(); return;
+  }
+  pendingLethal = null;
+  var hits = Math.ceil(m.hp / (G.atk - m.def));
+  for (var i = 0; i < Math.min(hits, 5); i++) SFX.hit(i);
+  shake = 6;
+  G.hp -= dmg;
+  if (G.hp <= 0) { G.hp = 0; updateHud(); dieGame(m.name); return; }
+  G.gold += m.gold;
+  consume(r, c);
+  addFloat('-' + dmg, '#ff6a6a', G.r, G.c);
+  if (m.gold) addFloat('金币+' + m.gold, '#ffcc00', r, c);
+  if (ch === 'X') { msg('巫王倒下了！快救出公主！'); SFX.win(); }
+  updateHud(); saveGame();
+}
+function oldman(r, c) {
+  var o = MOTA.oldmen[G.f];
+  if (!o) { consume(r, c); return; }
+  $('dlgTitle').textContent = o.name;
+  $('dlgText').textContent = '「' + o.line + '」';
+  show('ovDialog');
+  $('btnDlgOk').onclick = function () {
+    hide('ovDialog');
+    G[o.stat] += o.val;
+    addFloat(o.item + '！' + (o.stat === 'atk' ? '攻击' : '防御') + '+' + o.val, '#ffcc00', r, c);
+    consume(r, c); SFX.pickup(); updateHud(); saveGame();
+  };
+}
+
+/* 商店 */
+function openShop() {
+  var offers = MOTA.shops[G.f];
+  if (!offers) return;
+  $('shopGold').textContent = G.gold;
+  var list = $('shopList'); list.innerHTML = '';
+  var names = { hp: '生命', atk: '攻击', def: '防御', ky: '黄钥匙', kb: '蓝钥匙' };
+  offers.forEach(function (of, i) {
+    var sold = !!G.bought[G.f][i];
+    var div = document.createElement('div');
+    div.className = 'shopitem' + (sold ? ' sold' : '');
+    div.innerHTML = '<span>' + names[of.stat] + ' +' + of.val + '</span><span style="color:var(--gold)">' + of.cost + ' 金</span>';
+    var b = document.createElement('button');
+    b.textContent = sold ? '已购' : '购买';
+    b.disabled = sold || G.gold < of.cost;
+    b.onclick = function () {
+      if (G.gold < of.cost) return;
+      G.gold -= of.cost; G.bought[G.f][i] = true;
+      if (of.stat === 'hp') G.hp += of.val; else G[of.stat] += of.val;
+      SFX.buy(); updateHud(); saveGame(); openShop();
+    };
+    div.appendChild(b); list.appendChild(div);
+  });
+  show('ovShop');
+}
+
+/* 手册 */
+function openManual() {
+  if (!G.manual) { msg('还没有怪物手册（在第 2 层）'); SFX.error(); return; }
+  $('manualTitle').textContent = '怪物手册 · 第 ' + G.f + ' 层';
+  var seen = {}, listed = [];
+  for (var r = 0; r < 11; r++) for (var c = 0; c < 11; c++) {
+    var ch = entChar(G.f, r, c);
+    if (ch && isMonster(ch) && !seen[ch]) { seen[ch] = 1; listed.push(ch); }
+  }
+  var tb = $('manualBody'); tb.innerHTML = '';
+  if (!listed.length) tb.innerHTML = '<tr><td colspan="6" style="color:var(--dim);padding:14px">本层已无怪物</td></tr>';
+  listed.forEach(function (ch) {
+    var m = MOTA.monsters[ch];
+    var dmg = fightDmg(G.atk, G.def, m);
+    var cls = dmg < 0 ? 'dmgbad' : dmg === 0 ? 'dmgok' : dmg < G.hp * .25 ? 'dmgok' : dmg < G.hp ? 'dmgmid' : 'dmgbad';
+    var txt = dmg < 0 ? '???' : dmg;
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td class="nm">' + m.name + '</td><td>' + m.hp + '</td><td>' + m.atk + '</td><td>' + m.def + '</td><td>' + m.gold + '</td><td class="' + cls + '">' + txt + '</td>';
+    tb.appendChild(tr);
+  });
+  show('ovManual');
+}
+
+/* 楼层传送 */
+function openFly() {
+  if (!G.fly) { msg('还没有羽翼之书（在第 10 层）'); SFX.error(); return; }
+  var list = $('flyList'); list.innerHTML = '';
+  for (var f = 1; f <= FLOORS; f++) {
+    if (!G.visited[f]) continue;
+    (function (f) {
+      var b = document.createElement('button');
+      b.className = 'flybtn'; b.textContent = '第 ' + f + ' 层';
+      if (f === G.f) { b.disabled = true; b.style.opacity = .4; }
+      b.onclick = function () {
+        hide('ovFly');
+        var pos = stairDown[f] || startPos;
+        if (f === 1) pos = startPos;
+        G.f = f; G.r = pos.r; G.c = pos.c; G.visited[f] = true;
+        SFX.fly(); floorFade(f); updateHud(); saveGame();
+      };
+      list.appendChild(b);
+    })(f);
+  }
+  show('ovFly');
+}
+
+/* ================= 胜负 ================= */
+function winGame() {
+  G.won = true; playing = false;
+  SFX.win(); clearSave();
+  var t = G.time;
+  var best = null;
+  try { best = JSON.parse(localStorage.getItem(BEST_KEY)); } catch (e) {}
+  var isBest = !best || t < best;
+  if (isBest) try { localStorage.setItem(BEST_KEY, JSON.stringify(t)); } catch (e) {}
+  $('endTitle').textContent = '🏆 通关！公主得救了';
+  $('endText').innerHTML = '你斩落巫王，在第 <span class="em">16</span> 层救出了公主。<br>用时 <span class="em">' + fmtTime(t) + '</span>' +
+    (isBest ? '<br><span style="color:var(--gold)">★ 新的最快纪录！</span>' : (best ? '<br>最快纪录 ' + fmtTime(best) : ''));
+  $('btnEndLoad').style.display = 'none';
+  show('ovEnd');
+}
+function dieGame(killer) {
+  G.dead = true; playing = false;
+  SFX.die();
+  $('endTitle').textContent = '☠ 你倒下了';
+  $('endText').innerHTML = '死于 <span class="em">' + killer + '</span> 之手 · 第 <span class="em">' + G.f + '</span> 层<br>用时 ' + fmtTime(G.time) + '<br>存档保留在战斗前一步。';
+  var hasSave = !!localStorage.getItem(SAVE_KEY);
+  $('btnEndLoad').style.display = hasSave ? 'block' : 'none';
+  show('ovEnd');
+}
+
+/* ================= 寻路（触屏点击） ================= */
+function findPath(tr, tc) {
+  // BFS 到目标；目标若为交互体，走到相邻后撞击
+  var prev = {}, q = [[G.r, G.c]], seen = {}; seen[G.r + ',' + G.c] = 1;
+  var targetBlocked = !passable(G.f, tr, tc) && !walls[G.f][tr][tc];
+  while (q.length) {
+    var cur = q.shift(), r = cur[0], c = cur[1];
+    if (r === tr && c === tc) break;
+    var dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+    for (var i = 0; i < 4; i++) {
+      var nr = r + dirs[i][0], nc = c + dirs[i][1], k = nr + ',' + nc;
+      if (seen[k]) continue;
+      var ok = (nr === tr && nc === tc) ? (passable(G.f, nr, nc) || targetBlocked) : passable(G.f, nr, nc);
+      if (nr < 0 || nr > 10 || nc < 0 || nc > 10 || walls[G.f] && walls[G.f][nr] && walls[G.f][nr][nc] || !ok) continue;
+      seen[k] = 1; prev[k] = [r, c]; q.push([nr, nc]);
+    }
+  }
+  if (!seen[tr + ',' + tc]) return null;
+  var path = [], cur2 = [tr, tc];
+  while (cur2[0] !== G.r || cur2[1] !== G.c) {
+    var p = prev[cur2[0] + ',' + cur2[1]];
+    path.unshift([cur2[0] - p[0], cur2[1] - p[1]]);
+    cur2 = p;
+  }
+  return path;
+}
+cv.addEventListener('pointerdown', function (ev) {
+  ac();
+  if (!playing || anim.moving) return;
+  var rect = cv.getBoundingClientRect();
+  var c = Math.floor((ev.clientX - rect.left) / rect.width * 11);
+  var r = Math.floor((ev.clientY - rect.top) / rect.height * 11);
+  if (r < 0 || r > 10 || c < 0 || c > 10) return;
+  if (r === G.r && c === G.c) return;
+  var path = findPath(r, c);
+  if (!path) { SFX.bump(); return; }
+  walkQueue = path;
+  var s = walkQueue.shift(); tryStep(s[0], s[1]);
+});
+
+/* ================= 渲染 ================= */
+function sizeCanvas() {
+  var avail = Math.min(window.innerWidth - (window.innerWidth > 760 ? 220 : 16), window.innerHeight - (window.innerWidth > 760 ? 40 : 170), 560);
+  avail = Math.max(280, avail);
+  TILE = Math.floor(avail / 11);
+  var px2 = TILE * 11;
+  cv.style.width = px2 + 'px'; cv.style.height = px2 + 'px';
+  cv.width = px2 * DPR; cv.height = px2 * DPR;
+  ctx.imageSmoothingEnabled = false;
+}
+window.addEventListener('resize', sizeCanvas);
+function draw(dt) {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  var sx = 0, sy = 0;
+  if (shake > 0) { shake -= dt * .02; sx = (Math.random() - .5) * shake; sy = (Math.random() - .5) * shake; }
+  ctx.translate(sx, sy);
+  ctx.fillStyle = '#000'; ctx.fillRect(-8, -8, TILE * 11 + 16, TILE * 11 + 16);
+  if (!G) return;
+  var f = G.f;
+  for (var r = 0; r < 11; r++) for (var c = 0; c < 11; c++) {
+    var X = c * TILE, Y = r * TILE;
+    if (walls[f][r][c]) { ctx.drawImage(sprites.wall, X, Y, TILE, TILE); continue; }
+    ctx.drawImage(sprites.floor, X, Y, TILE, TILE);
+    var su = stairUp[f], sd = stairDown[f];
+    if (su && su.r === r && su.c === c) ctx.drawImage(sprites.stairUp, X, Y, TILE, TILE);
+    if (sd && sd.r === r && sd.c === c) ctx.drawImage(sprites.stairDown, X, Y, TILE, TILE);
+    var ch = entChar(f, r, c);
+    if (ch) {
+      var sp = sprites[entSprite[ch]];
+      if (sp) ctx.drawImage(sp, X + 2, Y + 2, TILE - 4, TILE - 4);
+      if (ch === 'X') { // Boss 微光
+        ctx.fillStyle = 'rgba(224,122,255,' + (.10 + .08 * Math.sin(Date.now() / 300)) + ')';
+        ctx.fillRect(X, Y, TILE, TILE);
+      }
+    }
+  }
+  // 开门动画
+  for (var i = doorAnims.length - 1; i >= 0; i--) {
+    var da = doorAnims[i];
+    da.t += dt;
+    if (da.f !== f) { if (da.t > 240) doorAnims.splice(i, 1); continue; }
+    var k = Math.min(1, da.t / 240);
+    var sp2 = sprites[entSprite[da.ch]];
+    var hgt = (TILE - 4) * (1 - k);
+    if (hgt > 1) ctx.drawImage(sp2, da.c * TILE + 2, da.r * TILE + 2 + (TILE - 4 - hgt), TILE - 4, hgt);
+    if (da.t > 240) doorAnims.splice(i, 1);
+  }
+  // 勇士
+  var hx = G.c, hy = G.r;
+  if (anim.moving) {
+    anim.t += dt;
+    var k2 = Math.min(1, anim.t / anim.dur);
+    hx = anim.fx + (anim.tx - anim.fx) * k2;
+    hy = anim.fy + (anim.ty - anim.fy) * k2;
+    if (k2 >= 1) { anim.moving = false; arrive(); }
+  }
+  ctx.drawImage(sprites.hero, hx * TILE + 2, hy * TILE + 2, TILE - 4, TILE - 4);
+  // 飘字
+  ctx.font = 'bold ' + Math.max(12, TILE * .34) + 'px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.textAlign = 'center';
+  for (i = floats.length - 1; i >= 0; i--) {
+    var fl2 = floats[i]; fl2.t += dt;
+    var prog = fl2.t / 900;
+    if (prog >= 1) { floats.splice(i, 1); continue; }
+    ctx.globalAlpha = 1 - prog * prog;
+    ctx.fillStyle = '#000';
+    ctx.fillText(fl2.txt, fl2.c * TILE + TILE / 2 + 1, fl2.r * TILE - prog * TILE * .8 + TILE * .4 + 1);
+    ctx.fillStyle = fl2.col;
+    ctx.fillText(fl2.txt, fl2.c * TILE + TILE / 2, fl2.r * TILE - prog * TILE * .8 + TILE * .4);
+    ctx.globalAlpha = 1;
+  }
+}
+function tick(ts) {
+  var dt = Math.min(50, ts - (lastTick || ts)); lastTick = ts;
+  if (playing) G.time += dt;
+  // HP 跳数字
+  if (G) {
+    if (hpShow !== G.hp) {
+      var diff = G.hp - hpShow;
+      hpShow += Math.abs(diff) < 4 ? diff : Math.ceil(diff * Math.min(1, dt / 90));
+      $('sHp').textContent = Math.round(hpShow);
+      $('sHp').style.color = hpShow < 300 ? '#ff6a6a' : '#7dd87d';
+    }
+    $('sTime').textContent = fmtTime(G.time);
+  }
+  draw(dt);
+  requestAnimationFrame(tick);
+}
+
+/* ================= HUD / UI ================= */
+function updateHud() {
+  $('sFl').textContent = G.f;
+  $('sAtk').textContent = G.atk;
+  $('sDef').textContent = G.def;
+  $('sGold').textContent = G.gold;
+  $('kY').textContent = G.ky; $('kB').textContent = G.kb; $('kR').textContent = G.kr;
+  $('btnManual').disabled = !G.manual;
+  $('btnFly').disabled = !G.fly;
+}
+var msgTimer = null;
+function msg(t) {
+  var el = $('msg'); el.textContent = t; el.style.opacity = 1;
+  if (msgTimer) clearTimeout(msgTimer);
+  msgTimer = setTimeout(function () { el.style.opacity = 0; }, 2200);
+}
+function show(id) { $(id).style.display = 'flex'; }
+function hide(id) { $(id).style.display = 'none'; }
+function anyOverlay() {
+  return ['ovStart', 'ovEnd', 'ovManual', 'ovShop', 'ovFly', 'ovDialog', 'ovConfirm'].some(function (id) { return $(id).style.display === 'flex'; });
+}
+
+/* ================= 输入 ================= */
+var keyDirs = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1], w: [-1, 0], s: [1, 0], a: [0, -1], d: [0, 1], W: [-1, 0], S: [1, 0], A: [0, -1], D: [0, 1] };
+document.addEventListener('keydown', function (ev) {
+  ac();
+  if (ev.key === 'Escape') {
+    ['ovManual', 'ovShop', 'ovFly'].forEach(function (id) { if ($(id).style.display === 'flex') hide(id); });
+    return;
+  }
+  if (anyOverlay()) return;
+  if (!playing) return;
+  var d2 = keyDirs[ev.key];
+  if (d2) { ev.preventDefault(); walkQueue = []; tryStep(d2[0], d2[1]); return; }
+  if (ev.key === 'm' || ev.key === 'M') openManual();
+  if (ev.key === 't' || ev.key === 'T') openFly();
+});
+// 按住方向键连走
+setInterval(function () {
+  if (!playing || anim.moving || anyOverlay()) return;
+  for (var k in keysDown) if (keysDown[k] && keyDirs[k]) { tryStep(keyDirs[k][0], keyDirs[k][1]); break; }
+}, 70);
+var keysDown = {};
+document.addEventListener('keydown', function (e) { keysDown[e.key] = true; });
+document.addEventListener('keyup', function (e) { keysDown[e.key] = false; });
+window.addEventListener('blur', function () { keysDown = {}; });
+// 触屏方向键
+document.querySelectorAll('#dpad button').forEach(function (b) {
+  var d2 = b.dataset.d.split(',').map(Number);
+  var iv = null;
+  function go() { walkQueue = []; tryStep(d2[1], d2[0]); }
+  b.addEventListener('pointerdown', function (e) { e.preventDefault(); ac(); go(); iv = setInterval(go, 130); });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (evn) { b.addEventListener(evn, function () { clearInterval(iv); }); });
+});
+
+/* 按钮 */
+$('btnManual').onclick = function () { ac(); openManual(); };
+$('btnFly').onclick = function () { ac(); openFly(); };
+$('btnSound').onclick = function () { soundOn = !soundOn; this.textContent = '音效：' + (soundOn ? '开' : '关'); ac(); };
+$('btnManualClose').onclick = function () { hide('ovManual'); };
+$('btnShopClose').onclick = function () { hide('ovShop'); };
+$('btnFlyClose').onclick = function () { hide('ovFly'); };
+$('btnRestart').onclick = function () { show('ovConfirm'); };
+$('btnConfirmNo').onclick = function () { hide('ovConfirm'); };
+$('btnConfirmYes').onclick = function () {
+  hide('ovConfirm'); clearSave(); playing = false;
+  $('btnContinue').style.display = 'none';
+  show('ovStart');
+};
+$('btnNew').onclick = function () { ac(); startPlay(true); };
+$('btnContinue').onclick = function () { ac(); startPlay(false); };
+$('btnEndRestart').onclick = function () {
+  hide('ovEnd');
+  $('btnContinue').style.display = localStorage.getItem(SAVE_KEY) ? 'block' : 'none';
+  refreshBest(); show('ovStart');
+};
+$('btnEndLoad').onclick = function () {
+  hide('ovEnd');
+  if (loadGame()) { playing = true; updateHud(); floorFade(G.f); }
+};
+function refreshBest() {
+  var best = null;
+  try { best = JSON.parse(localStorage.getItem(BEST_KEY)); } catch (e) {}
+  $('bestLine').textContent = best ? '最快通关纪录：' + fmtTime(best) : '';
+}
+function startPlay(isNew) {
+  if (isNew) { clearSave(); newGame(); }
+  else if (!loadGame()) { newGame(); }
+  hide('ovStart'); hide('ovEnd');
+  $('game').style.display = 'flex';
+  sizeCanvas(); updateHud();
+  playing = true;
+  floorFade(G.f);
+}
+
+/* ================= 启动 ================= */
+(function init() {
+  $('game').style.display = 'flex'; // 先布局算尺寸
+  sizeCanvas();
+  newGame(); updateHud(); // 背景显示第 1 层
+  playing = false;
+  if (localStorage.getItem(SAVE_KEY)) $('btnContinue').style.display = 'block';
+  refreshBest();
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
