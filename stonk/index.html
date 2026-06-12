@@ -70,6 +70,16 @@ body.touch .zone{display:block}
 .scard .pb i{display:block;height:100%;border-radius:2px;background:linear-gradient(90deg,#ffcc00,#ff9a3c)}
 .scard .sb{font-size:10px;color:rgba(170,192,230,.45)}
 .up{color:#ff5347}.dn{color:#2fbf83}
+/* —— 首次起飞教学提示 —— */
+#airTip{position:fixed;left:50%;top:36%;transform:translate(-50%,-50%);z-index:25;background:rgba(10,16,32,.74);border:1px solid rgba(255,204,0,.45);color:#ffd75e;font-size:17px;font-weight:700;padding:12px 24px;border-radius:14px;text-align:center;line-height:1.7;pointer-events:none;opacity:0;transition:opacity .35s;backdrop-filter:blur(3px);box-shadow:0 10px 32px rgba(0,0,0,.5)}
+#airTip.on{opacity:1}
+/* —— 音乐 / 音效开关 —— */
+#audioCtl{position:fixed;top:112px;right:16px;z-index:62;display:none;flex-direction:column;gap:6px}
+.actl{font-family:inherit;font-size:11px;letter-spacing:1px;color:rgba(196,212,242,.85);background:rgba(12,18,34,.6);border:1px solid rgba(110,160,255,.25);border-radius:12px;padding:4px 11px;cursor:pointer;backdrop-filter:blur(4px);transition:color .15s,border-color .15s}
+.actl.off{color:rgba(150,165,195,.38);border-color:rgba(110,160,255,.1);text-decoration:line-through}
+/* —— 杠杆开关 —— */
+.lev{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:rgba(255,176,90,.85);margin:2px 0 10px;cursor:pointer;border:1px solid rgba(255,170,80,.22);border-radius:20px;padding:5px 14px;background:rgba(255,160,60,.05)}
+.lev input{accent-color:#ffcc00;cursor:pointer}
 @media (max-width:560px){.card{padding:22px 18px}h1{font-size:30px;letter-spacing:4px}.keys{font-size:12px}#stockGrid{grid-template-columns:repeat(2,1fr)}#shud{top:76px;left:10px;padding:6px 12px 7px 10px}.btn{padding:11px 30px;margin:4px}}
 </style>
 </head>
@@ -86,15 +96,22 @@ body.touch .zone{display:block}
 </div>
 <div class="zone" id="zoneL"><span>◀ 刹车 · 后仰</span></div>
 <div class="zone" id="zoneR"><span>油门 · 前倾 ▶</span></div>
+<div id="airTip">空中 ← → 调整姿态<br>对准坡面落地！</div>
+<div id="audioCtl">
+  <button class="actl" id="btnMus">🎵 音乐</button>
+  <button class="actl" id="btnSfx">🔊 音效</button>
+</div>
 
 <div class="panel" id="menu">
   <div class="card wide">
     <h1>股市骑士</h1>
     <div class="sub">骑上真实历史 K 线 · 红涨绿跌 · 一路拿到收盘终点</div>
     <div class="keys">
-      <b>↑</b> 油门　<b>↓</b> 刹车/倒车　<b>←</b><b>→</b> 空中后仰/前倾　·　手机：左半屏 刹车 ｜ 右半屏 油门<br>
-      <span style="color:rgba(170,192,230,.42)">空中旋转满 360° 落地 = 空翻得分，头部着地即爆仓</span>
+      <b>↑</b> 油门　<b>↓</b> 刹车/倒车　<b>←</b><b>→</b> 配重：地面 后仰/前倾 · 空中 翻转姿态<br>
+      <span style="color:rgba(170,192,230,.42)">地面：油门+← 拉翘头得分，上陡坡 → 前倾防后翻 ｜ 空中：←→ 对准坡面落地，旋转满 360° = 空翻，头部着地即爆仓</span><br>
+      <span style="color:rgba(170,192,230,.42)">手机：左半屏 刹车/后仰 ｜ 右半屏 油门/前倾</span>
     </div>
+    <label class="lev" id="levRow"><input type="checkbox" id="levChk"><span>⚡ 杠杆 ×2 · 坡度全面放大，高风险高刺激</span></label>
     <div id="stockGrid"></div>
   </div>
 </div>
@@ -145,40 +162,57 @@ const G=2300;            // 重力 px/s^2
 const R=16;              // 车轮半径
 const HEADR=10;          // 头部碰撞半径
 const MAXV=1250;         // 驱动最高速 px/s
-const DRIVE=3000;        // 油门加速度（股市赛道大马力：长红坡可爬）
+const DRIVE=4200;        // 油门加速度（股市赛道大马力：verlet 传动稀释 ~1/4，实际持续爬坡极限 ~26°）
 const REVA=900, REVMAX=380; // 倒车
-const ALPHA=22, OMAX=9.5;   // 空中角加速度 / 角速度上限 rad
+const ALPHA=84, OMAX=16;    // 空中角加速度 / 角速度上限 rad（实测 0.55s 正常飞跃可拿满 360° 空翻）
+const ACOUNTER=1.6;         // 逆着现有旋转发力时的扭矩加成（起跳压旋更快，松手回稳更利落）
+const ADAMP=2.6;            // 空中松手角速度阻尼 /s（松手能稳住）
 const WHEELIE=4.2;       // 地面油门抬头力矩
+const LEANT=22;          // 地面前后配重力矩：←后仰防前滚/拉翘头 →前倾防后翻（要压得过接触约束/坡沿重力矩）
 const REST=0.04;         // 车轮弹性
 const STEP=6;            // 地形采样间距
 const CUP='#ff5347',CDN='#2fbf83';        // 中国惯例：红涨绿跌
 const DAYW=70;                            // 每个交易日的世界宽度 px
-const KLOG=800;                           // 对数价格 → 高度缩放（±2%≈缓坡，±5%≈陡坡跳台）
+const KLOG=1100;                          // 对数价格 → 高度缩放（调优 +37%：±2% 有体感起伏，±5% 陡坡跳台）
 const RUNWAY=1100;                        // 起跑平地长度
 
 /* ================= 音频 ================= */
-let AC=null,master=null,engO1=null,engO2=null,engF=null,engG=null,rpmS=0,thudT=0;
+/* master → 压限；sfxG（音效+引擎）与 musG（BGM 用户开关）→ bgmBus（编曲电平/duck） */
+let AC=null,master=null,sfxG=null,musG=null,bgmBus=null,noiseBuf=null;
+let engO1=null,engO2=null,engF=null,engG=null,rpmS=0,thudT=0;
+let sfxOn=true,musOn=true;
+try{sfxOn=localStorage.getItem('ai4399-stonk-sfx')!=='0';musOn=localStorage.getItem('ai4399-stonk-mus')!=='0';}catch(e){}
 function initAudio(){
   if(AC)return;
   try{
     AC=new (window.AudioContext||window.webkitAudioContext)();
-    master=AC.createGain();master.gain.value=.8;master.connect(AC.destination);
+    const comp=AC.createDynamicsCompressor();
+    comp.threshold.value=-15;comp.ratio.value=5;comp.attack.value=.003;comp.release.value=.2;
+    master=AC.createGain();master.gain.value=.85;master.connect(comp);comp.connect(AC.destination);
+    sfxG=AC.createGain();sfxG.gain.value=sfxOn?1:0;sfxG.connect(master);
+    musG=AC.createGain();musG.gain.value=musOn?1:0;musG.connect(master);
+    bgmBus=AC.createGain();bgmBus.gain.value=0;bgmBus.connect(musG);
+    noiseBuf=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);
+    const d=noiseBuf.getChannelData(0);
+    for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+    // 引擎：双振荡器 → lowpass 柔化（低 Q + 低截止），音量随油门/转速起伏
     engO1=AC.createOscillator();engO1.type='sawtooth';
     engO2=AC.createOscillator();engO2.type='square';
-    engF=AC.createBiquadFilter();engF.type='lowpass';engF.Q.value=2;
+    engF=AC.createBiquadFilter();engF.type='lowpass';engF.Q.value=.8;
     engG=AC.createGain();engG.gain.value=0;
-    engO1.connect(engF);engO2.connect(engF);engF.connect(engG);engG.connect(master);
+    engO1.connect(engF);engO2.connect(engF);engF.connect(engG);engG.connect(sfxG);
     engO1.start();engO2.start();
   }catch(e){AC=null;}
 }
 function engine(on,rpm,dt){
   if(!AC)return;
   rpmS+=(rpm-rpmS)*Math.min(1,dt*7);
-  const t=AC.currentTime,f=42+rpmS*180;
+  const t=AC.currentTime,f=40+rpmS*165;
   engO1.frequency.setTargetAtTime(f,t,.04);
   engO2.frequency.setTargetAtTime(f*.5,t,.04);
-  engF.frequency.setTargetAtTime(230+rpmS*1500,t,.05);
-  engG.gain.setTargetAtTime(on?.04+rpmS*.045:0,t,on?.06:.18);
+  engF.frequency.setTargetAtTime(150+rpmS*820,t,.05);
+  // 总音量降到旧版 ~35%；rpm² 曲线 → 怠速几乎听不见，给油才轰起来
+  engG.gain.setTargetAtTime(on?.003+rpmS*rpmS*.022:0,t,on?.07:.18);
 }
 function tone(f0,f1,dur,type,vol,when){
   if(!AC)return;
@@ -187,7 +221,7 @@ function tone(f0,f1,dur,type,vol,when){
   o.type=type;o.frequency.setValueAtTime(f0,t);
   if(f1!==f0)o.frequency.exponentialRampToValueAtTime(Math.max(1,f1),t+dur);
   g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);
-  o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.05);
+  o.connect(g);g.connect(sfxG);o.start(t);o.stop(t+dur+.05);
 }
 function noiseHit(dur,vol,fc){
   if(!AC)return;
@@ -196,7 +230,105 @@ function noiseHit(dur,vol,fc){
   const s=AC.createBufferSource();s.buffer=buf;
   const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=fc;
   const g=AC.createGain();g.gain.value=vol;
-  s.connect(f);f.connect(g);g.connect(master);s.start();
+  s.connect(f);f.connect(g);g.connect(sfxG);s.start();
+}
+/* —— BGM：程序化合成动感循环（鼓机 + bassline + lead，124 BPM，调度式生成无缝循环） —— */
+const BPM=124,SPB=60/BPM,S16B=SPB/4;
+let bgmActive=false,bgmS16=0,bgmStart=0,bgmDelay=null;
+function bgmEnv(g,t,a,peak,dec){
+  g.gain.setValueAtTime(.0001,t);
+  g.gain.linearRampToValueAtTime(peak,t+a);
+  g.gain.exponentialRampToValueAtTime(.0001,t+a+dec);
+}
+function bKick(t){
+  const o=AC.createOscillator(),g=AC.createGain();
+  o.type='sine';
+  o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(40,t+.1);
+  bgmEnv(g,t,.002,.5,.16);
+  o.connect(g);g.connect(bgmBus);o.start(t);o.stop(t+.24);
+}
+function bHat(t,open){
+  const s=AC.createBufferSource();s.buffer=noiseBuf;s.playbackRate.value=1.5;
+  const f=AC.createBiquadFilter();f.type='highpass';f.frequency.value=8000;
+  const g=AC.createGain();bgmEnv(g,t,.001,open?.08:.062,open?.16:.03);
+  s.connect(f);f.connect(g);g.connect(bgmBus);s.start(t);s.stop(t+.2);
+}
+function bSnare(t){
+  const s=AC.createBufferSource();s.buffer=noiseBuf;
+  const f=AC.createBiquadFilter();f.type='bandpass';f.frequency.value=1800;f.Q.value=.9;
+  const g=AC.createGain();bgmEnv(g,t,.001,.2,.12);
+  s.connect(f);f.connect(g);g.connect(bgmBus);s.start(t);s.stop(t+.18);
+}
+function bBass(t,fq,acc){
+  const o=AC.createOscillator(),g=AC.createGain();
+  const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=acc?760:480;lp.Q.value=1.6;
+  o.type='sawtooth';o.frequency.value=fq;
+  bgmEnv(g,t,.005,acc?.2:.15,.18);
+  o.connect(lp);lp.connect(g);g.connect(bgmBus);o.start(t);o.stop(t+.24);
+}
+function bLead(t,fq){
+  const g=AC.createGain();
+  const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2300;lp.Q.value=1;
+  bgmEnv(g,t,.008,.08,.24);
+  for(const dtn of [-6,6]){
+    const o=AC.createOscillator();
+    o.type='sawtooth';o.frequency.value=fq;o.detune.value=dtn;
+    o.connect(lp);o.start(t);o.stop(t+.3);
+  }
+  lp.connect(g);g.connect(bgmBus);if(bgmDelay)g.connect(bgmDelay);
+}
+function bPad(t,fs){
+  for(const fq of fs){
+    const o=AC.createOscillator(),g=AC.createGain();
+    o.type='triangle';o.frequency.value=fq;
+    bgmEnv(g,t,.06,.042,1.4);
+    o.connect(g);g.connect(bgmBus);o.start(t);o.stop(t+1.6);
+  }
+}
+const B_ROOTS=[55,43.65,49,65.41];                                      // Am F G C
+const B_CHORDS=[[220,261.63,329.63],[174.61,220,261.63],[196,246.94,293.66],[261.63,329.63,392]];
+const B_SCALE=[440,523.25,587.33,659.26,783.99,880,1046.5];
+const B_MEL=[1,0,3,0,5,0,4,3,1,0,3,4,5,0,3,0,6,0,5,0,4,0,3,4,5,3,4,0,2,0,3,0];
+function bgmStep(s,t){
+  const pos=s%16,bar=s>>4,ci=bar%4,hi=(bar>>2)%2===1; // 4 小节铺垫 / 4 小节高潮交替
+  if(pos%4===0)bKick(t);
+  if(pos%2===1)bHat(t,false);
+  if(hi&&pos===14)bHat(t,true);
+  if(pos===4||pos===12)bSnare(t);
+  if(pos%2===0)bBass(t,B_ROOTS[ci]*((pos===6||pos===14)?2:1),pos%4===0);
+  if(pos===0)bPad(t,B_CHORDS[ci]);
+  if(hi&&pos%2===0){
+    const m=B_MEL[(ci*8+(pos>>1))%32];
+    if(m)bLead(t,B_SCALE[m-1]);
+  }
+}
+function bgmSchedule(){
+  if(!AC||!bgmActive||botOn||AC.state!=='running')return;
+  const ahead=AC.currentTime+.2;
+  while(bgmStart+bgmS16*S16B<ahead){bgmStep(bgmS16,bgmStart+bgmS16*S16B);bgmS16++;}
+}
+function bgmPlay(){
+  if(!AC||botOn)return;
+  if(!bgmDelay){ // lead 的节拍同步延迟（懒初始化一次）
+    bgmDelay=AC.createDelay(1);bgmDelay.delayTime.value=SPB*.75;
+    const fb=AC.createGain();fb.gain.value=.26;
+    const wet=AC.createGain();wet.gain.value=.32;
+    bgmDelay.connect(fb);fb.connect(bgmDelay);bgmDelay.connect(wet);wet.connect(bgmBus);
+  }
+  bgmActive=true;bgmS16=0;bgmStart=AC.currentTime+.06;
+  bgmBus.gain.cancelScheduledValues(AC.currentTime);
+  bgmBus.gain.setTargetAtTime(.9,AC.currentTime,.25);
+}
+function bgmStop(){
+  bgmActive=false;
+  if(AC){bgmBus.gain.cancelScheduledValues(AC.currentTime);bgmBus.gain.setTargetAtTime(0,AC.currentTime,.3);}
+}
+function bgmDuck(){ // 爆仓/冲线：短暂压低 BGM 让结算音效突出
+  if(!AC||!bgmActive)return;
+  const t=AC.currentTime;
+  bgmBus.gain.cancelScheduledValues(t);
+  bgmBus.gain.setTargetAtTime(.14,t,.04);
+  bgmBus.gain.setTargetAtTime(.9,t+1.5,.5);
 }
 function sndCrash(){noiseHit(.4,.4,900);tone(110,28,.45,'triangle',.4,0);}
 function sndTrick(n){
@@ -296,7 +428,7 @@ function makeBike(x){
       {a:fw,b:bd,len:len(fw,bd),st:.28},
     ],
     spin:0,angle:Math.atan2(fy-ry,WB),omega:0,
-    air:0,airRot:0,cR:null,cF:null,maxX:x,leanVis:0,lastVt:0,
+    air:0,airRot:0,cR:null,cF:null,maxX:x,leanVis:0,lastVt:0,whT:0,
   };
 }
 function solveLink(L){
@@ -476,6 +608,15 @@ function fmtDay(ed){
 function pctTxt(v){return (v>=0?'+':'')+v.toFixed(1)+'%';}
 function stockBestGet(sym){try{return parseFloat(localStorage.getItem('ai4399-stonk-'+sym)||'0')||0;}catch(e){return 0;}}
 function stockBestSet(sym,v){try{localStorage.setItem('ai4399-stonk-'+sym,String(v));}catch(e){}}
+let levOn=false;try{levOn=localStorage.getItem('ai4399-stonk-lev')==='1';}catch(e){}
+let airTipDone=false;try{airTipDone=localStorage.getItem('ai4399-stonk-tip1')==='1';}catch(e){}
+function showAirTip(){ // 第一次起飞的一次性教学提示
+  airTipDone=true;try{localStorage.setItem('ai4399-stonk-tip1','1');}catch(e){}
+  const el=$('airTip');
+  if(isTouch)el.innerHTML='空中按住 左 / 右 半屏调整姿态<br>对准坡面落地！';
+  el.classList.add('on');
+  setTimeout(()=>el.classList.remove('on'),3800);
+}
 // 一次性迁移：旧版「特技摩托·股市模式」的进度搬到新 key（不删旧档）
 try{
   for(const s of STONKS){
@@ -488,31 +629,51 @@ function niceStep(x){
   const e=Math.pow(10,Math.floor(Math.log10(x))),m=x/e;
   return (m<1.5?1:m<3.5?2:m<7.5?5:10)*e;
 }
+// 个别股票局部微调（仅该日区间，不全局磨平）：sym → [[d0,d1,平滑半径,下坡限幅(×STEP)],...]
+// 区间为 bot 验证反复爆点（多为历史性暴跌跳空：NVDA DeepSeek 日、2025-04 关税崩盘、GME 2024-06 落潮）
+const EASE={
+  NVDA:[[34,46,5,1.0]],
+  AMZN:[[196,208,5,1.0]],
+  META:[[195,207,5,1.0],[373,385,5,1.0]],
+  NFLX:[[196,208,5,1.0],[455,467,5,1.0]],
+  PDD:[[50,62,5,1.0],[231,243,5,1.0],[456,468,5,1.0]],
+  GME:[[3,15,5,1.0],[194,206,5,1.0]],
+};
 function buildStockWorld(st){
   const rows=st.rows,N=rows.length,base=rows[0][4];
-  const py=p=>-Math.log(p/base)*KLOG;
-  const Y=rows.map(r=>py(r[4]));
-  const finishX=(N-1)*DAYW;
+  const K=KLOG*(levOn?1.5:1); // 杠杆 ×2：垂直比例再放大
+  const py=p=>-Math.log(p/base)*K;
+  // —— 日内 OHLC 子点路径：每个交易日展开为 前收→开→低/高→高/低→收 ——
+  // 上涨日 开→低→高→收，下跌日 开→高→低→收；跳空体现在每日开盘前 18% 段
+  const cps=[{x:0,y:py(rows[0][4])}];
+  for(let d=1;d<N;d++){
+    const x0=(d-1)*DAYW,r=rows[d],up=r[4]>=r[1];
+    cps.push({x:x0+DAYW*.18,y:py(r[1])});
+    cps.push({x:x0+DAYW*.46,y:py(up?r[3]:r[2])});
+    cps.push({x:x0+DAYW*.78,y:py(up?r[2]:r[3])});
+    cps.push({x:x0+DAYW,y:py(r[4])});
+  }
+  const finishX=(N-1)*DAYW,yEnd=cps[cps.length-1].y;
   firstX=-RUNWAY;
   const endX=finishX+1300,n=Math.ceil((endX-firstX)/STEP);
   hs=new Array(n+1);
+  let ci=0;
   for(let i=0;i<=n;i++){
     const x=firstX+i*STEP;
     let y;
     if(x<=0)y=0;
-    else if(x<finishX){ // Catmull-Rom 平滑收盘价
-      const f=x/DAYW,d=Math.floor(f),t=f-d;
-      const p0=Y[Math.max(0,d-1)],p1=Y[d],p2=Y[Math.min(N-1,d+1)],p3=Y[Math.min(N-1,d+2)];
-      y=.5*((2*p1)+(-p0+p2)*t+(2*p0-5*p1+4*p2-p3)*t*t+(-p0+3*p1-3*p2+p3)*t*t*t);
+    else if(x<finishX){ // 子点间线性插值（细节交给真实数据，圆角交给轻平滑）
+      while(ci<cps.length-2&&cps[ci+1].x<x)ci++;
+      const a=cps[ci],b=cps[ci+1];
+      y=a.y+(b.y-a.y)*clamp((x-a.x)/(b.x-a.x),0,1);
     }
-    else if(x<finishX+700)y=Y[N-1];                  // 终点平台
-    else if(x<finishX+1100)y=Y[N-1]-(x-finishX-700); // 收尾缓停坡
-    else y=Y[N-1]-400;
+    else if(x<finishX+700)y=yEnd;                  // 终点平台
+    else if(x<finishX+1100)y=yEnd-(x-finishX-700); // 收尾缓停坡
+    else y=yEnd-400;
     hs[i]=y;
   }
-  // 骑行面平滑（K 线视觉不变）：缓和 V 形谷与锐利坡顶；区间向跑道延伸避免衔接台阶
-  // 半径随波动率自适应：地狱级标的锯齿磨得更圆，保证可骑
-  const R1=Math.max(4,Math.round(st.vol*2.6));
+  // 骑行面轻平滑（半径较旧版减半，保留日内颠簸/二段坡细节）
+  const R1=Math.max(2,Math.round(st.vol*1.3));
   const si0=Math.max(1,Math.ceil((-300-firstX)/STEP)),si1=Math.min(n-1,Math.floor((finishX+650-firstX)/STEP));
   for(let pass=0;pass<2;pass++){
     const src=hs.slice();
@@ -522,7 +683,7 @@ function buildStockWorld(st){
       hs[i]=s/(2*R1+1);
     }
   }
-  // 深 V 谷垫底：宽核均值与原面取高者（填谷不削峰，峰仍是跳台）
+  // 深 V 谷垫底：宽核均值与原面取高者（填谷不削峰，峰仍是跳台）；半径减半
   const vFill=R2=>{
     const src=hs.slice();
     for(let i=si0;i<=si1;i++){
@@ -532,15 +693,54 @@ function buildStockWorld(st){
       if(s<hs[i])hs[i]=s;
     }
   };
-  vFill(26);
-  // 难度兜底：仅对骑行面做坡度软限幅，保证极端跳空与连续大阳线可通过
-  // 下坡限幅随波动率收紧：地狱股的悬崖更缓，免高坠硬着陆
-  const MAXUP=.38*STEP,MAXDN=Math.max(.9,1.6-st.vol*.16)*STEP;
+  vFill(13);
+  // 难度兜底（放宽）：上坡短坡 ~34°（长墙渐衰至 ~26°，保证爬得上去），下坡 ~60-64°
+  const MAXDN=Math.max(1.55,2.1-st.vol*.1)*STEP;
+  let upRun=0;
   for(let i=1;i<=n;i++){
-    if(hs[i]<hs[i-1]-MAXUP)hs[i]=hs[i-1]-MAXUP;
-    else if(hs[i]>hs[i-1]+MAXDN)hs[i]=hs[i-1]+MAXDN;
+    const upCap=(.675-Math.min(.255,upRun*.013))*STEP; // 34° 短坡 → 22.8° 长墙
+    if(hs[i]<hs[i-1]-upCap){hs[i]=hs[i-1]-upCap;upRun++;}
+    else{
+      if(hs[i]<hs[i-1]-.2*STEP)upRun++;else upRun=0;
+      if(hs[i]>hs[i-1]+MAXDN)hs[i]=hs[i-1]+MAXDN;
+    }
   }
-  vFill(22); // 二次填谷：圆滑限幅产生的坡脚折角
+  vFill(11); // 二次填谷：圆滑限幅产生的坡脚折角
+  // 车轮包络闭运算：填掉比车轮还窄的凹口（轮子物理上进不去，只会把前轮卡死）
+  // 宏观坡形/难度不变——任何宽于轮径的起伏原样保留
+  {
+    const RR=R+1,m=Math.floor(RR/STEP),sq=[];
+    for(let d=-m;d<=m;d++)sq.push(Math.sqrt(Math.max(0,RR*RR-d*STEP*d*STEP)));
+    const yc=new Array(n+1);
+    const c0=Math.max(0,si0-m),c1=Math.min(n,si1+m);
+    for(let i=c0;i<=c1;i++){
+      let v=1e18;
+      for(let d=-m;d<=m;d++)v=Math.min(v,hs[clamp(i+d,0,n)]-sq[d+m]);
+      yc[i]=v;
+    }
+    for(let i=si0;i<=si1;i++){
+      let v=-1e18; // 滚轮下缘包络：各落轮位置中触得最深的那个
+      for(let d=-m;d<=m;d++){
+        const j=clamp(i+d,c0,c1);
+        v=Math.max(v,yc[j]+sq[d+m]);
+      }
+      if(v<hs[i])hs[i]=v;
+    }
+  }
+  // 局部微调（仅指定日区间）
+  const ez=EASE[st.sym];
+  if(ez)for(const [d0,d1,sr,dn] of ez){
+    const a=Math.max(si0,Math.floor((d0*DAYW-firstX)/STEP)),b=Math.min(si1,Math.ceil((d1*DAYW-firstX)/STEP));
+    if(dn)for(let i=a+1;i<=b;i++)if(hs[i]>hs[i-1]+dn*STEP)hs[i]=hs[i-1]+dn*STEP;
+    if(sr)for(let pass=0;pass<2;pass++){
+      const src=hs.slice();
+      for(let i=a;i<=b;i++){
+        let s=0;
+        for(let k=-sr;k<=sr;k++)s+=src[clamp(i+k,0,n)];
+        hs[i]=s/(2*sr+1);
+      }
+    }
+  }
   // 月份刻度
   const months=[];let pm=-1;
   for(let i=0;i<N;i++){
@@ -596,13 +796,16 @@ function startStock(s){
   state='play';
   $('menu').classList.add('hidden');$('over').classList.add('hidden');
   $('hud').style.display='block';$('score').style.display='block';$('shud').style.display='block';
+  $('audioCtl').style.display='flex';
   $('tape').classList.add('on');
   $('shIcon').textContent=s.icon;$('shName').textContent=s.cn;$('shSym').textContent=s.sym;
+  bgmPlay();
 }
 function startGame(){if(stk)startStock(stk.st);}
 function doCrash(reason){
   if(state!=='play')return;
   state='crash';crashT=0;timeScale=.3;combo=0;crashReason=reason;
+  bgmDuck();
   buildRagdoll();
   addPop(rag.head.x,rag.head.y-30,'爆仓！','#ff5544',30);
   addDust(rag.chest.x,rag.chest.y,0,-80,14,1);
@@ -641,7 +844,9 @@ function showStockSel(){
   $('over').classList.add('hidden');
   $('menu').classList.remove('hidden');
   $('hud').style.display='none';$('score').style.display='none';$('shud').style.display='none';
+  $('audioCtl').style.display='none';
   $('tape').classList.remove('on');
+  bgmStop();
   buildCards();
 }
 /* ====== 选股卡片：sparkline 迷你走势图 ====== */
@@ -701,6 +906,34 @@ function buildCards(){
 }
 $('btnAgain').addEventListener('click',startGame);
 $('btnSwap').addEventListener('click',showStockSel);
+/* ====== 音乐 / 音效开关（独立持久化） ====== */
+function applyAudioPref(){
+  $('btnMus').classList.toggle('off',!musOn);
+  $('btnSfx').classList.toggle('off',!sfxOn);
+  if(AC){
+    musG.gain.setTargetAtTime(musOn?1:0,AC.currentTime,.05);
+    sfxG.gain.setTargetAtTime(sfxOn?1:0,AC.currentTime,.05);
+  }
+}
+$('btnMus').addEventListener('click',e=>{
+  e.stopPropagation();musOn=!musOn;
+  try{localStorage.setItem('ai4399-stonk-mus',musOn?'1':'0');}catch(err){}
+  initAudio();if(AC&&AC.state==='suspended')AC.resume();
+  applyAudioPref();
+});
+$('btnSfx').addEventListener('click',e=>{
+  e.stopPropagation();sfxOn=!sfxOn;
+  try{localStorage.setItem('ai4399-stonk-sfx',sfxOn?'1':'0');}catch(err){}
+  initAudio();if(AC&&AC.state==='suspended')AC.resume();
+  applyAudioPref();
+});
+applyAudioPref();
+/* ====== 杠杆 ×2 开关 ====== */
+$('levChk').checked=levOn;
+$('levChk').addEventListener('change',()=>{
+  levOn=$('levChk').checked;
+  try{localStorage.setItem('ai4399-stonk-lev',levOn?'1':'0');}catch(err){}
+});
 /* ====== ticker tape：其余 13 只滚动报价 ====== */
 function buildTape(cur){
   let html='';
@@ -725,16 +958,21 @@ function stepBike(dt){
     p.x+=vx;p.y+=vy+G*dt*dt;
   }
   const airborne=b.air>.07;
-  // 空中配重翻转
+  // 空中配重翻转：扭矩加强（一次飞跃可 360°），松手角速度阻尼稳姿
   if(play&&airborne){
     let dir=0;
     if(inBack())dir-=1;
     if(inFwd())dir+=1;
-    if(dir<0&&b.omega>-OMAX)rotateBike(b,-ALPHA*dt*dt);
-    else if(dir>0&&b.omega<OMAX)rotateBike(b,ALPHA*dt*dt);
+    if(dir<0&&b.omega>-OMAX)rotateBike(b,-(b.omega>0?ALPHA*ACOUNTER:ALPHA)*dt*dt);
+    else if(dir>0&&b.omega<OMAX)rotateBike(b,(b.omega<0?ALPHA*ACOUNTER:ALPHA)*dt*dt);
+    else if(dir===0)rotateBike(b,clamp(-b.omega*ADAMP,-ALPHA,ALPHA)*dt*dt);
   }
-  // 地面油门抬头
+  // 地面油门抬头 + 前后配重：←后仰（防前滚/配油门拉翘头） →前倾（上陡坡防后翻）
   if(thr&&b.cR&&!airborne)rotateBike(b,-WHEELIE*dt*dt);
+  if(play&&!airborne&&(b.cR||b.cF)){
+    if(inBack())rotateBike(b,-LEANT*dt*dt);
+    if(inFwd())rotateBike(b,LEANT*dt*dt);
+  }
   // 约束 + 无摩擦投影碰撞
   for(let k=0;k<5;k++){
     for(const L of b.links)solveLink(L);
@@ -746,9 +984,10 @@ function stepBike(dt){
     }
   }
   // 最终接触（摩擦 + 微弹）：刹车强摩擦只在前向行驶时生效，倒车用滚动摩擦
-  const fr=(brk&&b.lastVt>80*dt)?.962:.9995;
-  b.cR=contactPass(b.rw,fr,REST);
-  b.cF=contactPass(b.fw,fr,REST);
+  // 刹车后轮偏置：前轮弱刹 → 陡坡刹车不再自动前滚翻（endo）
+  const braking=brk&&b.lastVt>80*dt;
+  b.cR=contactPass(b.rw,braking?.955:.9995,REST);
+  b.cF=contactPass(b.fw,braking?.988:.9995,REST);
   // 驱动 / 倒车
   if(play&&b.cR){
     const n=b.cR,tx=-n.ny,ty=n.nx;
@@ -787,11 +1026,11 @@ function stepBike(dt){
       const n=b.cR||b.cF;
       const upx=Math.sin(a),upy=-Math.cos(a);
       const updot=upx*n.nx+upy*n.ny;
-      if(updot<-.2){
+      if(updot<-.08){ // 收紧：落地角度与坡面的匹配真实影响成败
         doCrash('落地姿态失衡');
       }else{
         const deg=Math.abs(b.airRot)*180/PI;
-        const flips=Math.floor((deg+28)/360);
+        const flips=Math.floor((deg+40)/360); // 容差放宽：视觉上转完即记空翻
         if(flips>=1){
           combo++;flipsTotal+=flips;
           const base=flips===1?500:flips===2?1600:flips*flips*400;
@@ -809,6 +1048,7 @@ function stepBike(dt){
     b.air=0;b.airRot=0;
   }else{
     b.air+=dt;b.airRot+=da;
+    if(play&&!botOn&&!airTipDone&&b.air>.42)showAirTip(); // 首次起飞教学（仅一次）
     // 空翻残影采样（纯视觉）
     if(b.air>.15&&Math.abs(b.omega)>4){
       ghostCD-=dt;
@@ -818,6 +1058,20 @@ function stepBike(dt){
         if(ghosts.length>16)ghosts.shift();
       }
     }
+  }
+  // 翘头（wheelie）：油门+后仰仅后轮着地持续前行，给小额风格分
+  if(play&&b.cR&&!b.cF&&!airborne){
+    const sl=Math.atan2(groundY(b.bd.x+40)-groundY(b.bd.x-40),80);
+    if(b.lastVt>110*dt&&wrapA(b.angle-sl)<-.25)b.whT+=dt;
+  }else if(b.whT>0){
+    if(b.whT>.8&&play){
+      const gain=Math.min(300,Math.round(b.whT*100/10)*10);
+      trickScore+=gain;
+      trickMsg='翘头 '+b.whT.toFixed(1)+'s！+'+gain;trickMsgT=2;
+      addPop((b.rw.x+b.fw.x)/2,b.bd.y-46,'翘头！+'+gain,'#ffd75e',20);
+      tone(880,1175,.12,'square',.08,0);
+    }
+    b.whT=0;
   }
   // 头部 / 躯干触地判定
   if(play){
@@ -850,7 +1104,7 @@ function stepBike(dt){
     addConfetti(b.bd.x,b.bd.y-40);
     addPop(b.bd.x+230,b.bd.y-170,'🎉 成功落袋！','#ffe066',36);
     addPop(b.bd.x+230,b.bd.y-120,pctTxt(pnl),pnl>=0?'#ff7a64':'#5ee8aa',30);
-    sndFanfare();
+    bgmDuck();sndFanfare();
   }
   // 受困检测：给油却动不了
   if(play){
@@ -1411,6 +1665,23 @@ function drawBike(){
     ctx.strokeStyle='rgba(140,200,255,.15)';
     ctx.beginPath();ctx.arc(p.mx,p.my,61,s0,e0);ctx.stroke();
   }
+  // 姿态指示：车身角 vs 落点坡角，临近落地变绿（对齐）/红（危险）
+  if(state==='play'&&b.air>.22){
+    const L=predictLanding(b);
+    if(L){
+      const ta=Math.atan2(groundY(L.x+45)-groundY(L.x-45),90);
+      const da=wrapA(ta-ang);
+      const near=L.t<.75,ok=Math.abs(da)<.42;
+      const col=near?(ok?'rgba(86,230,140,':'rgba(255,92,70,'):'rgba(140,190,255,';
+      const cx=p.mx,cy=p.my-92;
+      ctx.strokeStyle=col+'.3)';ctx.lineWidth=2;
+      ctx.beginPath();ctx.arc(cx,cy,16,0,TAU);ctx.stroke();
+      ctx.strokeStyle=col+'.95)';ctx.lineWidth=2.5;ctx.lineCap='round'; // 落点坡角
+      ctx.beginPath();ctx.moveTo(cx-Math.cos(ta)*14,cy-Math.sin(ta)*14);ctx.lineTo(cx+Math.cos(ta)*14,cy+Math.sin(ta)*14);ctx.stroke();
+      ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=1.6;        // 当前车身角
+      ctx.beginPath();ctx.moveTo(cx-Math.cos(ang)*9,cy-Math.sin(ang)*9);ctx.lineTo(cx+Math.cos(ang)*9,cy+Math.sin(ang)*9);ctx.stroke();
+    }
+  }
   if(state!=='crash'&&state!=='over'||!rag)drawRider(p);
 }
 function drawRagdoll(){
@@ -1511,66 +1782,104 @@ function drawHUD(){
   }
   if(t!==lastTrickTxt){$('trick').textContent=t;lastTrickTxt=t;}
 }
+/* ===== 弹道落点预测：玩家姿态指示 + bot 共用 ===== */
+function predictLanding(b){
+  let px0=b.bd.x,py0=b.bd.y,vx=(b.bd.x-b.bd.px)/DT,vy=(b.bd.y-b.bd.py)/DT;
+  for(let s=1;s<=60;s++){
+    px0+=vx*.05;py0+=vy*.05;vy+=G*.05;
+    if(py0>=groundY(px0)-26)return{x:px0,t:s*.05};
+  }
+  return null;
+}
 /* ===== 自动驾驶 bot：验证 14 只股票全部可通关 ===== */
 function botThink(){
   const b=bike;
   botC.thr=true;botC.brk=false;botC.back=false;botC.fwd=false;
   if(!b)return;
-  if(b.air>.04){ // 空中：弹道预测落点 + PD 对齐落点坡度
-    let px0=b.bd.x,py0=b.bd.y,vx=(b.bd.x-b.bd.px)/DT,vy=(b.bd.y-b.bd.py)/DT,lx=px0+60,tta=2.2;
-    for(let s=0;s<44;s++){
-      px0+=vx*.05;py0+=vy*.05;vy+=G*.05;
-      lx=px0;
-      if(py0>=groundY(px0)-26){tta=s*.05;break;}
+  if(b.air>.04){ // 空中：弹道预测落点 + PD 对齐落点坡度（短跳也调姿）
+    const L=predictLanding(b);
+    const lx=L?L.x:b.bd.x+60;
+    const ta=Math.atan2(groundY(lx+45)-groundY(lx-45),90);
+    const da=wrapA(ta-b.angle);
+    const want=clamp(da*3,-5,5);
+    if(b.omega<want-.25)botC.fwd=true;
+    else if(b.omega>want+.25)botC.back=true;
+    if(b.air>.12&&Math.abs(da)>2.4)botC.thr=false; // 姿态全乱时专心调姿
+    const vy=(b.bd.y-b.bd.py)/DT;
+    if(vy>0&&ta>.5)botC.thr=false;                  // 即将落在陡降面：松油备姿
+  }else{ // 地面：保守速度策略 —— 慢即是稳，马力足以低速爬任何坡
+    const x=b.bd.x;
+    const sl=Math.atan2(groundY(x+60)-groundY(x-60),120);
+    const desc=sl>.18;
+    // 姿态稳定：前后配重抵消俯仰失衡
+    const pda=wrapA(b.angle-sl);
+    if(pda<-.4)botC.fwd=true;                       // 仰头 → 前倾压回
+    else if(pda>.3)botC.back=true;                  // 栽头 → 后仰拉起
+    const v2=Math.hypot(b.bd.x-b.bd.px,b.bd.y-b.bd.py)/DT;
+    const g0=groundY(x),gh=groundY(x+90),g1=groundY(x+170),g2=groundY(x+340);
+    const dropA=Math.max(gh-g0,g1-g0,g2-g0);
+    const climb=g2-g0<-55&&g1-g0<-20;               // 前方大爬坡：放开限速攒动能
+    let vmax=climb?620:300;
+    if(desc)vmax=Math.min(vmax,230);
+    if(sl>.35){                                     // 陡坡面：压尾滑行；姿态健康时允许轻刹控速
+      botC.thr=v2<170;botC.back=true;
+      botC.brk=v2>300&&pda<.15;
+    }else if(dropA>55){                             // 坡沿：爬行慢速通过
+      botC.thr=v2<120;botC.brk=v2>190;
+    }else{
+      botC.thr=v2<vmax;
+      botC.brk=v2>vmax+80;
+      if(!desc&&!b.cF&&v2>300&&Math.atan2(groundY(x+95)-g0,95)>.12)botC.thr=false; // 高速越坡顶松油防栽头
+      if(pda<-.5)botC.thr=false;                    // 车头仰过头，松油
+      // 爬坡卡轮：低速顶在陡升坡 → 持续后仰抬前轮翘头爬（玩家同款技巧，带保持；离开爬坡即取消）
+      if(v2<90&&sl<-.25)botC._wh=360;
+      if(botC._wh>0){
+        botC._wh--;
+        if(sl<-.1&&v2<250){botC.back=true;botC.thr=true;botC.brk=false;}
+        else botC._wh=0;
+      }
+      if(pda<-.7){botC.back=false;botC.fwd=true;botC._wh=0;} // 防后仰过头翻车
     }
-    if(tta>.18){ // 小跳不折腾，长滞空才调姿
-      const ta=Math.atan2(groundY(lx+45)-groundY(lx-45),90);
-      const da=wrapA(ta-b.angle);
-      const want=clamp(da*2.5,-4,4);
-      if(b.omega<want-.3)botC.fwd=true;
-      else if(b.omega>want+.3)botC.back=true;
-      if(b.air>.12&&Math.abs(da)>2.6)botC.thr=false; // 姿态全乱时专心调姿
-    }
-  }else{ // 地面
-    const sl=Math.atan2(groundY(b.bd.x+60)-groundY(b.bd.x-60),120);
-    const slA=Math.atan2(groundY(b.bd.x+95)-groundY(b.bd.x),95);
-    const desc=sl>.18;                              // 已在下坡
-    if(!desc&&!b.cF&&slA>.12)botC.thr=false;        // 越坡顶前轮离地：松油防栽头
-    if(wrapA(b.angle-sl)<-.8)botC.thr=false;        // 车头仰过头，松油
-    const vx0=(b.bd.x-b.bd.px)/DT;
-    const g0=groundY(b.bd.x),g1=groundY(b.bd.x+170),g2=groundY(b.bd.x+340);
-    const climbAhead=groundY(b.bd.x+330)-g0<-55;    // 前方大爬坡：放开限速攒动能
-    if(!climbAhead&&vx0>560)botC.thr=false;         // 巡航限速：稳比快重要
-    if(!climbAhead&&vx0>720)botC.brk=true;
-    if(vx0>900)botC.thr=false;
-    if(desc){                                       // 陡降：控速滑行，低速持油稳车头
-      const v2=Math.hypot(b.bd.x-b.bd.px,b.bd.y-b.bd.py)/DT;
-      if(v2>380){botC.thr=false;botC.brk=true;}
-      else{botC.thr=true;botC.brk=false;}
-    }
-    // V 谷 / 悬崖预判：提前刹车控速
-    if(vx0>420&&g1-g0>45&&g1-g2>32){botC.thr=false;botC.brk=true;}      // V 谷
-    if(vx0>340&&g1-g0>85){botC.thr=false;botC.brk=true;}                // 大悬崖：贴崖缓降
+    // 翻滚预警（用平滑角速度，瞬时 omega 接触噪声大）
+    botC._om=(botC._om||0)*.8+b.omega*.2;
+    if(botC._om>1.8&&pda>-.1){botC.thr=false;botC.brk=false;botC.back=true;botC.fwd=false;}      // 前滚 → 后仰救车
+    else if(botC._om<-1.8&&pda<.1){botC.thr=false;botC.brk=false;botC.fwd=true;botC.back=false;botC._wh=0;} // 后翻 → 前倾救车
+    // 防卡死：6 秒没前进 → 全油冲 2 秒（应对爬坡口松油循环）
+    if(b.maxX>botC._lastMax+2){botC._lastMax=b.maxX;botC._stall=0;}
+    else botC._stall=(botC._stall||0)+1;
+    if(botC._burst>0){botC._burst--;botC.thr=true;botC.brk=false;}
+    else if(botC._stall>1440){botC._stall=0;botC._burst=480;}
   }
 }
 window.__botRun=function(sym,maxSec){
   const st=STONKS.find(s=>s.sym===sym);
   if(!st)return{sym,result:'no-such-sym'};
+  const lv=levOn;levOn=false; // 验证以默认（无杠杆）赛道为准
   startStock(st);
+  levOn=lv;
+  botC._lastMax=-1e9;botC._stall=0;botC._burst=0;botC._wh=0;botC._om=0;
   botOn=true;
   maxSec=maxSec||900;
-  let t=0,res='timeout';
+  let t=0,res='timeout',tr=[],ta=0;
   while(t<maxSec){
     botThink();
     physStep(DT);t+=DT;
+    ta+=DT;
+    if(ta>=.08){ // 验证用轨迹环形缓冲
+      ta=0;
+      tr.push([+t.toFixed(2),Math.round(bike.bd.x),Math.round(bike.bd.y),Math.round((bike.bd.x-bike.bd.px)/DT),Math.round((bike.bd.y-bike.bd.py)/DT),+bike.angle.toFixed(2),+bike.air.toFixed(2),botC.thr?1:0,botC.brk?1:0]);
+      if(tr.length>40)tr.shift();
+    }
     if(state==='finish'){res='finish';break;}
     if(state!=='play'){res=state;break;}
   }
   const prog=Math.round(clamp(bike.maxX/stk.finishX*100,0,100)*10)/10;
   botOn=false;
-  return{sym,result:res,prog,sec:Math.round(t),reason:crashReason,day:dayAt(Math.max(0,bike.maxX)),x:Math.round(bike.maxX)};
+  return{sym,result:res,prog,sec:Math.round(t),reason:crashReason,day:dayAt(Math.max(0,bike.maxX)),x:Math.round(bike.maxX),trace:tr};
 };
 window.__botAll=function(){return STONKS.map(s=>window.__botRun(s.sym));};
+window.__ground=x=>groundY(x); // 验证用：查询骑行面高度
+window.__dbg=()=>bike?{state,x:Math.round(bike.bd.x),y:Math.round(bike.bd.y),ang:+bike.angle.toFixed(2),air:+bike.air.toFixed(2),reason:crashReason}:null;
 window.__tick=function(sec){ // 后台标签 rAF 暂停时手动推进（验收用）
   let t=0;
   while(t<sec){advance(1/60);t+=1/60;}
@@ -1642,6 +1951,7 @@ function frame(t){
     const rpm=clamp(.12+(state==='play'&&inThr()?.45:0)+sp/MAXV*.5,0,1.25);
     engine(state==='play',rpm,dt);
   }
+  bgmSchedule();
 }
 buildCards();
 requestAnimationFrame(frame);
