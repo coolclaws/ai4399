@@ -93,6 +93,7 @@ body.touch .zone{display:block}
   <div class="r1"><span id="shIcon">📈</span> <span id="shName"></span><i id="shSym"></i></div>
   <div class="r2" id="shDate">—</div>
   <div class="r3">持仓收益<b id="shPnl">+0.0%</b></div>
+  <div class="r3">时速<b id="shSpd">0</b><span style="font-size:10px;margin-left:2px">km/h</span></div>
 </div>
 <div class="zone" id="zoneL"><span>◀ 刹车 · 后仰</span></div>
 <div class="zone" id="zoneR"><span>油门 · 前倾 ▶</span></div>
@@ -157,18 +158,18 @@ addEventListener('resize',resize);resize();
 
 /* ================= 常量 ================= */
 const PXM=40;            // 1 米 = 40px
-const DT=1/240;          // 物理子步长
+const DT=1/360;          // 物理子步长（提频：高速过放大细节不抖）
 const G=2300;            // 重力 px/s^2
 const R=16;              // 车轮半径
 const HEADR=10;          // 头部碰撞半径
-const MAXV=1250;         // 驱动最高速 px/s
-const DRIVE=4200;        // 油门加速度（股市赛道大马力：verlet 传动稀释 ~1/4，实际持续爬坡极限 ~26°）
+const MAXV=1950;         // 驱动最高速 px/s（轻快化：较旧版 +56%）
+const DRIVE=7800;        // 油门加速度（verlet 传动稀释 ~1/4）
 const REVA=900, REVMAX=380; // 倒车
-const ALPHA=84, OMAX=16;    // 空中角加速度 / 角速度上限 rad（实测 0.55s 正常飞跃可拿满 360° 空翻）
+const ALPHA=112, OMAX=16;   // 空中角加速度 / 角速度上限 rad（角惯量下调：更听 ←→ 也更易被地形抛转）
 const ACOUNTER=1.6;         // 逆着现有旋转发力时的扭矩加成（起跳压旋更快，松手回稳更利落）
-const ADAMP=2.6;            // 空中松手角速度阻尼 /s（松手能稳住）
-const WHEELIE=4.2;       // 地面油门抬头力矩
-const LEANT=22;          // 地面前后配重力矩：←后仰防前滚/拉翘头 →前倾防后翻（要压得过接触约束/坡沿重力矩）
+const ADAMP=3.0;            // 空中松手角速度阻尼 /s（松手能稳住）
+const WHEELIE=4.4;       // 地面油门抬头力矩
+const LEANT=34;          // 地面前后配重力矩：←后仰防前滚/拉翘头 →前倾防后翻（要压得过接触约束/坡沿重力矩）
 const REST=0.04;         // 车轮弹性
 const STEP=6;            // 地形采样间距
 const CUP='#ff5347',CDN='#2fbf83';        // 中国惯例：红涨绿跌
@@ -445,7 +446,11 @@ function bodySide(b){ // 防止车身质点翻过轮轴线（三角反折）
   const l=Math.hypot(ux,uy)||1;ux/=l;uy/=l;
   const upx=uy,upy=-ux;
   const s=(b.bd.x-mx)*upx+(b.bd.y-my)*upy;
-  if(s<20){const c=(20-s)*.6;b.bd.x+=upx*c;b.bd.y+=upy*c;}
+  if(s<20){ // 位置修正同时搬运 px/py：高频迭代下纯位置注入会变成弹射器
+    const c=(20-s)*.6;
+    b.bd.x+=upx*c;b.bd.y+=upy*c;
+    b.bd.px+=upx*c*.85;b.bd.py+=upy*c*.85;
+  }
 }
 function rotateBike(b,da){
   const pts=[b.rw,b.fw,b.bd];
@@ -629,40 +634,48 @@ function niceStep(x){
   const e=Math.pow(10,Math.floor(Math.log10(x))),m=x/e;
   return (m<1.5?1:m<3.5?2:m<7.5?5:10)*e;
 }
-// 个别股票局部微调（仅该日区间，不全局磨平）：sym → [[d0,d1,平滑半径,下坡限幅(×STEP)],...]
-// 区间为 bot 验证反复爆点（多为历史性暴跌跳空：NVDA DeepSeek 日、2025-04 关税崩盘、GME 2024-06 落潮）
-const EASE={
-  NVDA:[[34,46,5,1.0]],
-  AMZN:[[196,208,5,1.0]],
-  META:[[195,207,5,1.0],[373,385,5,1.0]],
-  NFLX:[[196,208,5,1.0],[455,467,5,1.0]],
-  PDD:[[50,62,5,1.0],[231,243,5,1.0],[456,468,5,1.0]],
-  GME:[[3,15,5,1.0],[194,206,5,1.0]],
-};
+// 双频段地形参数
+const GAPCLIFF=34;  // 跳空高度（px）超过此值 → 断崖（低开）/ 跳台斜坡（高开），不再缓坡化
+const GAPMARK=88;   // 红色 GAP 警示牌阈值（向下落差 px）
+let AMP=1.6;        // 高频细节（OHLC 子点相对趋势的偏差）放大倍数（__tune 可调；×波动归一+tanh 软限幅后的有效值）
 function buildStockWorld(st){
   const rows=st.rows,N=rows.length,base=rows[0][4];
-  const K=KLOG*(levOn?1.5:1); // 杠杆 ×2：垂直比例再放大
+  const K=KLOG*(levOn?1.4:1); // 杠杆 ×2：垂直比例再放大（新地形重校准 1.5→1.4）
   const py=p=>-Math.log(p/base)*K;
   // —— 日内 OHLC 子点路径：每个交易日展开为 前收→开→低/高→高/低→收 ——
-  // 上涨日 开→低→高→收，下跌日 开→高→低→收；跳空体现在每日开盘前 18% 段
+  // 上涨日 开→低→高→收，下跌日 开→高→低→收
+  // 跳空缺口：低开 → 近垂直断崖；高开 → ~46° 跳台斜坡（几何独立剥离，不参与趋势平滑）
   const cps=[{x:0,y:py(rows[0][4])}];
+  const gapEv=[];   // 缺口段 {x0,x1,dy}：阶跃函数，从趋势分解中剥离
+  const gapSigns=[];// 大落差断崖 → 红色 GAP 警示牌
   for(let d=1;d<N;d++){
     const x0=(d-1)*DAYW,r=rows[d],up=r[4]>=r[1];
-    cps.push({x:x0+DAYW*.18,y:py(r[1])});
-    cps.push({x:x0+DAYW*.46,y:py(up?r[3]:r[2])});
-    cps.push({x:x0+DAYW*.78,y:py(up?r[2]:r[3])});
+    const yo=py(r[1]),gp=yo-cps[cps.length-1].y; // + 低开（向下） / − 高开（向上）
+    let gw=DAYW*.18;
+    if(gp>GAPCLIFF)gw=clamp(gp*.55,DAYW*.1,DAYW*.92);      // 低开断崖：U 型池剖面（崖唇陡坠 → 池底切向；必须 <DAYW 保持 cps 单调）
+    else if(gp<-GAPCLIFF)gw=clamp(-gp*.95,DAYW*.14,DAYW*.5); // 高开跳台
+    if(Math.abs(gp)>GAPCLIFF)gapEv.push({x0,x1:x0+gw,dy:gp,q:gp>0});
+    if(gp>GAPMARK)gapSigns.push({x:x0,pct:(r[1]/rows[d-1][4]-1)*100});
+    const rest=DAYW-gw;
+    if(gp>GAPCLIFF){ // 断崖面 = 四分之一管：顶部近垂直坠落，底部切向接地（任何速度都能像滑台一样落底）
+      for(const tq of [.25,.5,.75])cps.push({x:x0+gw*tq,y:yo-gp+gp*Math.sin(tq*PI/2)});
+    }
+    cps.push({x:x0+gw,y:yo});
+    cps.push({x:x0+gw+rest*.34,y:py(up?r[3]:r[2])});
+    cps.push({x:x0+gw+rest*.72,y:py(up?r[2]:r[3])});
     cps.push({x:x0+DAYW,y:py(r[4])});
   }
   const finishX=(N-1)*DAYW,yEnd=cps[cps.length-1].y;
   firstX=-RUNWAY;
   const endX=finishX+1300,n=Math.ceil((endX-firstX)/STEP);
   hs=new Array(n+1);
-  let ci=0;
+  const raw=new Array(n+1),gof=new Array(n+1);
+  let ci=0,gi=0,gAcc=0;
   for(let i=0;i<=n;i++){
     const x=firstX+i*STEP;
     let y;
     if(x<=0)y=0;
-    else if(x<finishX){ // 子点间线性插值（细节交给真实数据，圆角交给轻平滑）
+    else if(x<finishX){ // 子点间线性插值
       while(ci<cps.length-2&&cps[ci+1].x<x)ci++;
       const a=cps[ci],b=cps[ci+1];
       y=a.y+(b.y-a.y)*clamp((x-a.x)/(b.x-a.x),0,1);
@@ -670,20 +683,125 @@ function buildStockWorld(st){
     else if(x<finishX+700)y=yEnd;                  // 终点平台
     else if(x<finishX+1100)y=yEnd-(x-finishX-700); // 收尾缓停坡
     else y=yEnd-400;
-    hs[i]=y;
+    raw[i]=y;
+    // 缺口阶跃函数（断崖段内随 U 型池曲线，跳台段内线性）
+    while(gi<gapEv.length&&x>=gapEv[gi].x1){gAcc+=gapEv[gi].dy;gi++;}
+    if(gi<gapEv.length&&x>gapEv[gi].x0){
+      const ge=gapEv[gi],tq=clamp((x-ge.x0)/(ge.x1-ge.x0),0,1);
+      gof[i]=gAcc+ge.dy*(ge.q?Math.sin(tq*PI/2):tq);
+    }else gof[i]=gAcc;
   }
-  // 骑行面轻平滑（半径较旧版减半，保留日内颠簸/二段坡细节）
-  const R1=Math.max(2,Math.round(st.vol*1.3));
   const si0=Math.max(1,Math.ceil((-300-firstX)/STEP)),si1=Math.min(n-1,Math.floor((finishX+650-firstX)/STEP));
-  for(let pass=0;pass<2;pass++){
-    const src=hs.slice();
+  // —— 双频段分解：core = raw − 缺口阶跃；低频趋势 = core 宽核平滑（~半个交易日 ×3 遍）——
+  const core=new Array(n+1);
+  for(let i=0;i<=n;i++)core[i]=raw[i]-gof[i];
+  const tr=core.slice();
+  const RT=Math.round(DAYW*.5/STEP);
+  for(let pass=0;pass<3;pass++){
+    const src=tr.slice();
     for(let i=si0;i<=si1;i++){
       let s=0;
-      for(let k=-R1;k<=R1;k++)s+=src[clamp(i+k,0,n)];
-      hs[i]=s/(2*R1+1);
+      for(let k=-RT;k<=RT;k++)s+=src[clamp(i+k,0,n)];
+      tr[i]=s/(2*RT+1);
     }
   }
-  // 深 V 谷垫底：宽核均值与原面取高者（填谷不削峰，峰仍是跳台）；半径减半
+  const trS=tr.slice(); // 未限幅趋势：高频细节的参照基线
+  // —— 趋势限幅（保证宏观可通）：上坡 34° 短坡 → 22.8° 长墙，下坡 ~47-52°（真断崖走缺口通道，不受此限）——
+  const MAXDN=Math.max(1.3,1.75-st.vol*.1)*STEP;
+  let upRun=0;
+  for(let i=si0;i<=si1;i++){
+    const upCap=(.675-Math.min(.255,upRun*.013))*STEP;
+    if(tr[i]<tr[i-1]-upCap){tr[i]=tr[i-1]-upCap;upRun++;}
+    else{
+      if(tr[i]<tr[i-1]-.2*STEP)upRun++;else upRun=0;
+      if(tr[i]>tr[i-1]+MAXDN)tr[i]=tr[i-1]+MAXDN;
+    }
+  }
+  // —— 高频细节：OHLC 子点相对趋势的偏差，微圆角后 ×AMP ——
+  // 子段宽度(~25px)窄于轴距(76px)，不圆角就是 50° 齿梳；半径 2 平滑只把齿磨成滚浪，振幅基本保留
+  const det=new Array(n+1);
+  for(let i=0;i<=n;i++)det[i]=core[i]-trS[i];
+  for(let pass=0;pass<2;pass++){ // ±4 样本核：齿梳 → 滚浪（轴距 76px 压不过 24px 的齿）
+    const src=det.slice();
+    for(let i=si0;i<=si1;i++)
+      det[i]=(src[i-4]+src[i-3]*2+src[i-2]*3+src[i-1]*4+src[i]*5+src[i+1]*4+src[i+2]*3+src[i+3]*2+src[i+4])/25;
+  }
+  // 大缺口（断崖）周边细节衰减：起跳助走与落地区不被高频颠簸搅局，崖本身的刺激不变
+  const att=new Array(n+1).fill(1);
+  const attZone=(xa,xb,depth)=>{
+    const a=Math.max(0,Math.floor((xa-firstX)/STEP)),b2=Math.min(n,Math.ceil((xb-firstX)/STEP));
+    for(let i=a;i<=b2;i++){
+      const u=clamp((firstX+i*STEP-xa)/(xb-xa),0,1);
+      att[i]=Math.min(att[i],1-depth*Math.sin(u*PI));
+    }
+  };
+  for(const ge of gapEv)if(ge.dy>45)attZone(ge.x0-170,ge.x1+230,.8);
+  // 极端波动日（振幅 >120px）同样衰减周边细节：暴跌暴涨日的趋势/缺口已经够刺激
+  for(let d=1;d<N;d++){
+    if(K*Math.log(rows[d][2]/rows[d][3])>108)attZone((d-1)*DAYW-80,d*DAYW+80,.62);
+  }
+  // —— 合成：限幅趋势 + 缺口原样（断崖/跳台保持锋利）+ 细节 ×AMP ——
+  // 细节振幅在前 2.5 个交易日从 0 渐入：起步不撞墙，热身后才是真行情
+  const ampV=AMP*Math.min(1,1.45/st.vol); // 高波动股原生振幅已大，倍率按波动归一，免得双重夸张
+  for(let i=0;i<=n;i++){
+    if(i<si0||i>si1){hs[i]=raw[i];continue;}
+    const af=ampV*att[i]*clamp((firstX+i*STEP)/(DAYW*4),0,1);
+    hs[i]=tr[i]+gof[i]+Math.tanh(det[i]*af/110)*110; // tanh 软限幅：日常细节全额放大，极端波动日压到 ~110px 不变成墙
+  }
+  // 缺口断崖样本掩码（这些位置豁免下坡限幅，保持垂直落差）
+  const cliffM=new Uint8Array(n+1);
+  for(const ge of gapEv){
+    if(ge.dy<=0)continue;
+    const a=Math.max(0,Math.floor((ge.x0-firstX)/STEP)-1),b2=Math.min(n,Math.ceil((ge.x1-firstX)/STEP)+1);
+    for(let i=a;i<=b2;i++)cliffM[i]=1;
+  }
+  // —— 细节兜底：上坡短冲 56° → 长持 ~29°（累计爬升衰减）；下坡 ~64°（断崖豁免）——
+  {
+    let rise=0;
+    const DN2=1.9*STEP;
+    for(let i=si0;i<=si1;i++){
+      const cap=(1.35-Math.min(.8,rise/240))*STEP;
+      if(hs[i]<hs[i-1]-cap)hs[i]=hs[i-1]-cap;
+      else if(!cliffM[i]&&hs[i]>hs[i-1]+DN2)hs[i]=hs[i-1]+DN2;
+      const dd=hs[i-1]-hs[i];
+      if(dd>.12*STEP)rise+=dd;else rise=Math.max(0,rise-(dd<0?-dd*.8:1.2));
+    }
+  }
+  // 刀尖圆角：极小半径单遍平滑（只去毛刺，细节振幅保留；断崖豁免）
+  {
+    const src=hs.slice();
+    for(let i=si0;i<=si1;i++){
+      if(cliffM[i]||cliffM[i-1]||cliffM[i+1])continue;
+      hs[i]=(src[i-1]+src[i]*2+src[i+1])/4;
+    }
+  }
+  // 断崖唇/池底过渡圆角：崖唇去毛刺、池底出口与后续地形顺滑衔接（消「池底拍车」死点）
+  for(const ge of gapEv){
+    if(ge.dy<=0)continue;
+    const sm=(xa,xb,r,passes)=>{
+      const a=Math.max(si0,Math.floor((xa-firstX)/STEP)),b2=Math.min(si1,Math.ceil((xb-firstX)/STEP));
+      for(let p=0;p<passes;p++){
+        const src=hs.slice();
+        for(let i=a;i<=b2;i++){
+          let s=0;
+          for(let k=-r;k<=r;k++)s+=src[clamp(i+k,0,n)];
+          hs[i]=s/(2*r+1);
+        }
+      }
+    };
+    sm(ge.x0-36,ge.x0+6,2,1);   // 崖唇
+    sm(ge.x1-12,ge.x1+78,4,2);  // 池底出口
+  }
+  // 削针尖山脊：脊点不得高出两侧 ±18px 均值 9px 以上（跨骑针尖会被约束求解器“西瓜籽”弹射）
+  {
+    const src=hs.slice();
+    for(let i=si0;i<=si1;i++){
+      if(cliffM[i])continue;
+      const m=(src[i-3]+src[i+3])/2-9;
+      if(hs[i]<m)hs[i]=m;
+    }
+  }
+  // 窄 V 谷微填（最小限度：半径 5 一次，只圆掉刀尖谷底，不磨细节）
   const vFill=R2=>{
     const src=hs.slice();
     for(let i=si0;i<=si1;i++){
@@ -693,19 +811,7 @@ function buildStockWorld(st){
       if(s<hs[i])hs[i]=s;
     }
   };
-  vFill(13);
-  // 难度兜底（放宽）：上坡短坡 ~34°（长墙渐衰至 ~26°，保证爬得上去），下坡 ~60-64°
-  const MAXDN=Math.max(1.55,2.1-st.vol*.1)*STEP;
-  let upRun=0;
-  for(let i=1;i<=n;i++){
-    const upCap=(.675-Math.min(.255,upRun*.013))*STEP; // 34° 短坡 → 22.8° 长墙
-    if(hs[i]<hs[i-1]-upCap){hs[i]=hs[i-1]-upCap;upRun++;}
-    else{
-      if(hs[i]<hs[i-1]-.2*STEP)upRun++;else upRun=0;
-      if(hs[i]>hs[i-1]+MAXDN)hs[i]=hs[i-1]+MAXDN;
-    }
-  }
-  vFill(11); // 二次填谷：圆滑限幅产生的坡脚折角
+  vFill(8);
   // 车轮包络闭运算：填掉比车轮还窄的凹口（轮子物理上进不去，只会把前轮卡死）
   // 宏观坡形/难度不变——任何宽于轮径的起伏原样保留
   {
@@ -727,20 +833,6 @@ function buildStockWorld(st){
       if(v<hs[i])hs[i]=v;
     }
   }
-  // 局部微调（仅指定日区间）
-  const ez=EASE[st.sym];
-  if(ez)for(const [d0,d1,sr,dn] of ez){
-    const a=Math.max(si0,Math.floor((d0*DAYW-firstX)/STEP)),b=Math.min(si1,Math.ceil((d1*DAYW-firstX)/STEP));
-    if(dn)for(let i=a+1;i<=b;i++)if(hs[i]>hs[i-1]+dn*STEP)hs[i]=hs[i-1]+dn*STEP;
-    if(sr)for(let pass=0;pass<2;pass++){
-      const src=hs.slice();
-      for(let i=a;i<=b;i++){
-        let s=0;
-        for(let k=-sr;k<=sr;k++)s+=src[clamp(i+k,0,n)];
-        hs[i]=s/(2*sr+1);
-      }
-    }
-  }
   // 月份刻度
   const months=[];let pm=-1;
   for(let i=0;i<N;i++){
@@ -760,7 +852,7 @@ function buildStockWorld(st){
     if(i>=20)a20-=rows[i-20][4];
     if(i>=19)ma[i]=py(a20/20);
   }
-  stk={st,N,finishX,base,py,months,levels,ma,bestProg:stockBestGet(st.sym)};
+  stk={st,N,finishX,base,py,months,levels,ma,gaps:gapSigns,bestProg:stockBestGet(st.sym)};
   chCache.clear();rdCache.clear();
   buildWatermark(st.sym);
   buildTape(st);
@@ -951,7 +1043,7 @@ function stepBike(dt){
   const thr=play&&inThr(),brk=play&&inBrk();
   // 积分
   for(const p of [b.rw,b.fw,b.bd]){
-    let vx=(p.x-p.px)*.9996,vy=(p.y-p.py)*.9996;
+    let vx=(p.x-p.px)*.99973,vy=(p.y-p.py)*.99973; // 360Hz 下等效旧 240Hz 阻尼
     const sp=Math.hypot(vx,vy),cap=6500*dt;
     if(sp>cap){vx*=cap/sp;vy*=cap/sp;}
     p.px=p.x;p.py=p.y;
@@ -986,15 +1078,19 @@ function stepBike(dt){
   // 最终接触（摩擦 + 微弹）：刹车强摩擦只在前向行驶时生效，倒车用滚动摩擦
   // 刹车后轮偏置：前轮弱刹 → 陡坡刹车不再自动前滚翻（endo）
   const braking=brk&&b.lastVt>80*dt;
-  b.cR=contactPass(b.rw,braking?.955:.9995,REST);
-  b.cF=contactPass(b.fw,braking?.988:.9995,REST);
+  b.cR=contactPass(b.rw,braking?.982:.99967,REST);
+  b.cF=contactPass(b.fw,braking?.995:.99967,REST);
   // 驱动 / 倒车
   if(play&&b.cR){
     const n=b.cR,tx=-n.ny,ty=n.nx;
     let vx=b.rw.x-b.rw.px,vy=b.rw.y-b.rw.py;
     let vt=vx*tx+vy*ty;
     const vn=vx*n.nx+vy*n.ny;
-    if(thr&&vt<MAXV*dt)vt=Math.min(MAXV*dt,vt+DRIVE*dt*dt);
+    if(thr&&vt<MAXV*dt){
+      // 牵引力随接触面陡峭度衰减：≤56° 全功率，80° 归零——否则大马力会沿陡壁切向“爬墙弹射”
+      const tr2=-n.ny>.55?1:Math.max(0,(-n.ny-.17)/.38);
+      vt=Math.min(MAXV*dt,vt+DRIVE*tr2*dt*dt);
+    }
     if(brk&&!thr&&vt<=80*dt)vt=Math.max(-REVMAX*dt,vt-REVA*dt*dt);
     b.lastVt=vt;
     b.rw.px=b.rw.x-(tx*vt+n.nx*vn);
@@ -1026,7 +1122,9 @@ function stepBike(dt){
       const n=b.cR||b.cF;
       const upx=Math.sin(a),upy=-Math.cos(a);
       const updot=upx*n.nx+upy*n.ny;
-      if(updot<-.08){ // 收紧：落地角度与坡面的匹配真实影响成败
+      const vimp=Math.hypot(b.bd.x-b.bd.px,b.bd.y-b.bd.py)/dt;
+      const tol=.3-.24*clamp((vimp-300)/1800,0,1); // 速度越快惩罚窗口越紧：慢落 .30 宽容 → 高速 .06 严苛
+      if(updot<-tol){
         doCrash('落地姿态失衡');
       }else{
         const deg=Math.abs(b.airRot)*180/PI;
@@ -1081,11 +1179,13 @@ function stepBike(dt){
       const ex=pose.at(-34,19);
       addSmoke(ex.x,ex.y,-pose.ux*55,-pose.uy*55-26);
     }
+    // 头胸触地：带冲击速度判定——高速磕头必死，低速栽倒可救（现实里就是伸脚撑一下）
+    const vbody=Math.hypot(b.bd.x-b.bd.px,b.bd.y-b.bd.py)/dt+Math.abs(b.omega)*40;
     const hh=hitTerrain(pose.head.x,pose.head.y,HEADR);
-    if(hh&&hh.d>1.2){doCrash('骑手头部着地');}
+    if(hh&&hh.d>1.2&&(vbody>170||hh.d>6.5)){doCrash('骑手头部着地');}
     else{
       const ch=hitTerrain(pose.chest.x,pose.chest.y,7);
-      if(ch&&ch.d>5)doCrash('骑手摔落');
+      if(ch&&ch.d>5&&(vbody>190||ch.d>10))doCrash('骑手摔落');
     }
   }
   // 视觉前后倾
@@ -1343,9 +1443,24 @@ function drawRoad(wl,wr){
   }
 }
 /* ===== 「开盘」电子行情牌 / 「收盘」旗 + 结算牌（世界空间） ===== */
-function drawGates(t){
+function drawGates(t,wl,wr){
   const st=stk.st,rows=st.rows;
   ctx.textAlign='center';
+  // —— 跳空断崖红色 GAP 警示牌（落差大才立牌，保留刺激）——
+  if(stk.gaps)for(const gp of stk.gaps){
+    const gx=gp.x-96;
+    if(gx<wl-60||gx>wr+60)continue;
+    const gy=groundY(gx);
+    const bl=Math.floor(t/320)%2; // 闪烁
+    ctx.fillStyle='#3a1b1b';ctx.fillRect(gx-2.5,gy-72,5,72);
+    ctx.fillStyle=bl?'rgba(255,64,46,.95)':'rgba(214,44,30,.85)';
+    ctx.beginPath();ctx.moveTo(gx,gy-120);ctx.lineTo(gx+25,gy-76);ctx.lineTo(gx-25,gy-76);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='rgba(255,235,230,.9)';ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle='#fff';ctx.font='800 17px Arial';
+    ctx.fillText('!',gx,gy-84);
+    ctx.fillStyle=bl?'#ff6450':'#e8503a';ctx.font='800 12px Arial';
+    ctx.fillText('GAP '+gp.pct.toFixed(0)+'%',gx,gy-128);
+  }
   // —— 开盘电子行情牌 ——
   const ax=-650,ay=groundY(ax);
   ctx.fillStyle='#1b2538';
@@ -1755,7 +1870,7 @@ function drawPops(){
   }
   ctx.globalAlpha=1;
 }
-let lastScoreTxt='',lastTrickTxt='',lastSHDate='',lastSHPnl='',lastSub2='';
+let lastScoreTxt='',lastTrickTxt='',lastSHDate='',lastSHPnl='',lastSub2='',lastSpd='';
 function drawHUD(){
   if(state==='menu'||!stk||!bike)return;
   const b=bike,x=clamp((b.rw.x+b.fw.x)/2,0,stk.finishX);
@@ -1768,6 +1883,8 @@ function drawHUD(){
     const el=$('shPnl');el.textContent=t2;el.style.color=pnl>=0?CUP:CDN;
     lastSHPnl=t2;
   }
+  const kmh=String(Math.round(Math.abs(b.bd.x-b.bd.px)/DT/PXM*3.6));
+  if(kmh!==lastSpd){$('shSpd').textContent=kmh;lastSpd=kmh;}
   const prog=clamp(b.maxX/stk.finishX*100,0,100);
   const sTxt=prog.toFixed(1)+'%';
   if(sTxt!==lastScoreTxt){$('scoreV').textContent=sTxt;lastScoreTxt=sTxt;}
@@ -1785,61 +1902,107 @@ function drawHUD(){
 /* ===== 弹道落点预测：玩家姿态指示 + bot 共用 ===== */
 function predictLanding(b){
   let px0=b.bd.x,py0=b.bd.y,vx=(b.bd.x-b.bd.px)/DT,vy=(b.bd.y-b.bd.py)/DT;
-  for(let s=1;s<=60;s++){
+  for(let s=1;s<=90;s++){ // 断崖大落差：预测窗口加长到 4.5s
     px0+=vx*.05;py0+=vy*.05;vy+=G*.05;
     if(py0>=groundY(px0)-26)return{x:px0,t:s*.05};
   }
   return null;
 }
-/* ===== 自动驾驶 bot：验证 14 只股票全部可通关 ===== */
+/* ===== 自动驾驶 bot：智能 bot 验证 14 只全通 / 傻瓜 bot 验证无脑全油门必死 ===== */
+let botDumb=false; // 傻瓜模式：全油门零操作（负向验收：不许通关）
+// 跳崖弹道规划：扫描起跳速度，选「轨迹角≈落点坡角（顺坡切入）+ 落点干净」的方案
+function planJump(lipX){
+  const sl0=Math.atan2(groundY(lipX)-groundY(lipX-44),44);
+  let best=420,bs=-1e9;
+  for(let v=240;v<=560;v+=20){
+    let px=lipX,py=groundY(lipX)-12,vx=v*Math.cos(sl0),vy=v*Math.sin(sl0),t=0;
+    for(let s=0;s<220;s++){
+      px+=vx*.016;py+=vy*.016;vy+=G*.016;t+=.016;
+      if(py>=groundY(px)-12)break;
+    }
+    const slL=Math.atan2(groundY(px+44)-groundY(px-44),88);
+    const traj=Math.atan2(vy,vx);
+    let s2=0; // 落点后 16-112px 是否还埋着陡坎（避免二段穿刺）
+    for(let q=16;q<=96;q+=16)s2=Math.max(s2,(groundY(px+q+16)-groundY(px+q))/16);
+    const sc=-Math.abs(slL-traj)*3-(s2>1.1?1.6:0)-Math.hypot(vx,vy)*.0008+Math.min(t,.8);
+    if(sc>bs){bs=sc;best=v;}
+  }
+  return best;
+}
 function botThink(){
   const b=bike;
   botC.thr=true;botC.brk=false;botC.back=false;botC.fwd=false;
-  if(!b)return;
+  if(!b||botDumb)return;
   if(b.air>.04){ // 空中：弹道预测落点 + PD 对齐落点坡度（短跳也调姿）
     const L=predictLanding(b);
     const lx=L?L.x:b.bd.x+60;
-    const ta=Math.atan2(groundY(lx+45)-groundY(lx-45),90);
+    // 落点坡度取落点前向窗口（落在断崖底时避免对齐到崖壁）
+    const ta=Math.atan2(groundY(lx+60)-groundY(lx-20),80);
     const da=wrapA(ta-b.angle);
-    const want=clamp(da*3,-5,5);
+    const want=clamp(da*5,-7,7);
     if(b.omega<want-.25)botC.fwd=true;
     else if(b.omega>want+.25)botC.back=true;
     if(b.air>.12&&Math.abs(da)>2.4)botC.thr=false; // 姿态全乱时专心调姿
     const vy=(b.bd.y-b.bd.py)/DT;
     if(vy>0&&ta>.5)botC.thr=false;                  // 即将落在陡降面：松油备姿
-  }else{ // 地面：保守速度策略 —— 慢即是稳，马力足以低速爬任何坡
+  }else{ // 地面：控速 + 断崖择机刹车 + 姿态管理（无物理外挂）
     const x=b.bd.x;
     const sl=Math.atan2(groundY(x+60)-groundY(x-60),120);
     const desc=sl>.18;
-    // 姿态稳定：前后配重抵消俯仰失衡
+    // 姿态稳定：对齐【前方 30-150px】坡度（短跳空中没时间调姿，起跳前就得摆好）
     const pda=wrapA(b.angle-sl);
-    if(pda<-.4)botC.fwd=true;                       // 仰头 → 前倾压回
-    else if(pda>.3)botC.back=true;                  // 栽头 → 后仰拉起
+    const slF=Math.atan2(groundY(x+150)-groundY(x+30),120);
+    const pdaA=wrapA(b.angle-slF);
+    if(pdaA<-.3&&b.omega<.9)botC.fwd=true;          // 鼻高于前方坡 → 前倾压头（带角速度阻尼防过冲振荡）
+    else if(pdaA>.28&&b.omega>-.9)botC.back=true;   // 鼻低于前方坡 → 后仰拉起
     const v2=Math.hypot(b.bd.x-b.bd.px,b.bd.y-b.bd.py)/DT;
-    const g0=groundY(x),gh=groundY(x+90),g1=groundY(x+170),g2=groundY(x+340);
+    const g0=groundY(x),gE=groundY(x+50),gh=groundY(x+120),g1=groundY(x+190),g2=groundY(x+360);
+    const dropN=Math.max(gE-g0,gh-g0);              // 近处大落差（跳空断崖）
     const dropA=Math.max(gh-g0,g1-g0,g2-g0);
-    const climb=g2-g0<-55&&g1-g0<-20;               // 前方大爬坡：放开限速攒动能
-    let vmax=climb?620:300;
-    if(desc)vmax=Math.min(vmax,230);
-    if(sl>.35){                                     // 陡坡面：压尾滑行；姿态健康时允许轻刹控速
-      botC.thr=v2<170;botC.back=true;
-      botC.brk=v2>300&&pda<.15;
-    }else if(dropA>55){                             // 坡沿：爬行慢速通过
-      botC.thr=v2<120;botC.brk=v2>190;
+    const climb=g2-g0<-60&&g1-g0<-24;               // 前方大爬坡 / 跳台：放开限速攒动能
+    let vmax=climb?980:(botC._cruise||330);
+    if(desc)vmax=Math.min(vmax,250);
+    let stMax=0,stAt=999; // 细扫前方 16-230px 的最陡下落面（短陡面用粗基线会被稀释漏检）
+    for(let ts=16;ts<=224;ts+=16){
+      const dd=(groundY(x+ts+16)-groundY(x+ts))/16;
+      if(dd>stMax){stMax=dd;stAt=ts;}
+    }
+    // 只对「大落差」启用弹道规划：>49° 且面高 >80px（小坑包巡航直接飞过即可）
+    const lipP=x+Math.max(0,stAt-16);
+    const cliffA=stMax>1.15&&(groundY(lipP+150)-groundY(lipP))>80;
+    if(cliffA){                                     // 绝不能爬行翻边——按弹道规划的速度起跳，滞空调姿
+      const lipX=lipP;
+      if(Math.abs((botC._lipX||-1e9)-lipX)>48){botC._lipX=lipX;botC._jv=planJump(lipX);}
+      const jv=botC._jv||420;
+      botC.thr=v2<jv;
+      botC.brk=v2>jv+110&&sl<.2&&Math.abs(pda)<.18&&!!b.cR&&!!b.cF;
+    }else if(sl>.35){                               // 陡坡面：压尾滑行 + 严格门控的点刹（双轮着地/无前滚趋势/姿态对齐才许碰刹车）
+      botC.thr=v2<170;botC.back=pda<.2;
+      botC.brk=botC._sb=v2>270&&b.omega<.6&&pda>-.18&&pda<.35&&!!b.cR&&!!b.cF;
+    }else if(dropN>110){
+      botC.thr=v2<260;botC.brk=v2>350;
+    }else if(dropA>70){                             // 中等落差坡沿：适度控速通过
+      botC.thr=v2<190;botC.brk=v2>280;
     }else{
-      botC.thr=v2<vmax;
-      botC.brk=v2>vmax+80;
-      if(!desc&&!b.cF&&v2>300&&Math.atan2(groundY(x+95)-g0,95)>.12)botC.thr=false; // 高速越坡顶松油防栽头
+      botC.thr=v2<vmax&&(!!b.cF||v2<140);           // 大马力下油门只在前轮有载时给：每次脉冲油都是一记抬头
+      botC.brk=v2>vmax+100;
+      if(!desc&&!b.cF&&v2>330&&Math.atan2(groundY(x+95)-g0,95)>.12)botC.thr=false; // 高速越坡顶松油防栽头
       if(pda<-.5)botC.thr=false;                    // 车头仰过头，松油
-      // 爬坡卡轮：低速顶在陡升坡 → 持续后仰抬前轮翘头爬（玩家同款技巧，带保持；离开爬坡即取消）
-      if(v2<90&&sl<-.25)botC._wh=360;
+      // 爬坡卡轮：低速顶在陡升坡 → 持续后仰抬前轮翘头爬（带保持；离开爬坡即取消）
+      if(v2<90&&sl<-.25)botC._wh=540;
       if(botC._wh>0){
         botC._wh--;
-        if(sl<-.1&&v2<250){botC.back=true;botC.thr=true;botC.brk=false;}
+        if(sl<-.1&&v2<250){botC.back=pda>-.5;botC.thr=pda>-.55;botC.brk=false;} // 占空比节流：马力大，全油会后空翻弹射
         else botC._wh=0;
       }
-      if(pda<-.7){botC.back=false;botC.fwd=true;botC._wh=0;} // 防后仰过头翻车
     }
+    // —— 全局姿态保护（所有分支之后生效，断崖冲刺也不许翻）——
+    if(sl>.25&&!botC._sb&&!(b.omega<.5&&pda>-.15&&pda<.35&&b.cR&&b.cF))botC.brk=false; // 下坡刹车需姿态门控：后轮刹车在下坡=支点拍头
+    if(pda>.55)botC.brk=false;                      // 鼻已朝下也禁刹
+    botC._sb=false;
+    if(pda<-.35&&v2>260&&groundY(x+130)-g0>34){botC.fwd=true;botC.back=false;} // 鼻高过坡顶接下坡：提前压头
+    if(pda<-.7){botC.back=false;botC.fwd=true;botC.thr=false;botC._wh=0;}   // 防后仰过头翻车：断油
+    if(pda<-.95){botC.thr=false;botC.brk=true;botC.fwd=true;botC.back=false;botC._wh=0;} // 过平衡点：断油+点刹硬救
     // 翻滚预警（用平滑角速度，瞬时 omega 接触噪声大）
     botC._om=(botC._om||0)*.8+b.omega*.2;
     if(botC._om>1.8&&pda>-.1){botC.thr=false;botC.brk=false;botC.back=true;botC.fwd=false;}      // 前滚 → 后仰救车
@@ -1848,17 +2011,17 @@ function botThink(){
     if(b.maxX>botC._lastMax+2){botC._lastMax=b.maxX;botC._stall=0;}
     else botC._stall=(botC._stall||0)+1;
     if(botC._burst>0){botC._burst--;botC.thr=true;botC.brk=false;}
-    else if(botC._stall>1440){botC._stall=0;botC._burst=480;}
+    else if(botC._stall>2160){botC._stall=0;botC._burst=720;}
   }
 }
-window.__botRun=function(sym,maxSec){
+window.__botRun=function(sym,maxSec,dumb){
   const st=STONKS.find(s=>s.sym===sym);
   if(!st)return{sym,result:'no-such-sym'};
   const lv=levOn;levOn=false; // 验证以默认（无杠杆）赛道为准
   startStock(st);
   levOn=lv;
   botC._lastMax=-1e9;botC._stall=0;botC._burst=0;botC._wh=0;botC._om=0;
-  botOn=true;
+  botOn=true;botDumb=!!dumb;
   maxSec=maxSec||900;
   let t=0,res='timeout',tr=[],ta=0;
   while(t<maxSec){
@@ -1874,12 +2037,30 @@ window.__botRun=function(sym,maxSec){
     if(state!=='play'){res=state;break;}
   }
   const prog=Math.round(clamp(bike.maxX/stk.finishX*100,0,100)*10)/10;
-  botOn=false;
+  botOn=false;botDumb=false;
   return{sym,result:res,prog,sec:Math.round(t),reason:crashReason,day:dayAt(Math.max(0,bike.maxX)),x:Math.round(bike.maxX),trace:tr};
 };
-window.__botAll=function(){return STONKS.map(s=>window.__botRun(s.sym));};
+window.__botAll=function(dumb){return STONKS.map(s=>window.__botRun(s.sym,0,dumb));};
+window.__tune=function(o){ // 调参验证用：地形细节倍率 / bot 巡航速度
+  if(o&&o.amp!==undefined)AMP=o.amp;
+  if(o&&o.cruise!==undefined)botC._cruise=o.cruise;
+  return{amp:AMP,cruise:botC._cruise||330};
+};
 window.__ground=x=>groundY(x); // 验证用：查询骑行面高度
 window.__dbg=()=>bike?{state,x:Math.round(bike.bd.x),y:Math.round(bike.bd.y),ang:+bike.angle.toFixed(2),air:+bike.air.toFixed(2),reason:crashReason}:null;
+window.__step=function(n,useBot){ // 验证用：单步推进物理（可带 bot 决策；同步推相机便于截图）
+  const out=[];
+  for(let i=0;i<n;i++){
+    if(useBot){botOn=true;botThink();}
+    physStep(DT);stepCam(DT);
+    out.push([+(bike.bd.x).toFixed(1),+(bike.bd.y).toFixed(1),
+      +((bike.bd.x-bike.bd.px)/DT).toFixed(0),+((bike.bd.y-bike.bd.py)/DT).toFixed(0),
+      +bike.angle.toFixed(3),+bike.omega.toFixed(1),+bike.air.toFixed(2),
+      +(bike.rw.x).toFixed(0),+(bike.rw.y).toFixed(0),+(bike.fw.x).toFixed(0),+(bike.fw.y).toFixed(0),
+      (botC.thr?1:0)+(botC.brk?2:0)+(botC.back?4:0)+(botC.fwd?8:0),state]);
+  }
+  return out;
+};
 window.__tick=function(sec){ // 后台标签 rAF 暂停时手动推进（验收用）
   let t=0;
   while(t<sec){advance(1/60);t+=1/60;}
@@ -1903,12 +2084,30 @@ function render(t){
   drawCandles(wl,wr);
   drawMA(wl,wr);
   drawRoad(wl,wr);
-  drawGates(t);
+  drawGates(t,wl,wr);
   drawParts();
   drawBike();
   drawRagdoll();
   drawPops();
   ctx.restore();
+  // —— 速度线：高速时屏幕级横向风线 ——
+  if(state==='play'||state==='finish'){
+    const sp=Math.abs(bike.bd.x-bike.bd.px)/DT;
+    const k=(sp/MAXV-.42)/.58;
+    if(k>0){
+      ctx.strokeStyle='rgba(190,216,255,'+Math.min(.4,k*.42).toFixed(3)+')';
+      ctx.lineWidth=1.6;
+      ctx.beginPath();
+      for(let i=0;i<13;i++){
+        const yy=((i*1973+557)%1000)/1000*H;
+        const len=50+k*170+(i*53)%70;
+        const per=W+len+120;
+        const xx=per-((t*sp*.0011+i*431)%per);
+        ctx.moveTo(xx,yy);ctx.lineTo(xx-len,yy);
+      }
+      ctx.stroke();
+    }
+  }
   drawStockScreen(ox,oy);
   // 坠毁慢镜头：色偏 + 暗角 + 红晕（均为缓存渐变）
   if(state==='crash'){
@@ -1934,8 +2133,8 @@ function advance(dt){ // 推进游戏时间线（真实秒）
   }
   acc+=dt*timeScale;
   let n=0;
-  while(acc>=DT&&n<30){physStep(DT);acc-=DT;n++;}
-  if(n>=30)acc=0;
+  while(acc>=DT&&n<45){physStep(DT);acc-=DT;n++;}
+  if(n>=45)acc=0;
   stepCam(dt);
 }
 function frame(t){
