@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>股市骑士 · AI4399</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:#0a0a12;font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;-webkit-user-select:none;user-select:none;touch-action:none;-webkit-tap-highlight-color:transparent}
+#cv{position:fixed;inset:0;display:block}
+#back{position:fixed;top:36px;left:16px;z-index:60;color:rgba(200,215,245,.55);text-decoration:none;font-size:14px;padding:6px 14px;border-radius:20px;background:rgba(110,160,255,.08);border:1px solid rgba(110,160,255,.14);backdrop-filter:blur(4px);transition:color .2s}
+#back:hover{color:#ffcc00}
+/* —— 顶部 ticker tape —— */
+#tape{position:fixed;top:0;left:0;right:0;height:26px;z-index:30;overflow:hidden;background:linear-gradient(180deg,rgba(7,10,22,.94),rgba(7,10,22,.78));border-bottom:1px solid rgba(96,150,255,.16);display:none;pointer-events:none}
+#tape.on{display:block}
+#tapeIn{display:inline-block;white-space:nowrap;line-height:26px;font-size:12px;color:rgba(170,192,230,.7);animation:tapeMove 42s linear infinite;will-change:transform;font-variant-numeric:tabular-nums}
+.ti{margin:0 17px}
+.ti b{color:#d7e4ff;font-weight:600;letter-spacing:1px;margin:0 3px}
+.ti i{font-style:normal;font-weight:600}
+@keyframes tapeMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+/* —— HUD —— */
+#hud{position:fixed;top:34px;left:0;right:0;text-align:center;z-index:20;pointer-events:none;color:#fff;display:none}
+#trick{font-size:15px;color:#ffd75e;min-height:22px;font-weight:600;text-shadow:0 1px 4px rgba(0,0,0,.8),0 0 14px rgba(255,200,60,.35)}
+#score{position:fixed;top:36px;right:16px;text-align:right;z-index:20;pointer-events:none;color:rgba(196,212,242,.75);font-size:13px;line-height:1.5;display:none;font-variant-numeric:tabular-nums;background:linear-gradient(180deg,rgba(12,18,34,.62),rgba(8,10,20,.45));border:1px solid rgba(110,160,255,.22);border-radius:14px;padding:7px 16px 8px;backdrop-filter:blur(4px);box-shadow:0 6px 22px rgba(0,0,0,.35)}
+#score b{color:#ffcc00;font-size:19px;display:block;text-shadow:0 0 14px rgba(255,204,0,.4);letter-spacing:.5px}
+#shud{position:fixed;top:84px;left:16px;z-index:20;pointer-events:none;display:none;color:#fff;text-align:left;background:linear-gradient(180deg,rgba(12,18,34,.62),rgba(8,10,20,.45));border:1px solid rgba(110,160,255,.22);border-radius:14px;padding:8px 18px 9px 14px;backdrop-filter:blur(4px);box-shadow:0 6px 22px rgba(0,0,0,.35);font-variant-numeric:tabular-nums}
+#shud .r1{font-size:15px;font-weight:700}
+#shud .r1 i{font-style:normal;color:rgba(170,192,230,.5);font-size:11px;margin-left:5px;letter-spacing:.5px}
+#shud .r2{font-size:12px;color:rgba(186,206,240,.7);margin-top:3px}
+#shud .r3{font-size:12px;color:rgba(170,192,230,.5);margin-top:1px}
+#shud .r3 b{font-size:17px;margin-left:5px}
+.zone{position:fixed;top:0;bottom:0;width:50%;z-index:10;display:none}
+#zoneL{left:0}#zoneR{right:0}
+.zone span{position:absolute;bottom:20px;left:0;width:100%;text-align:center;color:rgba(200,215,245,.38);font-size:13px;letter-spacing:2px;pointer-events:none}
+.zone.on{background:linear-gradient(to top,rgba(110,160,255,.08),transparent 45%)}
+/* —— 面板 —— */
+.panel{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:rgba(7,9,18,.6);backdrop-filter:blur(3px)}
+.card{background:rgba(11,15,28,.95);border:1px solid rgba(110,160,255,.24);border-radius:18px;padding:26px 34px;text-align:center;color:#fff;box-shadow:0 24px 70px rgba(0,0,0,.6),inset 0 1px 0 rgba(140,190,255,.08);max-width:94vw;max-height:94vh;overflow:auto}
+h1{font-size:38px;color:#ffcc00;letter-spacing:7px;margin-bottom:4px;text-shadow:0 0 26px rgba(255,204,0,.35);font-weight:800}
+.sub{color:rgba(170,192,230,.55);font-size:13px;margin-bottom:12px;letter-spacing:2px}
+.keys{font-size:13px;color:rgba(196,212,242,.66);line-height:2;margin-bottom:6px}
+.keys b{color:#9ecbff;background:rgba(110,170,255,.1);border:1px solid rgba(110,170,255,.3);padding:1px 8px;border-radius:6px;font-weight:600;margin:0 2px}
+.btn{display:inline-block;background:#ffcc00;color:#1a1400;font-size:18px;font-weight:700;padding:12px 44px;border:none;border-radius:30px;cursor:pointer;letter-spacing:5px;box-shadow:0 6px 22px rgba(255,204,0,.3);font-family:inherit;transition:transform .08s;margin:0 6px}
+.btn:active{transform:scale(.95)}
+.btn.dim{background:rgba(140,180,255,.12);color:rgba(214,228,255,.85);box-shadow:none;border:1px solid rgba(140,180,255,.28);letter-spacing:2px}
+.btn.dim:hover{border-color:rgba(255,204,0,.5);color:#ffcc00}
+#overTitle{font-size:32px;color:#ff5544;letter-spacing:6px;margin-bottom:4px;font-weight:800;text-shadow:0 0 22px rgba(255,80,60,.3)}
+#overSub{color:rgba(170,192,230,.5);font-size:13px;margin-bottom:14px}
+.stats{display:grid;grid-template-columns:auto auto;gap:7px 22px;justify-content:center;font-size:15px;color:rgba(196,212,242,.65);margin:10px 0 6px;text-align:left}
+.stats b{color:#fff;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.total{font-size:16px;color:#ffcc00;margin:10px 0 18px;font-weight:700}
+.total b{font-size:30px;margin-left:8px}
+#newRec{color:#ffcc00;font-weight:700;font-size:14px;margin-bottom:8px;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+.hidden{display:none!important}
+body.touch .zone{display:block}
+/* —— 选股卡片 —— */
+.card.wide{padding:22px 26px;width:min(960px,94vw)}
+#stockGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0 4px;max-height:62vh;overflow:auto;padding:4px}
+.scard{background:rgba(120,170,255,.045);border:1px solid rgba(120,170,255,.12);border-radius:12px;padding:11px 10px 9px;cursor:pointer;transition:transform .12s,border-color .12s,background .12s,box-shadow .12s;text-align:center}
+.scard:hover{transform:translateY(-3px);border-color:rgba(255,204,0,.6);background:rgba(255,204,0,.05);box-shadow:0 10px 26px rgba(0,0,0,.45)}
+.scard:active{transform:translateY(-1px) scale(.98)}
+.scard .si{font-size:24px;line-height:1.2}
+.scard .sn{font-size:13.5px;font-weight:700;color:#fff;margin-top:2px}
+.scard .sn i{font-style:normal;color:rgba(170,192,230,.45);font-size:10.5px;margin-left:4px;letter-spacing:.5px}
+.scard .spark{display:block;width:100%;height:38px;margin:5px 0 2px}
+.scard .sr{font-size:15px;font-weight:700;margin-top:1px;font-variant-numeric:tabular-nums}
+.scard .sd{font-size:10.5px;margin-top:3px;letter-spacing:1.5px}
+.scard .pb{height:4px;border-radius:2px;background:rgba(140,180,255,.12);margin:7px 10px 4px;overflow:hidden}
+.scard .pb i{display:block;height:100%;border-radius:2px;background:linear-gradient(90deg,#ffcc00,#ff9a3c)}
+.scard .sb{font-size:10px;color:rgba(170,192,230,.45)}
+.up{color:#ff5347}.dn{color:#2fbf83}
+@media (max-width:560px){.card{padding:22px 18px}h1{font-size:30px;letter-spacing:4px}.keys{font-size:12px}#stockGrid{grid-template-columns:repeat(2,1fr)}#shud{top:76px;left:10px;padding:6px 12px 7px 10px}.btn{padding:11px 30px;margin:4px}}
+</style>
+</head>
+<body>
+<a id="back" href="../">← AI4399</a>
+<canvas id="cv"></canvas>
+<div id="tape"><div id="tapeIn"></div></div>
+<div id="hud"><div id="trick"></div></div>
+<div id="score"><b id="scoreV">0%</b><span id="scoreSub2"></span></div>
+<div id="shud">
+  <div class="r1"><span id="shIcon">📈</span> <span id="shName"></span><i id="shSym"></i></div>
+  <div class="r2" id="shDate">—</div>
+  <div class="r3">持仓收益<b id="shPnl">+0.0%</b></div>
+</div>
+<div class="zone" id="zoneL"><span>◀ 刹车 · 后仰</span></div>
+<div class="zone" id="zoneR"><span>油门 · 前倾 ▶</span></div>
+
+<div class="panel" id="menu">
+  <div class="card wide">
+    <h1>股市骑士</h1>
+    <div class="sub">骑上真实历史 K 线 · 红涨绿跌 · 一路拿到收盘终点</div>
+    <div class="keys">
+      <b>↑</b> 油门　<b>↓</b> 刹车/倒车　<b>←</b><b>→</b> 空中后仰/前倾　·　手机：左半屏 刹车 ｜ 右半屏 油门<br>
+      <span style="color:rgba(170,192,230,.42)">空中旋转满 360° 落地 = 空翻得分，头部着地即爆仓</span>
+    </div>
+    <div id="stockGrid"></div>
+  </div>
+</div>
+
+<div class="panel hidden" id="over">
+  <div class="card">
+    <div id="overTitle">爆仓了！</div>
+    <div id="overSub">骑手头部着地</div>
+    <div class="stats" id="statsS">
+      <span id="ovDateL">骑到日期</span><b id="ovDate">—</b>
+      <span>当日收盘</span><b id="ovPrice">—</b>
+      <span>本次进度</span><b id="ovProg">0%</b>
+      <span>历史最佳</span><b id="ovBProg">0%</b>
+      <span>空翻次数</span><b id="ovFlips2">0</b>
+    </div>
+    <div class="total"><span id="totalL">浮动收益</span><b id="ovTotal">0</b></div>
+    <div id="newRec" class="hidden">★ 新纪录！</div>
+    <div><button class="btn" id="btnAgain">再来一局</button><button class="btn dim" id="btnSwap">换一只股票</button></div>
+  </div>
+</div>
+
+<script src="stocks.js"></script>
+<script>
+(()=>{
+'use strict';
+/* ================= 工具 ================= */
+const TAU=Math.PI*2, PI=Math.PI;
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const lerp=(a,b,t)=>a+(b-a)*t;
+const rand=(a,b)=>a+Math.random()*(b-a);
+const wrapA=a=>((a+PI)%TAU+TAU)%TAU-PI;
+const $=id=>document.getElementById(id);
+
+const cv=$('cv'), ctx=cv.getContext('2d');
+let W=innerWidth,H=innerHeight,DPR=1;
+function resize(){
+  DPR=Math.min(devicePixelRatio||1,2);
+  W=innerWidth;H=innerHeight;
+  cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
+  cv.style.width=W+'px';cv.style.height=H+'px';
+}
+addEventListener('resize',resize);resize();
+
+/* ================= 常量 ================= */
+const PXM=40;            // 1 米 = 40px
+const DT=1/240;          // 物理子步长
+const G=2300;            // 重力 px/s^2
+const R=16;              // 车轮半径
+const HEADR=10;          // 头部碰撞半径
+const MAXV=1250;         // 驱动最高速 px/s
+const DRIVE=3000;        // 油门加速度（股市赛道大马力：长红坡可爬）
+const REVA=900, REVMAX=380; // 倒车
+const ALPHA=22, OMAX=9.5;   // 空中角加速度 / 角速度上限 rad
+const WHEELIE=4.2;       // 地面油门抬头力矩
+const REST=0.04;         // 车轮弹性
+const STEP=6;            // 地形采样间距
+const CUP='#ff5347',CDN='#2fbf83';        // 中国惯例：红涨绿跌
+const DAYW=70;                            // 每个交易日的世界宽度 px
+const KLOG=800;                           // 对数价格 → 高度缩放（±2%≈缓坡，±5%≈陡坡跳台）
+const RUNWAY=1100;                        // 起跑平地长度
+
+/* ================= 音频 ================= */
+let AC=null,master=null,engO1=null,engO2=null,engF=null,engG=null,rpmS=0,thudT=0;
+function initAudio(){
+  if(AC)return;
+  try{
+    AC=new (window.AudioContext||window.webkitAudioContext)();
+    master=AC.createGain();master.gain.value=.8;master.connect(AC.destination);
+    engO1=AC.createOscillator();engO1.type='sawtooth';
+    engO2=AC.createOscillator();engO2.type='square';
+    engF=AC.createBiquadFilter();engF.type='lowpass';engF.Q.value=2;
+    engG=AC.createGain();engG.gain.value=0;
+    engO1.connect(engF);engO2.connect(engF);engF.connect(engG);engG.connect(master);
+    engO1.start();engO2.start();
+  }catch(e){AC=null;}
+}
+function engine(on,rpm,dt){
+  if(!AC)return;
+  rpmS+=(rpm-rpmS)*Math.min(1,dt*7);
+  const t=AC.currentTime,f=42+rpmS*180;
+  engO1.frequency.setTargetAtTime(f,t,.04);
+  engO2.frequency.setTargetAtTime(f*.5,t,.04);
+  engF.frequency.setTargetAtTime(230+rpmS*1500,t,.05);
+  engG.gain.setTargetAtTime(on?.04+rpmS*.045:0,t,on?.06:.18);
+}
+function tone(f0,f1,dur,type,vol,when){
+  if(!AC)return;
+  const t=AC.currentTime+(when||0);
+  const o=AC.createOscillator(),g=AC.createGain();
+  o.type=type;o.frequency.setValueAtTime(f0,t);
+  if(f1!==f0)o.frequency.exponentialRampToValueAtTime(Math.max(1,f1),t+dur);
+  g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);
+  o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.05);
+}
+function noiseHit(dur,vol,fc){
+  if(!AC)return;
+  const n=Math.floor(AC.sampleRate*dur),buf=AC.createBuffer(1,n,AC.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n);
+  const s=AC.createBufferSource();s.buffer=buf;
+  const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=fc;
+  const g=AC.createGain();g.gain.value=vol;
+  s.connect(f);f.connect(g);g.connect(master);s.start();
+}
+function sndCrash(){noiseHit(.4,.4,900);tone(110,28,.45,'triangle',.4,0);}
+function sndTrick(n){
+  const fs=[660,880,1108,1318];
+  for(let i=0;i<Math.min(n+1,4);i++)tone(fs[i],fs[i],.1,'square',.1,i*.07);
+}
+function sndThud(v){
+  const now=performance.now();
+  if(now-thudT<160)return;thudT=now;
+  noiseHit(.07,clamp(v,.05,.25),700);
+}
+function sndFanfare(){
+  const fs=[523,659,784,1046,1318];
+  for(let i=0;i<fs.length;i++)tone(fs[i],fs[i],.16,'square',.12,i*.09);
+  tone(262,262,.5,'triangle',.18,.36);
+}
+
+/* ================= 地形（仅股市赛道，buildStockWorld 一次性生成） ================= */
+let hs=[0],firstX=0;
+function groundY(x){
+  const f=(x-firstX)/STEP,i=Math.floor(f);
+  if(i<0)return hs[0];
+  if(i>=hs.length-1)return hs[hs.length-1];
+  return hs[i]+(hs[i+1]-hs[i])*(f-i);
+}
+function hitTerrain(px,py,r){
+  let i0=Math.floor((px-r-firstX)/STEP),i1=Math.ceil((px+r-firstX)/STEP);
+  i0=Math.max(0,i0);i1=Math.min(hs.length-1,i1);
+  let bd=0,bnx=0,bny=-1,hit=false;
+  for(let i=i0;i<i1;i++){
+    const ax=firstX+i*STEP,ay=hs[i],by=hs[i+1];
+    const aby=by-ay,len2=STEP*STEP+aby*aby;
+    let tt=((px-ax)*STEP+(py-ay)*aby)/len2;
+    tt=tt<0?0:tt>1?1:tt;
+    const cx=ax+STEP*tt,cy=ay+aby*tt;
+    const dx=px-cx,dy=py-cy,d=Math.hypot(dx,dy);
+    const il=1/Math.sqrt(len2),nux=aby*il,nuy=-STEP*il; // 朝上的法线
+    const s=dx*nux+dy*nuy; // 有符号深度
+    let depth,nx,ny;
+    if(s>=0){
+      if(d>=r)continue;
+      depth=r-d;
+      if(d>1e-4){nx=dx/d;ny=dy/d;}else{nx=nux;ny=nuy;}
+    }else{ // 圆心陷入地下
+      depth=r-s;nx=nux;ny=nuy;
+    }
+    if(!hit||depth>bd){hit=true;bd=depth;bnx=nx;bny=ny;}
+  }
+  return hit?{nx:bnx,ny:bny,d:bd}:null;
+}
+
+/* ================= 输入 ================= */
+const keys={};
+let tL=false,tR=false;
+const isTouch=('ontouchstart'in window)||navigator.maxTouchPoints>0;
+if(isTouch)document.body.classList.add('touch');
+addEventListener('keydown',e=>{
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();
+  keys[e.code]=true;
+  initAudio();if(AC&&AC.state==='suspended')AC.resume();
+  if((e.code==='Space'||e.code==='Enter'||e.code==='KeyR')&&!e.repeat){
+    if(state==='over'&&performance.now()-overAt>500)startGame();
+  }
+});
+addEventListener('keyup',e=>{keys[e.code]=false;});
+function bindZone(el,set){
+  const on=e=>{e.preventDefault();set(true);el.classList.add('on');initAudio();if(AC&&AC.state==='suspended')AC.resume();};
+  const off=e=>{e.preventDefault();set(false);el.classList.remove('on');};
+  el.addEventListener('touchstart',on,{passive:false});
+  el.addEventListener('touchend',off,{passive:false});
+  el.addEventListener('touchcancel',off,{passive:false});
+  el.addEventListener('mousedown',on);
+  el.addEventListener('mouseup',off);el.addEventListener('mouseleave',off);
+}
+bindZone($('zoneL'),v=>tL=v);
+bindZone($('zoneR'),v=>tR=v);
+let botOn=false;const botC={thr:false,brk:false,back:false,fwd:false}; // 自动驾驶（赛道可通性验证）
+const inThr=()=>botOn?botC.thr:!!(keys.ArrowUp||keys.KeyW||keys.Space||tR);
+const inBrk=()=>botOn?botC.brk:!!(keys.ArrowDown||keys.KeyS||tL);
+const inBack=()=>botOn?botC.back:!!(keys.ArrowLeft||keys.KeyA||tL);
+const inFwd=()=>botOn?botC.fwd:!!(keys.ArrowRight||keys.KeyD||tR);
+
+/* ================= 摩托刚体（verlet 三质点） ================= */
+function makePt(x,y,im){return{x,y,px:x,py:y,im};}
+let bike=null;
+const WB=76,BH=46; // 轴距 / 车身质点高
+function makeBike(x){
+  const ry=groundY(x-WB/2)-R,fy=groundY(x+WB/2)-R;
+  const rw=makePt(x-WB/2,ry,1),fw=makePt(x+WB/2,fy,1);
+  const bd=makePt(x,Math.min(ry,fy)-BH,.5);
+  const len=(a,b)=>Math.hypot(b.x-a.x,b.y-a.y);
+  return{
+    rw,fw,bd,
+    links:[
+      {a:rw,b:fw,len:len(rw,fw),st:.95},  // 轴距：刚性
+      {a:rw,b:bd,len:len(rw,bd),st:.28},  // 悬挂：弹性
+      {a:fw,b:bd,len:len(fw,bd),st:.28},
+    ],
+    spin:0,angle:Math.atan2(fy-ry,WB),omega:0,
+    air:0,airRot:0,cR:null,cF:null,maxX:x,leanVis:0,lastVt:0,
+  };
+}
+function solveLink(L){
+  const a=L.a,b=L.b;
+  let dx=b.x-a.x,dy=b.y-a.y;
+  const d=Math.hypot(dx,dy)||1e-6,diff=(d-L.len)/d*L.st;
+  const w=a.im+b.im,wa=a.im/w,wb=b.im/w;
+  a.x+=dx*diff*wa;a.y+=dy*diff*wa;
+  b.x-=dx*diff*wb;b.y-=dy*diff*wb;
+}
+function bodySide(b){ // 防止车身质点翻过轮轴线（三角反折）
+  const mx=(b.rw.x+b.fw.x)/2,my=(b.rw.y+b.fw.y)/2;
+  let ux=b.fw.x-b.rw.x,uy=b.fw.y-b.rw.y;
+  const l=Math.hypot(ux,uy)||1;ux/=l;uy/=l;
+  const upx=uy,upy=-ux;
+  const s=(b.bd.x-mx)*upx+(b.bd.y-my)*upy;
+  if(s<20){const c=(20-s)*.6;b.bd.x+=upx*c;b.bd.y+=upy*c;}
+}
+function rotateBike(b,da){
+  const pts=[b.rw,b.fw,b.bd];
+  let cx=0,cy=0,tm=0;
+  for(const p of pts){const m=1/p.im;cx+=p.x*m;cy+=p.y*m;tm+=m;}
+  cx/=tm;cy/=tm;
+  const s=Math.sin(da),c=Math.cos(da);
+  for(const p of pts){
+    const dx=p.x-cx,dy=p.y-cy;
+    p.x=cx+dx*c-dy*s;p.y=cy+dx*s+dy*c;
+  }
+}
+function contactPass(p,fric,rest){
+  const h=hitTerrain(p.x,p.y,R);
+  if(!h)return null;
+  p.x+=h.nx*h.d;p.y+=h.ny*h.d;p.px+=h.nx*h.d;p.py+=h.ny*h.d;
+  const tx=-h.ny,ty=h.nx;
+  let vx=p.x-p.px,vy=p.y-p.py;
+  let vn=vx*h.nx+vy*h.ny,vt=vx*tx+vy*ty;
+  const impact=vn<0?-vn:0;
+  if(vn<0)vn=-vn*rest;
+  vt*=fric;
+  p.px=p.x-(h.nx*vn+tx*vt);
+  p.py=p.y-(h.ny*vn+ty*vt);
+  return{nx:h.nx,ny:h.ny,impact};
+}
+function riderPose(b){
+  let ux=b.fw.x-b.rw.x,uy=b.fw.y-b.rw.y;
+  const l=Math.hypot(ux,uy)||1;ux/=l;uy/=l;
+  const px=uy,py=-ux;
+  const mx=(b.rw.x+b.fw.x)/2,my=(b.rw.y+b.fw.y)/2;
+  const at=(a,u)=>({x:mx+ux*a+px*u,y:my+uy*a+py*u});
+  const ln=b.leanVis;
+  const hip=at(-9+ln*3,30),chest=at(-2+ln*7,52);
+  const head={x:chest.x+ux*(4+ln*5)+px*15,y:chest.y+uy*(4+ln*5)+py*15};
+  return{hip,chest,head,hand:at(21,41),foot:at(2,12),knee:at(15,21),ux,uy,px,py,mx,my,at};
+}
+
+/* ================= 布娃娃 / 头盔 ================= */
+let rag=null,helmet=null;
+function buildRagdoll(){
+  const p=riderPose(bike);
+  const vx=bike.bd.x-bike.bd.px,vy=bike.bd.y-bike.bd.py;
+  const mk=(pt,kx,ky)=>{
+    const o=makePt(pt.x,pt.y,1);
+    o.px-=vx+kx;o.py-=vy+ky;return o;
+  };
+  const head=mk(p.head,rand(-1,1),rand(0,1.5));
+  const chest=mk(p.chest,0,0),hip=mk(p.hip,0,0);
+  const hand=mk(p.hand,rand(-1,1),0),foot=mk(p.foot,0,0);
+  rag={
+    pts:[head,chest,hip,hand,foot],
+    links:[
+      {a:head,b:chest,len:15,st:.9},
+      {a:chest,b:hip,len:26,st:.9},
+      {a:chest,b:hand,len:24,st:.7},
+      {a:hip,b:foot,len:30,st:.7},
+      {a:head,b:hip,len:38,st:.25},
+    ],
+    head,chest,hip,hand,foot,
+  };
+  helmet={x:p.head.x,y:p.head.y,px:p.head.x-vx*.7-rand(1,3),py:p.head.y-vy*.7+rand(2,4),rot:0,vr:rand(-.2,.2)};
+}
+function stepRagdoll(dt){
+  if(!rag)return;
+  for(const p of rag.pts){
+    const vx=(p.x-p.px)*.999,vy=(p.y-p.py)*.999;
+    p.px=p.x;p.py=p.y;p.x+=vx;p.y+=vy+G*dt*dt;
+  }
+  for(let k=0;k<3;k++)for(const L of rag.links)solveLink(L);
+  for(const p of rag.pts){
+    const h=hitTerrain(p.x,p.y,5);
+    if(h){
+      p.x+=h.nx*h.d;p.y+=h.ny*h.d;p.px+=h.nx*h.d;p.py+=h.ny*h.d;
+      const tx=-h.ny,ty=h.nx;
+      let vx=p.x-p.px,vy=p.y-p.py;
+      let vn=vx*h.nx+vy*h.ny,vt=(vx*tx+vy*ty)*.9;
+      if(vn<0)vn=-vn*.15;
+      p.px=p.x-(h.nx*vn+tx*vt);p.py=p.y-(h.ny*vn+ty*vt);
+    }
+  }
+  if(helmet){
+    const h=helmet,vx=(h.x-h.px)*.999,vy=(h.y-h.py)*.999;
+    h.px=h.x;h.py=h.y;h.x+=vx;h.y+=vy+G*dt*dt;h.rot+=h.vr;
+    const c=hitTerrain(h.x,h.y,9);
+    if(c){
+      h.x+=c.nx*c.d;h.y+=c.ny*c.d;h.px+=c.nx*c.d;h.py+=c.ny*c.d;
+      const tx=-c.ny,ty=c.nx;
+      let wx=h.x-h.px,wy=h.y-h.py;
+      let vn=wx*c.nx+wy*c.ny,vt=(wx*tx+wy*ty)*.97;
+      if(vn<0)vn=-vn*.45;h.vr*=.92;
+      h.px=h.x-(c.nx*vn+tx*vt);h.py=h.y-(c.ny*vn+ty*vt);
+    }
+  }
+}
+
+/* ================= 粒子 / 飘字 ================= */
+/* col: 0 数据光点 | 1 火花 | 2 落地光环 | 3 排气微烟 | 4 冲线彩带 | 5 数字雨字符 */
+const parts=[],pops=[],ghosts=[];
+let ghostCD=0;
+const DCH=['0','1','$','¥','%','+'];
+function addDust(x,y,vx,vy,n,col){
+  for(let i=0;i<n;i++){
+    if(parts.length>320)parts.shift();
+    const digit=(col||0)===0&&Math.random()<.3;
+    parts.push({x,y,vx:vx+rand(-60,60),vy:vy+rand(-70,10),life:0,max:rand(.5,1.1),r:rand(2,4.5),
+      col:digit?5:(col||0),ch:digit?DCH[Math.floor(Math.random()*DCH.length)]:''});
+  }
+}
+function addRing(x,y,big){
+  if(parts.length>320)parts.shift();
+  parts.push({x,y,vx:0,vy:0,life:0,max:.55,r:big?13:8,col:2});
+}
+function addSmoke(x,y,vx,vy){
+  if(parts.length>320)parts.shift();
+  parts.push({x,y,vx:vx+rand(-14,14),vy:vy+rand(-10,6),life:0,max:rand(.45,.9),r:rand(1.8,3.2),col:3});
+}
+const CONF_COLS=['#ffd24a','#ff5347','#4ab3ff','#2fbf83','#ff8ad0','#f5f5ff'];
+function addConfetti(x,y){ // 冲线彩带
+  for(let i=0;i<96;i++){
+    if(parts.length>300)parts.shift();
+    parts.push({x:x+rand(-40,40),y:y+rand(-30,10),vx:rand(-340,340),vy:rand(-640,-140),
+      life:0,max:rand(1.3,2.5),r:rand(2,3.8),col:4,hue:CONF_COLS[i%6]});
+  }
+}
+function stepParts(dt){
+  for(let i=parts.length-1;i>=0;i--){
+    const p=parts[i];
+    p.life+=dt;
+    if(p.life>p.max){parts.splice(i,1);continue;}
+    if(p.col===2)continue; // 光环原地扩散
+    p.x+=p.vx*dt;p.y+=p.vy*dt;
+    p.vx*=Math.exp(-1.8*dt);
+    p.vy=p.vy*Math.exp(-1.8*dt)+(p.col===1?900:p.col===3?-36:p.col===4?430:160)*dt;
+  }
+  for(let i=ghosts.length-1;i>=0;i--){
+    ghosts[i].a+=dt;
+    if(ghosts[i].a>.38)ghosts.splice(i,1);
+  }
+  for(let i=pops.length-1;i>=0;i--){
+    const o=pops[i];o.age+=dt;o.y-=34*dt;
+    if(o.age>1.6)pops.splice(i,1);
+  }
+}
+function addPop(x,y,txt,col,size){pops.push({x,y,txt,col,size:size||22,age:0});}
+
+/* ================= 游戏状态 ================= */
+let state='menu';            // menu | play | crash | finish | over
+let timeScale=1,crashT=0,overAt=0,crashReason='';
+let trickScore=0,combo=0,flipsTotal=0,meters=0;
+let trickMsg='',trickMsgT=0,stuckT=0;
+let camX=0,camY=0,zoom=1,shake=0;
+let stk=null;                // 当前股市赛道
+let finishT=0,finished=false;
+function fmtP(p){return p>=1000?Math.round(p).toLocaleString('en-US'):p>=100?p.toFixed(1):p.toFixed(2);}
+function fmtDay(ed){
+  const d=new Date(ed*86400000);
+  return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0');
+}
+function pctTxt(v){return (v>=0?'+':'')+v.toFixed(1)+'%';}
+function stockBestGet(sym){try{return parseFloat(localStorage.getItem('ai4399-stonk-'+sym)||'0')||0;}catch(e){return 0;}}
+function stockBestSet(sym,v){try{localStorage.setItem('ai4399-stonk-'+sym,String(v));}catch(e){}}
+// 一次性迁移：旧版「特技摩托·股市模式」的进度搬到新 key（不删旧档）
+try{
+  for(const s of STONKS){
+    const nk='ai4399-stonk-'+s.sym,ok='ai4399-moto-stock-'+s.sym;
+    if(!localStorage.getItem(nk)&&localStorage.getItem(ok))localStorage.setItem(nk,localStorage.getItem(ok));
+  }
+}catch(e){}
+function starsOf(v){return v<1.3?['★','新手']:v<2?['★★','进阶']:v<2.7?['★★★','老手']:['★★★★','地狱'];}
+function niceStep(x){
+  const e=Math.pow(10,Math.floor(Math.log10(x))),m=x/e;
+  return (m<1.5?1:m<3.5?2:m<7.5?5:10)*e;
+}
+function buildStockWorld(st){
+  const rows=st.rows,N=rows.length,base=rows[0][4];
+  const py=p=>-Math.log(p/base)*KLOG;
+  const Y=rows.map(r=>py(r[4]));
+  const finishX=(N-1)*DAYW;
+  firstX=-RUNWAY;
+  const endX=finishX+1300,n=Math.ceil((endX-firstX)/STEP);
+  hs=new Array(n+1);
+  for(let i=0;i<=n;i++){
+    const x=firstX+i*STEP;
+    let y;
+    if(x<=0)y=0;
+    else if(x<finishX){ // Catmull-Rom 平滑收盘价
+      const f=x/DAYW,d=Math.floor(f),t=f-d;
+      const p0=Y[Math.max(0,d-1)],p1=Y[d],p2=Y[Math.min(N-1,d+1)],p3=Y[Math.min(N-1,d+2)];
+      y=.5*((2*p1)+(-p0+p2)*t+(2*p0-5*p1+4*p2-p3)*t*t+(-p0+3*p1-3*p2+p3)*t*t*t);
+    }
+    else if(x<finishX+700)y=Y[N-1];                  // 终点平台
+    else if(x<finishX+1100)y=Y[N-1]-(x-finishX-700); // 收尾缓停坡
+    else y=Y[N-1]-400;
+    hs[i]=y;
+  }
+  // 骑行面平滑（K 线视觉不变）：缓和 V 形谷与锐利坡顶；区间向跑道延伸避免衔接台阶
+  // 半径随波动率自适应：地狱级标的锯齿磨得更圆，保证可骑
+  const R1=Math.max(4,Math.round(st.vol*2.6));
+  const si0=Math.max(1,Math.ceil((-300-firstX)/STEP)),si1=Math.min(n-1,Math.floor((finishX+650-firstX)/STEP));
+  for(let pass=0;pass<2;pass++){
+    const src=hs.slice();
+    for(let i=si0;i<=si1;i++){
+      let s=0;
+      for(let k=-R1;k<=R1;k++)s+=src[clamp(i+k,0,n)];
+      hs[i]=s/(2*R1+1);
+    }
+  }
+  // 深 V 谷垫底：宽核均值与原面取高者（填谷不削峰，峰仍是跳台）
+  const vFill=R2=>{
+    const src=hs.slice();
+    for(let i=si0;i<=si1;i++){
+      let s=0;
+      for(let k=-R2;k<=R2;k++)s+=src[clamp(i+k,0,n)];
+      s/=2*R2+1;
+      if(s<hs[i])hs[i]=s;
+    }
+  };
+  vFill(26);
+  // 难度兜底：仅对骑行面做坡度软限幅，保证极端跳空与连续大阳线可通过
+  // 下坡限幅随波动率收紧：地狱股的悬崖更缓，免高坠硬着陆
+  const MAXUP=.38*STEP,MAXDN=Math.max(.9,1.6-st.vol*.16)*STEP;
+  for(let i=1;i<=n;i++){
+    if(hs[i]<hs[i-1]-MAXUP)hs[i]=hs[i-1]-MAXUP;
+    else if(hs[i]>hs[i-1]+MAXDN)hs[i]=hs[i-1]+MAXDN;
+  }
+  vFill(22); // 二次填谷：圆滑限幅产生的坡脚折角
+  // 月份刻度
+  const months=[];let pm=-1;
+  for(let i=0;i<N;i++){
+    const d=new Date(rows[i][0]*86400000),m=d.getUTCMonth();
+    if(m!==pm){pm=m;months.push({x:i*DAYW,label:d.getUTCFullYear()+'.'+(m+1)});}
+  }
+  // 价格网格（1-2-5 阶梯）
+  let lo=1e18,hi=-1e18;
+  for(const r of rows){lo=Math.min(lo,r[3]);hi=Math.max(hi,r[2]);}
+  const stp=niceStep((hi-lo)/9),levels=[];
+  for(let p=Math.ceil(lo/stp)*stp;p<=hi;p+=stp)levels.push({p,y:py(p)});
+  // MA20 均线（真实 20 日收盘均值）
+  const ma=new Array(N).fill(null);
+  let a20=0;
+  for(let i=0;i<N;i++){
+    a20+=rows[i][4];
+    if(i>=20)a20-=rows[i-20][4];
+    if(i>=19)ma[i]=py(a20/20);
+  }
+  stk={st,N,finishX,base,py,months,levels,ma,bestProg:stockBestGet(st.sym)};
+  chCache.clear();rdCache.clear();
+  buildWatermark(st.sym);
+  buildTape(st);
+}
+function dayAt(x){return clamp(Math.round(x/DAYW),0,stk.N-1);}
+function priceAt(x){
+  if(x<=0)return stk.base;
+  const f=x/DAYW,d=Math.floor(f);
+  if(d>=stk.N-1)return stk.st.rows[stk.N-1][4];
+  const t=f-d,c0=stk.st.rows[d][4],c1=stk.st.rows[d+1][4];
+  return c0*Math.pow(c1/c0,t);
+}
+// 日线段方向：0 中性（跑道/收尾）| 1 涨 | 2 跌（线段 d→d+1 表示第 d+1 日的涨跌）
+function segDir(d){
+  if(!stk||d<0||d>=stk.N-1)return 0;
+  return stk.st.rows[d+1][4]>=stk.st.rows[d][4]?1:2;
+}
+
+function spawnReset(sx){
+  bike=makeBike(sx);
+  rag=null;helmet=null;parts.length=0;pops.length=0;
+  ghosts.length=0;ghostCD=0;
+  trickScore=0;combo=0;flipsTotal=0;meters=0;
+  trickMsg='';trickMsgT=0;stuckT=0;crashT=0;timeScale=1;shake=0;
+  finishT=0;finished=false;
+  camX=sx+120;camY=groundY(sx)-90;zoom=baseZoom();
+}
+function baseZoom(){return clamp(Math.min(W/1150,H/700),.5,1.05);}
+function startStock(s){
+  initAudio();if(AC&&AC.state==='suspended')AC.resume();
+  buildStockWorld(s);
+  spawnReset(-900);
+  state='play';
+  $('menu').classList.add('hidden');$('over').classList.add('hidden');
+  $('hud').style.display='block';$('score').style.display='block';$('shud').style.display='block';
+  $('tape').classList.add('on');
+  $('shIcon').textContent=s.icon;$('shName').textContent=s.cn;$('shSym').textContent=s.sym;
+}
+function startGame(){if(stk)startStock(stk.st);}
+function doCrash(reason){
+  if(state!=='play')return;
+  state='crash';crashT=0;timeScale=.3;combo=0;crashReason=reason;
+  buildRagdoll();
+  addPop(rag.head.x,rag.head.y-30,'爆仓！','#ff5544',30);
+  addDust(rag.chest.x,rag.chest.y,0,-80,14,1);
+  sndCrash();shake=14;
+}
+function endStock(success,title,sub){ // 结算
+  state='over';overAt=performance.now();timeScale=1;
+  $('over').classList.remove('hidden');
+  const st=stk.st,rows=st.rows;
+  const prog=success?100:clamp(bike.maxX/stk.finishX*100,0,100);
+  const di=dayAt(success?stk.finishX:Math.max(0,bike.maxX));
+  const row=rows[di];
+  const pnl=(row[4]/rows[0][4]-1)*100;
+  const prev=stk.bestProg;
+  const rec=prog>prev;
+  if(rec){const v=Math.round(prog*10)/10;stockBestSet(st.sym,v);stk.bestProg=v;}
+  $('overTitle').textContent=success?'成功落袋！':(title||'爆仓！');
+  $('overTitle').style.color=success?'#ffcc00':'#ff5544';
+  $('overSub').textContent=success
+    ?st.icon+' '+st.cn+'：从 '+fmtDay(rows[0][0])+' 一路拿到 '+fmtDay(row[0])+'，钻石手实锤'
+    :st.icon+' '+st.cn+' · '+(sub||'')+'，下次拿稳点';
+  $('ovDateL').textContent=success?'落袋日':'爆仓日';
+  $('ovDate').textContent=fmtDay(row[0]);
+  $('ovPrice').textContent='$'+fmtP(row[4]);
+  $('ovProg').textContent=prog.toFixed(1)+'%';
+  $('ovBProg').textContent=Math.max(prev,prog).toFixed(1)+'%';
+  $('ovFlips2').textContent=flipsTotal+(trickScore?'（特技分 '+trickScore+'）':'');
+  $('totalL').textContent=success?'全程收益':'浮动收益';
+  $('ovTotal').textContent=pctTxt(pnl);
+  $('ovTotal').style.color=pnl>=0?CUP:CDN;
+  $('newRec').textContent=success?'★ 落袋为安，全图通关！':'★ 进度新纪录！';
+  $('newRec').classList.toggle('hidden',!rec);
+}
+function showStockSel(){
+  state='menu';
+  $('over').classList.add('hidden');
+  $('menu').classList.remove('hidden');
+  $('hud').style.display='none';$('score').style.display='none';$('shud').style.display='none';
+  $('tape').classList.remove('on');
+  buildCards();
+}
+/* ====== 选股卡片：sparkline 迷你走势图 ====== */
+function drawSpark(cvs,s){
+  const dpr=Math.min(devicePixelRatio||1,2);
+  const w=Math.max(120,cvs.clientWidth||160),h=38;
+  cvs.width=Math.round(w*dpr);cvs.height=Math.round(h*dpr);
+  const g=cvs.getContext('2d');
+  g.scale(dpr,dpr);
+  const rows=s.rows,N=rows.length;
+  let lo=1e18,hi=-1e18;
+  for(const r of rows){lo=Math.min(lo,r[4]);hi=Math.max(hi,r[4]);}
+  const span=Math.max(1e-9,hi-lo);
+  const col=s.ret>=0?CUP:CDN;
+  const X=i=>2+(w-4)*i/(N-1),Y=p=>3+(h-8)*(1-(p-lo)/span);
+  const k=Math.max(1,Math.floor(N/140));
+  g.beginPath();
+  g.moveTo(X(0),Y(rows[0][4]));
+  for(let i=k;i<N;i+=k)g.lineTo(X(i),Y(rows[i][4]));
+  g.lineTo(X(N-1),Y(rows[N-1][4]));
+  // 渐变填充
+  const gr=g.createLinearGradient(0,0,0,h);
+  gr.addColorStop(0,col+'3c');gr.addColorStop(1,col+'00');
+  g.save();
+  g.lineTo(X(N-1),h);g.lineTo(X(0),h);g.closePath();
+  g.fillStyle=gr;g.fill();
+  g.restore();
+  g.beginPath();
+  g.moveTo(X(0),Y(rows[0][4]));
+  for(let i=k;i<N;i+=k)g.lineTo(X(i),Y(rows[i][4]));
+  g.lineTo(X(N-1),Y(rows[N-1][4]));
+  g.strokeStyle=col;g.lineWidth=1.6;g.lineJoin='round';g.stroke();
+  // 收盘端点
+  g.fillStyle=col;
+  g.beginPath();g.arc(X(N-1),Y(rows[N-1][4]),2,0,TAU);g.fill();
+}
+function buildCards(){
+  const grid=$('stockGrid');grid.innerHTML='';
+  for(const s of STONKS){
+    const bp=stockBestGet(s.sym),[stars,tag]=starsOf(s.vol);
+    const sc=stars.length===4?'#ff7a64':stars.length===3?'#ffb04a':'rgba(196,212,242,.5)';
+    const el=document.createElement('div');
+    el.className='scard';
+    el.innerHTML='<div class="si">'+s.icon+'</div>'
+      +'<div class="sn">'+s.cn+'<i>'+s.sym+'</i></div>'
+      +'<canvas class="spark"></canvas>'
+      +'<div class="sr '+(s.ret>=0?'up':'dn')+'">'+(s.ret>=0?'+':'')+s.ret+'%</div>'
+      +'<div class="sd" style="color:'+sc+'">'+stars+' '+tag+'</div>'
+      +'<div class="pb"><i style="width:'+clamp(bp,0,100)+'%"></i></div>'
+      +'<div class="sb">'+(bp>=100?'✅ 已通关':bp>0?'最佳 '+bp.toFixed(0)+'%':'未挑战')+'</div>';
+    el.addEventListener('click',()=>startStock(s));
+    grid.appendChild(el);
+  }
+  // 同步绘制 sparkline（菜单已可见，clientWidth 有效；读取即强制布局）
+  const cards=grid.children;
+  for(let i=0;i<cards.length;i++)drawSpark(cards[i].querySelector('.spark'),STONKS[i]);
+}
+$('btnAgain').addEventListener('click',startGame);
+$('btnSwap').addEventListener('click',showStockSel);
+/* ====== ticker tape：其余 13 只滚动报价 ====== */
+function buildTape(cur){
+  let html='';
+  for(const s of STONKS){
+    if(s.sym===cur.sym)continue;
+    html+='<span class="ti">'+s.icon+'<b>'+s.sym+'</b><i class="'+(s.ret>=0?'up':'dn')+'">'+(s.ret>=0?'+':'')+s.ret+'%</i></span>';
+  }
+  $('tapeIn').innerHTML=html+html; // 双份内容 + translateX(-50%) 无缝循环
+}
+
+/* ================= 摩托物理步进 ================= */
+function stepBike(dt){
+  const b=bike;
+  const play=state==='play';
+  const thr=play&&inThr(),brk=play&&inBrk();
+  // 积分
+  for(const p of [b.rw,b.fw,b.bd]){
+    let vx=(p.x-p.px)*.9996,vy=(p.y-p.py)*.9996;
+    const sp=Math.hypot(vx,vy),cap=6500*dt;
+    if(sp>cap){vx*=cap/sp;vy*=cap/sp;}
+    p.px=p.x;p.py=p.y;
+    p.x+=vx;p.y+=vy+G*dt*dt;
+  }
+  const airborne=b.air>.07;
+  // 空中配重翻转
+  if(play&&airborne){
+    let dir=0;
+    if(inBack())dir-=1;
+    if(inFwd())dir+=1;
+    if(dir<0&&b.omega>-OMAX)rotateBike(b,-ALPHA*dt*dt);
+    else if(dir>0&&b.omega<OMAX)rotateBike(b,ALPHA*dt*dt);
+  }
+  // 地面油门抬头
+  if(thr&&b.cR&&!airborne)rotateBike(b,-WHEELIE*dt*dt);
+  // 约束 + 无摩擦投影碰撞
+  for(let k=0;k<5;k++){
+    for(const L of b.links)solveLink(L);
+    bodySide(b);
+    for(const w of [b.rw,b.fw]){
+      // 半径略减：留余量给最终接触检测（摩擦/驱动），否则接触永远测不到
+      const h=hitTerrain(w.x,w.y,R-.6);
+      if(h){w.x+=h.nx*h.d;w.y+=h.ny*h.d;w.px+=h.nx*h.d;w.py+=h.ny*h.d;}
+    }
+  }
+  // 最终接触（摩擦 + 微弹）：刹车强摩擦只在前向行驶时生效，倒车用滚动摩擦
+  const fr=(brk&&b.lastVt>80*dt)?.962:.9995;
+  b.cR=contactPass(b.rw,fr,REST);
+  b.cF=contactPass(b.fw,fr,REST);
+  // 驱动 / 倒车
+  if(play&&b.cR){
+    const n=b.cR,tx=-n.ny,ty=n.nx;
+    let vx=b.rw.x-b.rw.px,vy=b.rw.y-b.rw.py;
+    let vt=vx*tx+vy*ty;
+    const vn=vx*n.nx+vy*n.ny;
+    if(thr&&vt<MAXV*dt)vt=Math.min(MAXV*dt,vt+DRIVE*dt*dt);
+    if(brk&&!thr&&vt<=80*dt)vt=Math.max(-REVMAX*dt,vt-REVA*dt*dt);
+    b.lastVt=vt;
+    b.rw.px=b.rw.x-(tx*vt+n.nx*vn);
+    b.rw.py=b.rw.y-(ty*vt+n.ny*vn);
+    b.spin+=vt/R;
+    // 数据光点（轮下溅起）
+    if(thr&&Math.random()<dt*55&&Math.abs(vt)>30*dt)
+      addDust(b.rw.x-n.nx*R*.9,b.rw.y-n.ny*R*.9,-tx*Math.abs(vt)/dt*.25,-40,1);
+  }else if(thr){
+    b.spin+=26*dt; // 空中给油空转
+  }
+  // 落地冲击反馈
+  for(const c of [b.cR,b.cF]){
+    if(c&&c.impact>380*dt){
+      const w=b.cR===c?b.rw:b.fw;
+      addDust(w.x,w.y+R*.6,0,-60,Math.min(10,c.impact/dt/120),0);
+      if(c.impact>650*dt)addRing(w.x,w.y+R*.5,c.impact>1000*dt); // 落地光环
+      sndThud(c.impact/dt/2200);
+    }
+  }
+  // 姿态角 / 空翻统计
+  const a=Math.atan2(b.fw.y-b.rw.y,b.fw.x-b.rw.x);
+  const da=wrapA(a-b.angle);
+  b.omega=da/dt;b.angle=a;
+  const contact=!!(b.cR||b.cF);
+  if(contact){
+    if(b.air>.25&&play){
+      // 落地姿态判定
+      const n=b.cR||b.cF;
+      const upx=Math.sin(a),upy=-Math.cos(a);
+      const updot=upx*n.nx+upy*n.ny;
+      if(updot<-.2){
+        doCrash('落地姿态失衡');
+      }else{
+        const deg=Math.abs(b.airRot)*180/PI;
+        const flips=Math.floor((deg+28)/360);
+        if(flips>=1){
+          combo++;flipsTotal+=flips;
+          const base=flips===1?500:flips===2?1600:flips*flips*400;
+          const gain=Math.round(base*(1+(combo-1)*.5)/10)*10;
+          trickScore+=gain;
+          const dirTxt=b.airRot<0?'后空翻':'前空翻';
+          const name=(flips>=3?flips+' 周':flips===2?'双重':'')+dirTxt;
+          trickMsg=name+'！+'+gain+(combo>1?'（连击 ×'+combo+'）':'');
+          trickMsgT=2.4;
+          addPop((b.rw.x+b.fw.x)/2,b.bd.y-46,name+'！+'+gain,'#ffcc00',24);
+          sndTrick(flips);
+        }
+      }
+    }
+    b.air=0;b.airRot=0;
+  }else{
+    b.air+=dt;b.airRot+=da;
+    // 空翻残影采样（纯视觉）
+    if(b.air>.15&&Math.abs(b.omega)>4){
+      ghostCD-=dt;
+      if(ghostCD<=0){
+        ghostCD=.03;
+        ghosts.push({rx:b.rw.x,ry:b.rw.y,fx:b.fw.x,fy:b.fw.y,a:0});
+        if(ghosts.length>16)ghosts.shift();
+      }
+    }
+  }
+  // 头部 / 躯干触地判定
+  if(play){
+    const pose=riderPose(b);
+    // 排气微烟（纯视觉）
+    if(thr&&Math.random()<dt*24){
+      const ex=pose.at(-34,19);
+      addSmoke(ex.x,ex.y,-pose.ux*55,-pose.uy*55-26);
+    }
+    const hh=hitTerrain(pose.head.x,pose.head.y,HEADR);
+    if(hh&&hh.d>1.2){doCrash('骑手头部着地');}
+    else{
+      const ch=hitTerrain(pose.chest.x,pose.chest.y,7);
+      if(ch&&ch.d>5)doCrash('骑手摔落');
+    }
+  }
+  // 视觉前后倾
+  if(play){
+    const tgt=(thr?.3:0)+(inFwd()?.6:0)-(brk?.35:0)-(inBack()?.6:0);
+    b.leanVis+=(clamp(tgt,-1,1)-b.leanVis)*Math.min(1,dt*10);
+  }
+  // 里程
+  const mx=(b.rw.x+b.fw.x)/2;
+  if(mx>b.maxX)b.maxX=mx;
+  meters=Math.max(meters,b.maxX/PXM);
+  // 冲线
+  if(stk&&play&&!finished&&b.maxX>=stk.finishX){
+    finished=true;state='finish';finishT=0;
+    const pnl=(stk.st.rows[stk.N-1][4]/stk.base-1)*100;
+    addConfetti(b.bd.x,b.bd.y-40);
+    addPop(b.bd.x+230,b.bd.y-170,'🎉 成功落袋！','#ffe066',36);
+    addPop(b.bd.x+230,b.bd.y-120,pctTxt(pnl),pnl>=0?'#ff7a64':'#5ee8aa',30);
+    sndFanfare();
+  }
+  // 受困检测：给油却动不了
+  if(play){
+    const spd=Math.hypot(b.bd.x-b.bd.px,b.bd.y-b.bd.py)/dt;
+    if((thr||brk)&&spd<26)stuckT+=dt;else stuckT=Math.max(0,stuckT-dt*2);
+    if(stuckT>3.5)endStock(false,'套牢了！','横盘太久，原地动弹不得');
+    // 防软锁：跌出地形范围
+    if(b.bd.y-groundY(mx)>1800)endStock(false,'爆仓！','坠入了虚空');
+  }
+}
+
+function physStep(dt){
+  if(!bike)return;
+  stepBike(dt);
+  stepRagdoll(dt);
+  stepParts(dt);
+}
+
+/* ================= 摄像机 ================= */
+function stepCam(dt){
+  if(!bike)return;
+  const b=bike;
+  const follow=rag?rag.chest:{x:(b.rw.x+b.fw.x)/2,y:b.bd.y,};
+  const vx=rag?0:(b.bd.x-b.bd.px)/DT;
+  const sp=Math.abs(vx);
+  const tz=baseZoom()*clamp(1.04-sp/MAXV*.38,.6,1.04);
+  zoom+=(tz-zoom)*Math.min(1,dt*2.2);
+  const tx=follow.x+clamp(vx*.3,-260,260);
+  const gAhead=groundY(follow.x+180);
+  const ty=Math.min(follow.y,gAhead)-30;
+  const k=1-Math.exp(-4.5*dt);
+  camX+=(tx-camX)*k;
+  camY+=(ty-camY)*(1-Math.exp(-3*dt));
+  shake*=Math.exp(-6*dt);
+}
+
+/* ================= 渲染：缓存与预渲染 ================= */
+const SS=2; // 离屏精灵超采样
+function mkCanvas(w,h){const c=document.createElement('canvas');c.width=Math.max(1,w);c.height=Math.max(1,h);return c;}
+// —— 屏幕级渐变缓存（仅尺寸变化时重建）——
+let gradKey='',G_sky=null,G_crash=null,G_vig=null;
+function ensureGrads(){
+  const k=W+'x'+H;
+  if(k===gradKey)return;
+  gradKey=k;
+  // 行情终端暗底：近黑深蓝
+  G_sky=ctx.createLinearGradient(0,0,0,H);
+  G_sky.addColorStop(0,'#070a14');G_sky.addColorStop(.45,'#0a0e1d');
+  G_sky.addColorStop(1,'#0c1226');
+  G_crash=ctx.createRadialGradient(W/2,H/2,H*.3,W/2,H/2,H*.85);
+  G_crash.addColorStop(0,'rgba(255,40,30,0)');G_crash.addColorStop(1,'rgba(255,40,30,.22)');
+  G_vig=ctx.createRadialGradient(W/2,H/2,H*.36,W/2,H/2,H*.95);
+  G_vig.addColorStop(0,'rgba(4,6,16,0)');G_vig.addColorStop(1,'rgba(4,6,16,.5)');
+}
+/* ===== 巨型股票代码水印（预渲染，慢视差） ===== */
+let wmSpr=null;
+function buildWatermark(sym){
+  const fs=300;
+  const m=mkCanvas(8,8).getContext('2d');
+  m.font='900 '+fs+'px "Helvetica Neue",Arial,sans-serif';
+  const tw=Math.ceil(m.measureText(sym).width)+40;
+  const c=mkCanvas(tw,fs+60),g=c.getContext('2d');
+  g.font='900 '+fs+'px "Helvetica Neue",Arial,sans-serif';
+  g.textBaseline='middle';
+  g.fillStyle='rgba(96,140,220,.066)';
+  g.fillText(sym,20,(fs+60)/2);
+  g.strokeStyle='rgba(120,170,255,.05)';g.lineWidth=2;
+  g.strokeText(sym,20,(fs+60)/2);
+  wmSpr=c;
+}
+/* ================= 背景：行情终端 ================= */
+function drawBG(t){
+  ctx.fillStyle=G_sky;ctx.fillRect(0,0,W,H);
+  // 巨大代码水印：随场景缓慢视差，周期平铺
+  if(wmSpr&&stk){
+    const dh=Math.min(H*.42,360),dw=wmSpr.width*dh/wmSpr.height;
+    const per=dw+W*.55;
+    let mx=((W*.52-camX*.06)%per+per)%per-dw;
+    const wy=H*.27;
+    ctx.drawImage(wmSpr,mx,wy,dw,dh);
+    ctx.drawImage(wmSpr,mx+per,wy,dw,dh);
+  }
+}
+/* ===== 网格（世界空间）：横向价格线 + 纵向月份线 ===== */
+function drawGridWorld(wl,wr){
+  const vt=camY-H*.7/zoom-60,vb=camY+H*.6/zoom+60;
+  ctx.strokeStyle='rgba(120,165,235,.085)';
+  ctx.lineWidth=1.2/zoom;
+  ctx.beginPath();
+  for(const L of stk.levels){
+    if(L.y<vt||L.y>vb)continue;
+    ctx.moveTo(wl,L.y);ctx.lineTo(wr,L.y);
+  }
+  ctx.stroke();
+  ctx.strokeStyle='rgba(120,165,235,.05)';
+  ctx.beginPath();
+  for(const m of stk.months){
+    if(m.x<wl||m.x>wr)continue;
+    ctx.moveTo(m.x,vt);ctx.lineTo(m.x,vb);
+  }
+  ctx.stroke();
+}
+/* ===== 半透明蜡烛背景层（区块离屏缓存，LRU） ===== */
+const chCache=new Map();
+const CHW=1536,CHS=1.25;           // 区块世界宽 / 离屏超采样
+function candleChunk(j){
+  let e=chCache.get(j);
+  if(e){chCache.delete(j);chCache.set(j,e);return e;} // 刷新 LRU 顺序
+  const rows=stk.st.rows,N=stk.N;
+  const d0=Math.max(0,Math.floor(j*CHW/DAYW)-1),d1=Math.min(N-1,Math.ceil((j+1)*CHW/DAYW)+1);
+  let y0=1e9,y1=-1e9;
+  for(let i=d0;i<=d1;i++){y0=Math.min(y0,stk.py(rows[i][2]));y1=Math.max(y1,stk.py(rows[i][3]));}
+  y0-=30;y1+=40;
+  const c=mkCanvas(Math.ceil(CHW*CHS),Math.ceil((y1-y0)*CHS)),g=c.getContext('2d');
+  g.scale(CHS,CHS);g.translate(-j*CHW,-y0);
+  const bw=DAYW*.52;
+  for(let i=d0;i<=d1;i++){
+    const r=rows[i],x=i*DAYW;
+    const yO=stk.py(r[1]),yH=stk.py(r[2]),yL=stk.py(r[3]),yC=stk.py(r[4]);
+    const up=r[4]>=r[1];
+    const bt=Math.min(yO,yC),bb=Math.max(yO,yC,bt+2);
+    // 影线（淡）
+    g.strokeStyle=up?'rgba(255,110,95,.26)':'rgba(80,212,160,.26)';
+    g.lineWidth=1.8;
+    g.beginPath();g.moveTo(x,yH);g.lineTo(x,yL);g.stroke();
+    // 实体（红涨绿跌，退到背景的氛围层）
+    g.fillStyle=up?'rgba(255,83,71,.13)':'rgba(47,191,131,.13)';
+    g.fillRect(x-bw/2,bt,bw,bb-bt);
+    g.strokeStyle=up?'rgba(255,130,112,.22)':'rgba(98,222,168,.22)';
+    g.lineWidth=1;g.strokeRect(x-bw/2,bt,bw,bb-bt);
+  }
+  e={c,y0,h:y1-y0};
+  chCache.set(j,e);
+  if(chCache.size>8){const k=chCache.keys().next().value;chCache.delete(k);}
+  return e;
+}
+function drawCandles(wl,wr){
+  const maxJ=Math.floor((stk.finishX+DAYW)/CHW);
+  const j0=Math.max(0,Math.floor(wl/CHW)),j1=Math.min(maxJ,Math.floor(wr/CHW));
+  for(let j=j0;j<=j1;j++){
+    const e=candleChunk(j);
+    ctx.drawImage(e.c,j*CHW,e.y0,CHW,e.h);
+  }
+}
+/* ===== MA20 均线：细虚线淡金 ===== */
+function drawMA(wl,wr){
+  const d0=Math.max(19,Math.floor(wl/DAYW)),d1=Math.min(stk.N-1,Math.ceil(wr/DAYW));
+  if(d1<=d0)return;
+  ctx.save();
+  ctx.setLineDash([9,7]);
+  ctx.strokeStyle='rgba(255,213,110,.38)';
+  ctx.lineWidth=1.6/Math.max(.5,zoom);
+  ctx.beginPath();
+  let started=false;
+  for(let d=d0;d<=d1;d++){
+    const y=stk.ma[d];
+    if(y===null){started=false;continue;}
+    if(!started){ctx.moveTo(d*DAYW,y);started=true;}
+    else ctx.lineTo(d*DAYW,y);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+/* ===== 路面 = 发光价格线（区块离屏缓存）=====
+   按日涨跌红/绿分段着色 + 面积图渐变填充 + 收盘转折点光点，沿物理面绘制 */
+const rdCache=new Map();
+const RCH=1536,RCS=1.25,FILLH=260;
+const ROAD_COLS=[ // [外晕, 中层, 核线, 填充顶色（向中性蓝靠拢，避免成排色柱）]
+  ['rgba(110,170,255,.15)','rgba(140,190,255,.5)','#cfe4ff','rgba(110,160,255,'],
+  ['rgba(255,83,71,.17)','rgba(255,112,98,.55)','#ffd6cf','rgba(204,110,135,'],
+  ['rgba(47,191,131,.17)','rgba(72,212,156,.55)','#cdf6e4','rgba(69,180,174,'],
+];
+function roadChunk(j){
+  let e=rdCache.get(j);
+  if(e){rdCache.delete(j);rdCache.set(j,e);return e;}
+  const xa=j*RCH,xb=xa+RCH,n=hs.length-1;
+  let i0=Math.floor((xa-firstX)/STEP)-3,i1=Math.ceil((xb-firstX)/STEP)+3;
+  i0=Math.max(0,i0);i1=Math.min(n,i1);
+  let yTop=1e9,yBotS=-1e9;
+  for(let i=i0;i<=i1;i++){yTop=Math.min(yTop,hs[i]);yBotS=Math.max(yBotS,hs[i]);}
+  const y0=yTop-46,y1=yBotS+FILLH;
+  const c=mkCanvas(Math.ceil(RCH*RCS),Math.ceil((y1-y0)*RCS)),g=c.getContext('2d');
+  g.scale(RCS,RCS);g.translate(-xa,-y0);
+  g.lineJoin='round';g.lineCap='round';
+  // —— 面积图渐变填充：逐样本竖条，渐变锚定在线本身（颜色随当前段涨跌）——
+  for(let i=i0;i<i1;i++){
+    const x0=firstX+i*STEP,x1=x0+STEP;
+    const ci=segDir(Math.floor((x0+STEP*.5)/DAYW));
+    const top=Math.min(hs[i],hs[i+1]);
+    const gr=g.createLinearGradient(0,top,0,top+FILLH);
+    gr.addColorStop(0,ROAD_COLS[ci][3]+'.11)');
+    gr.addColorStop(.45,ROAD_COLS[ci][3]+'.03)');
+    gr.addColorStop(1,ROAD_COLS[ci][3]+'0)');
+    g.fillStyle=gr;
+    g.beginPath();
+    g.moveTo(x0-.3,hs[i]);g.lineTo(x1+.3,hs[i+1]);
+    g.lineTo(x1+.3,top+FILLH);g.lineTo(x0-.3,top+FILLH);
+    g.closePath();g.fill();
+  }
+  // —— 发光价格线：按涨跌色分段连续描边 ——
+  let runs=[],cur=null;
+  for(let i=i0;i<i1;i++){
+    const ci=segDir(Math.floor((firstX+(i+.5)*STEP)/DAYW));
+    if(!cur||cur.ci!==ci){cur={ci,a:i,b:i+1};runs.push(cur);}else cur.b=i+1;
+  }
+  for(const r of runs){
+    const C=ROAD_COLS[r.ci];
+    g.beginPath();
+    g.moveTo(firstX+r.a*STEP,hs[r.a]);
+    for(let i=r.a+1;i<=r.b;i++)g.lineTo(firstX+i*STEP,hs[i]);
+    g.strokeStyle=C[0];g.lineWidth=11;g.stroke();
+    g.strokeStyle=C[1];g.lineWidth=4.6;g.stroke();
+    g.strokeStyle=C[2];g.lineWidth=1.8;g.stroke();
+  }
+  // —— 每个交易日收盘点的微小光点（落在物理面上）——
+  const d0=Math.max(0,Math.ceil((xa-30)/DAYW)),d1=Math.min(stk.N-1,Math.floor((xb+30)/DAYW));
+  for(let d=d0;d<=d1;d++){
+    const x=d*DAYW,y=groundY(x);
+    const C=ROAD_COLS[segDir(d-1)];
+    g.fillStyle=C[1];
+    g.beginPath();g.arc(x,y,4.4,0,TAU);g.fill();
+    g.fillStyle='rgba(255,255,255,.85)';
+    g.beginPath();g.arc(x,y,1.9,0,TAU);g.fill();
+  }
+  e={c,y0,h:y1-y0};
+  rdCache.set(j,e);
+  if(rdCache.size>8){const k=rdCache.keys().next().value;rdCache.delete(k);}
+  return e;
+}
+function drawRoad(wl,wr){
+  const jMin=Math.floor(firstX/RCH),jMax=Math.floor((stk.finishX+1300)/RCH);
+  const j0=Math.max(jMin,Math.floor(wl/RCH)),j1=Math.min(jMax,Math.floor(wr/RCH));
+  for(let j=j0;j<=j1;j++){
+    const e=roadChunk(j);
+    ctx.drawImage(e.c,j*RCH,e.y0,RCH,e.h);
+  }
+}
+/* ===== 「开盘」电子行情牌 / 「收盘」旗 + 结算牌（世界空间） ===== */
+function drawGates(t){
+  const st=stk.st,rows=st.rows;
+  ctx.textAlign='center';
+  // —— 开盘电子行情牌 ——
+  const ax=-650,ay=groundY(ax);
+  ctx.fillStyle='#1b2538';
+  ctx.fillRect(ax-96,ay-152,8,152);ctx.fillRect(ax+88,ay-152,8,152);
+  ctx.fillStyle='rgba(7,12,24,.92)';
+  ctx.fillRect(ax-118,ay-212,236,66);
+  ctx.strokeStyle='rgba(96,160,255,.65)';ctx.lineWidth=2;
+  ctx.strokeRect(ax-118,ay-212,236,66);
+  ctx.strokeStyle='rgba(96,160,255,.18)';ctx.lineWidth=1;
+  ctx.strokeRect(ax-112,ay-206,224,54);
+  ctx.fillStyle='#5ec8ff';ctx.font='700 17px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText('● 开盘 OPEN',ax,ay-188);
+  ctx.fillStyle='#ffd75e';ctx.font='700 15px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText(st.icon+' '+st.cn+' '+st.sym+' · $'+fmtP(rows[0][4]),ax,ay-164);
+  // 行情牌底部的 LED 闪点
+  const bl=Math.floor(t/400)%2;
+  ctx.fillStyle=bl?'rgba(94,200,255,.9)':'rgba(94,200,255,.25)';
+  ctx.fillRect(ax-108,ay-152,5,3);ctx.fillRect(ax+103,ay-152,5,3);
+  // —— 收盘 ——
+  const fx=stk.finishX,fy=groundY(fx);
+  for(let i=0;i<8;i++){ // 地面格纹终点带
+    ctx.fillStyle=i%2?'#10182c':'#dce6f5';
+    ctx.fillRect(fx-56+i*14,fy-2.5,14,5);
+  }
+  ctx.fillStyle='#b9c8e6';ctx.fillRect(fx-2.5,fy-192,5,192); // 旗杆
+  const pnl=(rows[stk.N-1][4]/rows[0][4]-1)*100;
+  const fc=pnl>=0?CUP:CDN;
+  ctx.fillStyle=fc;
+  ctx.beginPath();ctx.moveTo(fx+2.5,fy-188);ctx.lineTo(fx+64,fy-176);ctx.lineTo(fx+2.5,fy-160);ctx.closePath();ctx.fill();
+  ctx.fillStyle='rgba(7,12,24,.92)';
+  ctx.fillRect(fx-86,fy-248,172,40);
+  ctx.strokeStyle='rgba(96,160,255,.65)';ctx.lineWidth=2;
+  ctx.strokeRect(fx-86,fy-248,172,40);
+  ctx.fillStyle='#ffd75e';ctx.font='700 17px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText('收盘 CLOSE · 落袋',fx,fy-222);
+  // —— 结算牌 ——
+  const px2=fx+330,py2=groundY(px2);
+  ctx.fillStyle='rgba(7,12,24,.9)';
+  ctx.fillRect(px2-92,py2-150,184,84);
+  ctx.strokeStyle='rgba(96,160,255,.5)';ctx.lineWidth=2;
+  ctx.strokeRect(px2-92,py2-150,184,84);
+  ctx.fillStyle='rgba(170,192,230,.7)';ctx.font='13px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText('全程收益结算',px2,py2-126);
+  ctx.fillStyle=fc;ctx.font='800 30px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText(pctTxt(pnl),px2,py2-88);
+  ctx.fillStyle='#1b2538';ctx.fillRect(px2-4,py2-66,8,66);
+  ctx.textAlign='start';
+}
+/* ===== 屏幕层：价格轴 / 时间轴 / 十字光标 / 趋势氛围 ===== */
+function drawStockScreen(ox,oy){
+  // 右侧价格轴
+  ctx.fillStyle='rgba(7,10,20,.55)';
+  ctx.fillRect(W-58,26,58,H-26);
+  ctx.fillStyle='rgba(120,165,235,.18)';
+  ctx.fillRect(W-58,26,1,H-26);
+  ctx.font='11px "Menlo","PingFang SC",monospace,sans-serif';
+  ctx.textAlign='right';
+  for(const L of stk.levels){
+    const sy=(L.y-camY)*zoom+oy;
+    if(sy<58||sy>H-46)continue;
+    ctx.fillStyle='rgba(140,186,255,.2)';
+    ctx.fillRect(W-58,sy-.5,8,1);
+    ctx.fillStyle='rgba(150,196,255,.5)';
+    ctx.fillText('$'+fmtP(L.p),W-8,sy+3.5);
+  }
+  // 底部时间轴
+  ctx.fillStyle='rgba(7,10,20,.55)';
+  ctx.fillRect(0,H-26,W,26);
+  ctx.fillStyle='rgba(120,165,235,.18)';
+  ctx.fillRect(0,H-26,W,1);
+  ctx.textAlign='center';
+  for(const m of stk.months){
+    const sx=(m.x-camX)*zoom+ox;
+    if(sx<34||sx>W-70)continue;
+    ctx.fillStyle='rgba(140,186,255,.3)';
+    ctx.fillRect(sx-.5,H-26,1,5);
+    ctx.fillStyle='rgba(166,196,240,.5)';
+    ctx.fillText(m.label,sx,H-9);
+  }
+  // 十字光标竖线：跟随摩托 x，顶端日期标签（行情页 hover 效果）
+  if(bike&&(state==='play'||state==='finish'||state==='crash')){
+    const x=clamp((bike.rw.x+bike.fw.x)/2,0,stk.finishX);
+    const sx=(x-camX)*zoom+ox;
+    if(sx>4&&sx<W-62){
+      ctx.strokeStyle='rgba(150,190,255,.2)';
+      ctx.lineWidth=1;
+      ctx.setLineDash([5,5]);
+      ctx.beginPath();ctx.moveTo(sx,46);ctx.lineTo(sx,H-26);ctx.stroke();
+      ctx.setLineDash([]);
+      const dtx=fmtDay(stk.st.rows[dayAt(x)][0]);
+      ctx.font='11px "Menlo","PingFang SC",monospace,sans-serif';
+      const tw=ctx.measureText(dtx).width+14;
+      ctx.fillStyle='rgba(14,22,42,.92)';
+      ctx.fillRect(sx-tw/2,30,tw,17);
+      ctx.strokeStyle='rgba(120,170,255,.45)';
+      ctx.strokeRect(sx-tw/2,30,tw,17);
+      ctx.fillStyle='rgba(196,220,255,.92)';
+      ctx.fillText(dtx,sx,42);
+    }
+  }
+  ctx.textAlign='start';
+  // 近期趋势氛围色：连涨暖红 / 连跌冷绿（克制）
+  if(bike&&(state==='play'||state==='finish')){
+    const x=(bike.rw.x+bike.fw.x)/2;
+    if(x>DAYW*4){
+      const di=dayAt(x),rows=stk.st.rows;
+      const r=rows[di][4]/rows[Math.max(0,di-4)][4]-1;
+      const a=clamp(Math.abs(r)*1.1,0,.085);
+      if(a>.01){
+        ctx.fillStyle=(r>=0?'rgba(255,84,52,':'rgba(46,200,140,')+a.toFixed(3)+')';
+        ctx.fillRect(0,0,W,H);
+      }
+    }
+  }
+}
+/* ===== 车轮精灵：辐条 + 胎纹，高速叠加旋转模糊环 ===== */
+const wheelSpr=(()=>{
+  const s=(R+5)*2*SS,c=mkCanvas(s,s),g=c.getContext('2d');
+  g.translate(s/2,s/2);g.scale(SS,SS);
+  g.fillStyle='#1a1a22';
+  g.beginPath();g.arc(0,0,R,0,TAU);g.fill();
+  // 胎纹块
+  g.strokeStyle='#06060a';g.lineWidth=3;
+  for(let i=0;i<10;i++){
+    const a=i*TAU/10;
+    g.beginPath();
+    g.moveTo(Math.cos(a)*(R-3.5),Math.sin(a)*(R-3.5));
+    g.lineTo(Math.cos(a)*(R+.5),Math.sin(a)*(R+.5));
+    g.stroke();
+  }
+  // 胎侧 / 轮辋
+  g.strokeStyle='#34343f';g.lineWidth=2.5;
+  g.beginPath();g.arc(0,0,R-4.5,0,TAU);g.stroke();
+  g.strokeStyle='#b9b9c8';g.lineWidth=1.8;
+  g.beginPath();g.arc(0,0,R-6.5,0,TAU);g.stroke();
+  // 交叉辐条
+  g.strokeStyle='#9a9aac';g.lineWidth=1.3;
+  for(let i=0;i<7;i++){
+    const a=i*TAU/7;
+    g.beginPath();g.moveTo(Math.cos(a)*2.5,Math.sin(a)*2.5);g.lineTo(Math.cos(a+.5)*(R-7),Math.sin(a+.5)*(R-7));g.stroke();
+    g.beginPath();g.moveTo(Math.cos(a)*2.5,Math.sin(a)*2.5);g.lineTo(Math.cos(a-.5)*(R-7),Math.sin(a-.5)*(R-7));g.stroke();
+  }
+  // 轮毂
+  g.fillStyle='#d8d8e6';g.beginPath();g.arc(0,0,3.6,0,TAU);g.fill();
+  g.fillStyle='#5a5a6a';g.beginPath();g.arc(0,0,1.8,0,TAU);g.fill();
+  return c;
+})();
+const wheelBlur=(()=>{ // 高转速下的辐条拖影环
+  const s=(R+5)*2*SS,c=mkCanvas(s,s),g=c.getContext('2d');
+  g.translate(s/2,s/2);g.scale(SS,SS);
+  g.strokeStyle='rgba(140,140,158,.4)';g.lineWidth=R-9;
+  g.beginPath();g.arc(0,0,(R-4)/2+2.5,0,TAU);g.stroke();
+  g.strokeStyle='rgba(190,190,210,.3)';g.lineWidth=1.8;
+  g.beginPath();g.arc(0,0,R-6.5,0,TAU);g.stroke();
+  return c;
+})();
+/* ===== 车体精灵：局部坐标 x 沿轴向前 / u 向上，整体按姿态角旋转 ===== */
+const bodySpr=(()=>{
+  const c=mkCanvas(120*SS,72*SS),g=c.getContext('2d');
+  g.scale(SS,SS);g.translate(60,58);
+  const ln=(a1,u1,a2,u2,wd,col)=>{
+    g.strokeStyle=col;g.lineWidth=wd;g.lineCap='round';
+    g.beginPath();g.moveTo(a1,-u1);g.lineTo(a2,-u2);g.stroke();
+  };
+  // 后挡泥板
+  g.strokeStyle='#b6451f';g.lineWidth=4;
+  g.beginPath();g.arc(-38,0,R+4,PI*1.05,PI*1.72);g.stroke();
+  // 后摇臂（管线 + 高光）
+  ln(-38,0,-7,13,5,'#2c2c38');
+  ln(-38,0,-7,13,1.6,'#4a4a5a');
+  // 排气管：弯管 → 消音筒 → 热盾高光
+  ln(-2,13,-16,17,4,'#5e5e70');
+  ln(-16,17,-33,20,7,'#7a7a8c');
+  ln(-19,18.5,-31,20.4,1.6,'#b9b9ca');
+  g.fillStyle='#15151d';g.beginPath();g.arc(-33,-20,2.6,0,TAU);g.fill();
+  // 发动机缸体 + 散热鳍
+  g.fillStyle='#3a3a47';g.fillRect(-3,-19,16,10);
+  g.strokeStyle='#23232e';g.lineWidth=1.2;
+  for(let i=0;i<3;i++){g.beginPath();g.moveTo(-1,-17+i*3);g.lineTo(11,-17+i*3);g.stroke();}
+  // 车架管线（可见三角结构）
+  ln(-15,15,-4,30,4.5,'#33333f');
+  ln(-4,30,17,27,4.5,'#33333f');
+  ln(17,27,12,13,4.5,'#33333f');
+  ln(12,13,-15,15,4.5,'#33333f');
+  ln(-15,15,-4,30,1.6,'#55556a');
+  ln(-4,30,17,27,1.6,'#55556a');
+  // 油箱（站点金 + 受光渐变）
+  const tk=g.createLinearGradient(0,-38,0,-26);
+  tk.addColorStop(0,'#ffe27a');tk.addColorStop(.45,'#ffcc00');tk.addColorStop(1,'#bd8e08');
+  g.fillStyle=tk;
+  g.beginPath();
+  g.moveTo(-3,-29);g.quadraticCurveTo(2,-37,10,-36);
+  g.quadraticCurveTo(19,-35,20,-29);g.quadraticCurveTo(12,-26,4,-26.5);
+  g.closePath();g.fill();
+  g.strokeStyle='rgba(120,86,4,.6)';g.lineWidth=1;g.stroke();
+  // 坐垫
+  ln(-18,31,-3,32,6,'#191921');
+  // 前叉双管 + 下滑管减震
+  ln(38,0,27,35,3,'#c8c8d8');
+  ln(36.4,2,25.6,33,1.6,'#8e8ea0');
+  ln(38,0,33.5,17,5,'#8a8a9a');
+  // 前挡泥板
+  g.strokeStyle='#b6451f';g.lineWidth=4;
+  g.beginPath();g.arc(38,0,R+4,PI*1.25,PI*1.95);g.stroke();
+  // 车把 + 握把 + 头灯
+  ln(27,35,33,45,3,'#6a6a7c');
+  g.fillStyle='#1c1c26';g.beginPath();g.arc(33,-45,2.4,0,TAU);g.fill();
+  g.fillStyle='rgba(255,210,130,.35)';g.beginPath();g.arc(28,-29,4.6,0,TAU);g.fill();
+  g.fillStyle='#ffe9b0';g.beginPath();g.arc(28,-29,2.4,0,TAU);g.fill();
+  return c;
+})();
+/* ===== 头盔精灵：反光壳体 + 镜片高光 ===== */
+const helmetSpr=(()=>{
+  const s=30*SS,c=mkCanvas(s,s),g=c.getContext('2d');
+  g.translate(s/2,s/2);g.scale(SS,SS);
+  const sh=g.createLinearGradient(-8,-9,6,9);
+  sh.addColorStop(0,'#ffe183');sh.addColorStop(.5,'#ffcc00');sh.addColorStop(1,'#c2920a');
+  g.fillStyle=sh;
+  g.beginPath();g.arc(0,0,9,PI*.85,PI*2.15);g.closePath();g.fill();
+  g.strokeStyle='rgba(130,96,6,.8)';g.lineWidth=1.4;
+  g.beginPath();g.moveTo(-8.2,2.8);g.lineTo(8.2,2.8);g.stroke();
+  // 面罩 + 反光
+  g.fillStyle='#1b2333';
+  g.beginPath();g.arc(2.5,-1,5.5,-.7,1.05);g.lineTo(2,4);g.closePath();g.fill();
+  g.strokeStyle='rgba(190,225,255,.85)';g.lineWidth=1.2;
+  g.beginPath();g.arc(2.2,-1,4.1,-.5,.3);g.stroke();
+  // 壳顶高光
+  g.strokeStyle='rgba(255,255,255,.55)';g.lineWidth=1.6;
+  g.beginPath();g.arc(-1,-1.5,6.4,-PI*.82,-PI*.45);g.stroke();
+  // 后部气孔
+  g.strokeStyle='rgba(120,90,10,.85)';g.lineWidth=1;
+  g.beginPath();g.moveTo(-5.5,-4.5);g.lineTo(-7,-3.2);g.moveTo(-4,-6);g.lineTo(-5.6,-4.8);g.stroke();
+  return c;
+})();
+function drawWheel(p,spin,spd){
+  const s=(R+5)*2;
+  ctx.save();
+  ctx.translate(p.x,p.y);ctx.rotate(spin);
+  ctx.drawImage(wheelSpr,-s/2,-s/2,s,s);
+  ctx.restore();
+  if(spd>16){ // 转速旋转模糊
+    ctx.globalAlpha=Math.min(.75,(spd-16)/26);
+    ctx.drawImage(wheelBlur,p.x-s/2,p.y-s/2,s,s);
+    ctx.globalAlpha=1;
+  }
+}
+function limb(a,b,w,col){
+  ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+}
+function torsoQuad(a,b,wa,wb,col){ // 有体积的躯干
+  let dx=b.x-a.x,dy=b.y-a.y;
+  const l=Math.hypot(dx,dy)||1,nx=-dy/l,ny=dx/l;
+  ctx.fillStyle=col;
+  ctx.beginPath();
+  ctx.moveTo(a.x+nx*wa,a.y+ny*wa);
+  ctx.lineTo(b.x+nx*wb,b.y+ny*wb);
+  ctx.lineTo(b.x-nx*wb,b.y-ny*wb);
+  ctx.lineTo(a.x-nx*wa,a.y-ny*wa);
+  ctx.closePath();ctx.fill();
+}
+function drawHelmetAt(x,y,rot){
+  ctx.save();ctx.translate(x,y);ctx.rotate(rot);
+  ctx.drawImage(helmetSpr,-15,-15,30,30);
+  ctx.restore();
+}
+function drawGhosts(){ // 空翻旋转残影
+  for(const g of ghosts){
+    const a=1-g.a/.38;
+    if(a<=0)continue;
+    ctx.strokeStyle='rgba(120,200,255,'+(a*.32).toFixed(3)+')';
+    ctx.lineWidth=3.5;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(g.rx,g.ry);ctx.lineTo(g.fx,g.fy);ctx.stroke();
+  }
+}
+function drawRider(p){
+  // 腿：骑行裤分色 + 靴
+  limb(p.hip,p.knee,6,'#27304a');
+  limb(p.knee,p.foot,5,'#1f2738');
+  ctx.fillStyle='#12161f';
+  ctx.beginPath();ctx.arc(p.foot.x,p.foot.y,3.4,0,TAU);ctx.fill();
+  // 躯干：骑行服主色 + 背部亮条
+  torsoQuad(p.hip,p.chest,5.5,7,'#b8432a');
+  limb({x:lerp(p.hip.x,p.chest.x,.18),y:lerp(p.hip.y,p.chest.y,.18)},
+       {x:lerp(p.hip.x,p.chest.x,.88),y:lerp(p.hip.y,p.chest.y,.88)},2.8,'#e8dcc8');
+  // 手臂：大臂 / 小臂分色 + 手套
+  const elb={x:(p.chest.x+p.hand.x)/2,y:(p.chest.y+p.hand.y)/2-4};
+  limb(p.chest,elb,5,'#a03a24');
+  limb(elb,p.hand,4.2,'#8c3120');
+  ctx.fillStyle='#161b28';
+  ctx.beginPath();ctx.arc(p.hand.x,p.hand.y,2.8,0,TAU);ctx.fill();
+  drawHelmetAt(p.head.x,p.head.y,Math.atan2(p.uy,p.ux));
+}
+function drawBike(){
+  const b=bike,p=riderPose(b);
+  const ang=Math.atan2(b.fw.y-b.rw.y,b.fw.x-b.rw.x);
+  const spd=Math.abs(b.rw.x-b.rw.px)/DT/R; // 近似轮角速度 rad/s
+  drawGhosts();
+  drawWheel(b.rw,b.spin,spd);
+  drawWheel(b.fw,b.spin,spd);
+  // 车体：预渲染精灵按姿态角旋转
+  ctx.save();
+  ctx.translate(p.mx,p.my);ctx.rotate(ang);
+  ctx.drawImage(bodySpr,-60,-58,120,72);
+  ctx.restore();
+  // 动态后减震：连到物理车身质点，随悬挂压缩伸缩
+  const s1=p.at(-26,8);
+  const s2={x:lerp(p.at(-8,26).x,b.bd.x,.45),y:lerp(p.at(-8,26).y,b.bd.y,.45)};
+  limb(s1,s2,3.5,'#caa53f');
+  limb(s1,s2,1.4,'#f5dd8a');
+  // 空中旋转弧线提示
+  if(state==='play'&&b.air>.15&&Math.abs(b.omega)>4){
+    const dir=b.omega>0?1:-1;
+    const s0=dir>0?ang-2.3:ang+.5,e0=dir>0?ang-.5:ang+2.3;
+    ctx.strokeStyle='rgba(140,200,255,.35)';ctx.lineWidth=2.5;ctx.lineCap='round';
+    ctx.beginPath();ctx.arc(p.mx,p.my,54,s0,e0);ctx.stroke();
+    ctx.strokeStyle='rgba(140,200,255,.15)';
+    ctx.beginPath();ctx.arc(p.mx,p.my,61,s0,e0);ctx.stroke();
+  }
+  if(state!=='crash'&&state!=='over'||!rag)drawRider(p);
+}
+function drawRagdoll(){
+  if(!rag)return;
+  limb(rag.hip,rag.foot,5.5,'#27304a');
+  ctx.fillStyle='#12161f';
+  ctx.beginPath();ctx.arc(rag.foot.x,rag.foot.y,3.2,0,TAU);ctx.fill();
+  torsoQuad(rag.hip,rag.chest,5.5,7,'#b8432a');
+  limb(rag.chest,rag.hand,4.2,'#8c3120');
+  ctx.fillStyle='#161b28';
+  ctx.beginPath();ctx.arc(rag.hand.x,rag.hand.y,2.6,0,TAU);ctx.fill();
+  limb(rag.head,rag.chest,4,'#a03a24');
+  // 裸头（头盔已飞出）
+  ctx.fillStyle='#d9a06b';
+  ctx.beginPath();ctx.arc(rag.head.x,rag.head.y,6.5,0,TAU);ctx.fill();
+  ctx.fillStyle='#5a3a22';
+  ctx.beginPath();ctx.arc(rag.head.x,rag.head.y-2,5.4,PI,TAU);ctx.fill();
+  if(helmet)drawHelmetAt(helmet.x,helmet.y,helmet.rot);
+}
+function drawParts(){
+  ctx.font='700 10px "Menlo",monospace';
+  ctx.textAlign='center';
+  for(const p of parts){
+    const a=1-p.life/p.max;
+    if(p.col===1){ // 火花（爆仓红）
+      ctx.fillStyle='rgba(255,99,80,'+(a*.9).toFixed(3)+')';
+      ctx.fillRect(p.x-1.5,p.y-1.5,3,3);
+    }else if(p.col===2){ // 落地冲击数据光环
+      const k=p.life/p.max,r=p.r+k*85;
+      ctx.strokeStyle='rgba(120,200,255,'+((1-k)*.45).toFixed(3)+')';
+      ctx.lineWidth=3*(1-k)+1;
+      ctx.beginPath();ctx.ellipse(p.x,p.y,r,r*.3,0,0,TAU);ctx.stroke();
+    }else if(p.col===3){ // 排气微烟
+      ctx.fillStyle='rgba(130,148,176,'+(a*.2).toFixed(3)+')';
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r*(1+p.life*2.4),0,TAU);ctx.fill();
+    }else if(p.col===4){ // 冲线彩带
+      ctx.save();
+      ctx.translate(p.x,p.y);ctx.rotate(p.life*9+p.x*.13);
+      ctx.globalAlpha=clamp(a*1.5,0,1);
+      ctx.fillStyle=p.hue;
+      ctx.fillRect(-p.r,-p.r*.55,p.r*2,p.r*1.1);
+      ctx.restore();ctx.globalAlpha=1;
+    }else if(p.col===5){ // 数字雨字符
+      ctx.fillStyle='rgba(120,210,255,'+(a*.75).toFixed(3)+')';
+      ctx.fillText(p.ch,p.x,p.y);
+    }else{ // 数据光点
+      ctx.fillStyle='rgba(110,205,255,'+(a*.18).toFixed(3)+')';
+      ctx.fillRect(p.x-3,p.y-3,6,6);
+      ctx.fillStyle='rgba(170,225,255,'+(a*.8).toFixed(3)+')';
+      ctx.fillRect(p.x-1.2,p.y-1.2,2.4,2.4);
+    }
+  }
+  ctx.textAlign='start';
+}
+function drawPops(){
+  for(const o of pops){
+    const a=o.age<1.2?1:1-(o.age-1.2)/.4;
+    const sc=o.age<.15?.5+o.age/.15*.5:1;
+    ctx.save();
+    ctx.translate(o.x,o.y);ctx.scale(sc/zoom,sc/zoom);
+    ctx.font='700 '+o.size+'px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.textAlign='center';
+    ctx.globalAlpha=clamp(a,0,1);
+    ctx.strokeStyle='rgba(4,8,22,.75)';ctx.lineWidth=4;ctx.strokeText(o.txt,0,0);
+    ctx.fillStyle=o.col;ctx.fillText(o.txt,0,0);
+    if(o.col==='#ffcc00'||o.col==='#ffe066'){ // 金色飘字加高光层
+      ctx.fillStyle='rgba(255,250,220,.45)';
+      ctx.fillText(o.txt,0,-1.2);
+    }
+    ctx.restore();
+  }
+  ctx.globalAlpha=1;
+}
+let lastScoreTxt='',lastTrickTxt='',lastSHDate='',lastSHPnl='',lastSub2='';
+function drawHUD(){
+  if(state==='menu'||!stk||!bike)return;
+  const b=bike,x=clamp((b.rw.x+b.fw.x)/2,0,stk.finishX);
+  const di=dayAt(x),row=stk.st.rows[di];
+  const p=priceAt(x),pnl=(p/stk.base-1)*100;
+  const t1='📅 '+fmtDay(row[0])+' · $'+fmtP(p);
+  if(t1!==lastSHDate){$('shDate').textContent=t1;lastSHDate=t1;}
+  const t2=pctTxt(pnl);
+  if(t2!==lastSHPnl){
+    const el=$('shPnl');el.textContent=t2;el.style.color=pnl>=0?CUP:CDN;
+    lastSHPnl=t2;
+  }
+  const prog=clamp(b.maxX/stk.finishX*100,0,100);
+  const sTxt=prog.toFixed(1)+'%';
+  if(sTxt!==lastScoreTxt){$('scoreV').textContent=sTxt;lastScoreTxt=sTxt;}
+  const sub='空翻 '+flipsTotal+' ｜ 最佳 '+stk.bestProg.toFixed(0)+'%';
+  if(sub!==lastSub2){$('scoreSub2').textContent=sub;lastSub2=sub;}
+  let t='';
+  if(state==='play'){
+    if(b.air>.18&&Math.abs(b.airRot)>.7)
+      t='空中旋转 '+Math.round(Math.abs(b.airRot)*180/PI)+'°';
+    else if(trickMsgT>0)t=trickMsg;
+    else if(combo>1)t='连击 ×'+combo;
+  }
+  if(t!==lastTrickTxt){$('trick').textContent=t;lastTrickTxt=t;}
+}
+/* ===== 自动驾驶 bot：验证 14 只股票全部可通关 ===== */
+function botThink(){
+  const b=bike;
+  botC.thr=true;botC.brk=false;botC.back=false;botC.fwd=false;
+  if(!b)return;
+  if(b.air>.04){ // 空中：弹道预测落点 + PD 对齐落点坡度
+    let px0=b.bd.x,py0=b.bd.y,vx=(b.bd.x-b.bd.px)/DT,vy=(b.bd.y-b.bd.py)/DT,lx=px0+60,tta=2.2;
+    for(let s=0;s<44;s++){
+      px0+=vx*.05;py0+=vy*.05;vy+=G*.05;
+      lx=px0;
+      if(py0>=groundY(px0)-26){tta=s*.05;break;}
+    }
+    if(tta>.18){ // 小跳不折腾，长滞空才调姿
+      const ta=Math.atan2(groundY(lx+45)-groundY(lx-45),90);
+      const da=wrapA(ta-b.angle);
+      const want=clamp(da*2.5,-4,4);
+      if(b.omega<want-.3)botC.fwd=true;
+      else if(b.omega>want+.3)botC.back=true;
+      if(b.air>.12&&Math.abs(da)>2.6)botC.thr=false; // 姿态全乱时专心调姿
+    }
+  }else{ // 地面
+    const sl=Math.atan2(groundY(b.bd.x+60)-groundY(b.bd.x-60),120);
+    const slA=Math.atan2(groundY(b.bd.x+95)-groundY(b.bd.x),95);
+    const desc=sl>.18;                              // 已在下坡
+    if(!desc&&!b.cF&&slA>.12)botC.thr=false;        // 越坡顶前轮离地：松油防栽头
+    if(wrapA(b.angle-sl)<-.8)botC.thr=false;        // 车头仰过头，松油
+    const vx0=(b.bd.x-b.bd.px)/DT;
+    const g0=groundY(b.bd.x),g1=groundY(b.bd.x+170),g2=groundY(b.bd.x+340);
+    const climbAhead=groundY(b.bd.x+330)-g0<-55;    // 前方大爬坡：放开限速攒动能
+    if(!climbAhead&&vx0>560)botC.thr=false;         // 巡航限速：稳比快重要
+    if(!climbAhead&&vx0>720)botC.brk=true;
+    if(vx0>900)botC.thr=false;
+    if(desc){                                       // 陡降：控速滑行，低速持油稳车头
+      const v2=Math.hypot(b.bd.x-b.bd.px,b.bd.y-b.bd.py)/DT;
+      if(v2>380){botC.thr=false;botC.brk=true;}
+      else{botC.thr=true;botC.brk=false;}
+    }
+    // V 谷 / 悬崖预判：提前刹车控速
+    if(vx0>420&&g1-g0>45&&g1-g2>32){botC.thr=false;botC.brk=true;}      // V 谷
+    if(vx0>340&&g1-g0>85){botC.thr=false;botC.brk=true;}                // 大悬崖：贴崖缓降
+  }
+}
+window.__botRun=function(sym,maxSec){
+  const st=STONKS.find(s=>s.sym===sym);
+  if(!st)return{sym,result:'no-such-sym'};
+  startStock(st);
+  botOn=true;
+  maxSec=maxSec||900;
+  let t=0,res='timeout';
+  while(t<maxSec){
+    botThink();
+    physStep(DT);t+=DT;
+    if(state==='finish'){res='finish';break;}
+    if(state!=='play'){res=state;break;}
+  }
+  const prog=Math.round(clamp(bike.maxX/stk.finishX*100,0,100)*10)/10;
+  botOn=false;
+  return{sym,result:res,prog,sec:Math.round(t),reason:crashReason,day:dayAt(Math.max(0,bike.maxX)),x:Math.round(bike.maxX)};
+};
+window.__botAll=function(){return STONKS.map(s=>window.__botRun(s.sym));};
+window.__tick=function(sec){ // 后台标签 rAF 暂停时手动推进（验收用）
+  let t=0;
+  while(t<sec){advance(1/60);t+=1/60;}
+  render(performance.now());
+  return{state,x:bike?Math.round(bike.bd.x):0};
+};
+
+function render(t){
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ensureGrads();
+  drawBG(t);
+  if(!bike||!stk)return;
+  const ox=W*.42,oy=H*.55;
+  const shx=shake>.4?rand(-shake,shake):0,shy=shake>.4?rand(-shake,shake):0;
+  ctx.save();
+  ctx.translate(ox+shx,oy+shy);
+  ctx.scale(zoom,zoom);
+  ctx.translate(-camX,-camY);
+  const wl=camX-ox/zoom-60,wr=camX+(W-ox)/zoom+60;
+  drawGridWorld(wl,wr);
+  drawCandles(wl,wr);
+  drawMA(wl,wr);
+  drawRoad(wl,wr);
+  drawGates(t);
+  drawParts();
+  drawBike();
+  drawRagdoll();
+  drawPops();
+  ctx.restore();
+  drawStockScreen(ox,oy);
+  // 坠毁慢镜头：色偏 + 暗角 + 红晕（均为缓存渐变）
+  if(state==='crash'){
+    ctx.fillStyle='rgba(40,20,80,.16)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=G_vig;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=G_crash;ctx.fillRect(0,0,W,H);
+  }
+  drawHUD();
+}
+
+/* ================= 主循环 ================= */
+let lastT=0,acc=0;
+function advance(dt){ // 推进游戏时间线（真实秒）
+  if(trickMsgT>0)trickMsgT-=dt;
+  if(state==='crash'){ // 爆仓慢镜头（用真实时间推进）
+    crashT+=dt;
+    if(crashT>1.1)timeScale=Math.min(1,timeScale+dt*1.6);
+    if(crashT>2.3)endStock(false,'爆仓！',crashReason);
+  }
+  if(state==='finish'){ // 冲线庆祝：滑行 + 彩带，然后结算
+    finishT+=dt;
+    if(finishT>2.6)endStock(true);
+  }
+  acc+=dt*timeScale;
+  let n=0;
+  while(acc>=DT&&n<30){physStep(DT);acc-=DT;n++;}
+  if(n>=30)acc=0;
+  stepCam(dt);
+}
+function frame(t){
+  requestAnimationFrame(frame);
+  if(!lastT)lastT=t;
+  let dt=(t-lastT)/1000;lastT=t;
+  if(dt>.05)dt=.05;
+  advance(dt);
+  render(t);
+  // 引擎声
+  if(bike&&AC){
+    const sp=Math.abs(bike.bd.x-bike.bd.px)/DT;
+    const rpm=clamp(.12+(state==='play'&&inThr()?.45:0)+sp/MAXV*.5,0,1.25);
+    engine(state==='play',rpm,dt);
+  }
+}
+buildCards();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
